@@ -248,76 +248,18 @@ class RealDebrid: PollingDebridSource, ObservableObject {
 
     // MARK: - Instant availability
 
-    // Checks if the magnet is streamable on RD
+    // Post-API changes
+    // Use user magnets to check for IA instead
     func instantAvailability(magnets: [Magnet]) async throws {
-        let now = Date().timeIntervalSince1970
+        // Fetch the user magnets to the latest version
+        try await getUserMagnets()
 
-        let sendMagnets = magnets.filter { magnet in
-            if let IAIndex = IAValues.firstIndex(where: { $0.magnet.hash == magnet.hash }) {
-                if now > IAValues[IAIndex].expiryTimeStamp {
-                    IAValues.remove(at: IAIndex)
-                    return true
-                } else {
-                    return false
-                }
-            } else {
-                return true
-            }
-        }
-
-        if sendMagnets.isEmpty {
-            return
-        }
-
-        var request = URLRequest(url: URL(string: "\(baseApiUrl)/torrents/instantAvailability/\(sendMagnets.compactMap(\.hash).joined(separator: "/"))")!)
-
-        let data = try await performRequest(request: &request, requestName: #function)
-
-        let rawResponseDict = try jsonDecoder.decode([String: InstantAvailabilityResponse].self, from: data)
-
-        for (hash, response) in rawResponseDict {
-            guard let data = response.data else {
-                continue
-            }
-
-            if data.rd.isEmpty {
-                continue
-            }
-
-            // Handle files array
-            let batches = data.rd.map { fileDict in
-                let batchFiles: [RealDebrid.IABatchFile] = fileDict.map { key, value in
-                    // Force unwrapped ID. Is safe because ID is guaranteed on a successful response
-                    RealDebrid.IABatchFile(id: Int(key)!, fileName: value.filename)
-                }.sorted(by: { $0.id < $1.id })
-
-                return RealDebrid.IABatch(files: batchFiles)
-            }
-
-            var files: [DebridIAFile] = []
-
-            for batch in batches {
-                let batchFileIds = batch.files.map(\.id)
-
-                for batchFile in batch.files {
-                    if !files.contains(where: { $0.id == batchFile.id }) {
-                        files.append(
-                            DebridIAFile(
-                                id: batchFile.id,
-                                name: batchFile.fileName,
-                                batchIds: batchFileIds
-                            )
-                        )
-                    }
-                }
-            }
-
-            // TTL: 5 minutes
+        for cloudMagnet in cloudMagnets {
             IAValues.append(
                 DebridIA(
-                    magnet: Magnet(hash: hash, link: nil),
+                    magnet: Magnet(hash: cloudMagnet.hash, link: nil),
                     expiryTimeStamp: Date().timeIntervalSince1970 + 300,
-                    files: files
+                    files: []
                 )
             )
         }
