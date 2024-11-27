@@ -118,7 +118,7 @@ class OffCloud: DebridSource, ObservableObject {
             return
         }
 
-        var request = URLRequest(url: try buildRequestURL(urlString: "\(baseApiUrl)/cache"))
+        var request = try URLRequest(url: buildRequestURL(urlString: "\(baseApiUrl)/cache"))
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
@@ -202,7 +202,7 @@ class OffCloud: DebridSource, ObservableObject {
 
     // Called as "cloud" in offcloud's API
     private func offcloudDownload(magnet: Magnet) async throws -> CloudDownloadResponse {
-        var request = URLRequest(url: try buildRequestURL(urlString: "\(baseApiUrl)/cloud"))
+        var request = try URLRequest(url: buildRequestURL(urlString: "\(baseApiUrl)/cloud"))
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
@@ -220,7 +220,7 @@ class OffCloud: DebridSource, ObservableObject {
     }
 
     private func cloudExplore(requestId: String) async throws -> CloudExploreResponse {
-        var request = URLRequest(url: try buildRequestURL(urlString: "\(baseApiUrl)/cloud/explore/\(requestId)"))
+        var request = try URLRequest(url: buildRequestURL(urlString: "\(baseApiUrl)/cloud/explore/\(requestId)"))
 
         let data = try await performRequest(request: &request, requestName: "cloudExplore")
         let rawResponse = try jsonDecoder.decode(CloudExploreResponse.self, from: data)
@@ -245,7 +245,7 @@ class OffCloud: DebridSource, ObservableObject {
     func deleteUserDownload(downloadId: String) {}
 
     func getUserMagnets() async throws {
-        var request = URLRequest(url: try buildRequestURL(urlString: "\(baseApiUrl)/cloud/history"))
+        var request = try URLRequest(url: buildRequestURL(urlString: "\(baseApiUrl)/cloud/history"))
 
         let data = try await performRequest(request: &request, requestName: "cloudHistory")
         let rawResponse = try jsonDecoder.decode([CloudHistoryResponse].self, from: data)
@@ -271,7 +271,7 @@ class OffCloud: DebridSource, ObservableObject {
             throw DebridError.InvalidPostBody
         }
 
-        var request = URLRequest(url: try buildRequestURL(urlString: "\(website)/cloud/remove/\(cloudMagnetId)"))
+        var request = try URLRequest(url: buildRequestURL(urlString: "\(website)/cloud/remove/\(cloudMagnetId)"))
         try await performRequest(request: &request, requestName: "cloudRemove")
     }
 }

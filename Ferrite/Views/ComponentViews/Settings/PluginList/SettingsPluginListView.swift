@@ -1,5 +1,5 @@
 //
-//  SettingsSourceListView.swift
+//  SettingsPluginListView.swift
 //  Ferrite
 //
 //  Created by Brian Dashore on 7/25/22.

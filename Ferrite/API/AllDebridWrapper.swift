@@ -81,7 +81,7 @@ class AllDebrid: PollingDebridSource, ObservableObject {
             URLQueryItem(name: "pin", value: pin)
         ]
 
-        let request = URLRequest(url: try buildRequestURL(urlString: "\(baseApiUrl)/pin/check", queryItems: queryItems))
+        let request = try URLRequest(url: buildRequestURL(urlString: "\(baseApiUrl)/pin/check", queryItems: queryItems))
 
         // Timer to poll AD API for key
         authTask = Task {
@@ -197,7 +197,7 @@ class AllDebrid: PollingDebridSource, ObservableObject {
         }
 
         let queryItems = sendMagnets.map { URLQueryItem(name: "magnets[]", value: $0.hash) }
-        var request = URLRequest(url: try buildRequestURL(urlString: "\(baseApiUrl)/magnet/instant", queryItems: queryItems))
+        var request = try URLRequest(url: buildRequestURL(urlString: "\(baseApiUrl)/magnet/instant", queryItems: queryItems))
 
         let data = try await performRequest(request: &request, requestName: #function)
         let rawResponse = try jsonDecoder.decode(ADResponse<InstantAvailabilityResponse>.self, from: data).data
@@ -246,7 +246,7 @@ class AllDebrid: PollingDebridSource, ObservableObject {
             throw DebridError.FailedRequest(description: "The magnet link is invalid")
         }
 
-        var request = URLRequest(url: try buildRequestURL(urlString: "\(baseApiUrl)/magnet/upload"))
+        var request = try URLRequest(url: buildRequestURL(urlString: "\(baseApiUrl)/magnet/upload"))
         request.httpMethod = "POST"
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
 
@@ -271,7 +271,7 @@ class AllDebrid: PollingDebridSource, ObservableObject {
         let queryItems = [
             URLQueryItem(name: "id", value: magnetId)
         ]
-        var request = URLRequest(url: try buildRequestURL(urlString: "\(baseApiUrl)/magnet/status", queryItems: queryItems))
+        var request = try URLRequest(url: buildRequestURL(urlString: "\(baseApiUrl)/magnet/status", queryItems: queryItems))
 
         let data = try await performRequest(request: &request, requestName: #function)
         let rawResponse = try jsonDecoder.decode(ADResponse<MagnetStatusResponse>.self, from: data).data
@@ -289,7 +289,7 @@ class AllDebrid: PollingDebridSource, ObservableObject {
         let queryItems = [
             URLQueryItem(name: "link", value: restrictedFile.streamUrlString)
         ]
-        var request = URLRequest(url: try buildRequestURL(urlString: "\(baseApiUrl)/link/unlock", queryItems: queryItems))
+        var request = try URLRequest(url: buildRequestURL(urlString: "\(baseApiUrl)/link/unlock", queryItems: queryItems))
 
         let data = try await performRequest(request: &request, requestName: "unlockLink")
         let rawResponse = try jsonDecoder.decode(ADResponse<UnlockLinkResponse>.self, from: data).data
@@ -301,7 +301,7 @@ class AllDebrid: PollingDebridSource, ObservableObject {
         let queryItems = [
             URLQueryItem(name: "links[]", value: link)
         ]
-        var request = URLRequest(url: try buildRequestURL(urlString: "\(baseApiUrl)/user/links/save", queryItems: queryItems))
+        var request = try URLRequest(url: buildRequestURL(urlString: "\(baseApiUrl)/user/links/save", queryItems: queryItems))
 
         try await performRequest(request: &request, requestName: #function)
     }
@@ -309,7 +309,7 @@ class AllDebrid: PollingDebridSource, ObservableObject {
     // MARK: - Cloud methods
 
     func getUserMagnets() async throws {
-        var request = URLRequest(url: try buildRequestURL(urlString: "\(baseApiUrl)/magnet/status"))
+        var request = try URLRequest(url: buildRequestURL(urlString: "\(baseApiUrl)/magnet/status"))
 
         let data = try await performRequest(request: &request, requestName: #function)
         let rawResponse = try jsonDecoder.decode(ADResponse<MagnetStatusResponse>.self, from: data).data
@@ -333,13 +333,13 @@ class AllDebrid: PollingDebridSource, ObservableObject {
         let queryItems = [
             URLQueryItem(name: "id", value: cloudMagnetId)
         ]
-        var request = URLRequest(url: try buildRequestURL(urlString: "\(baseApiUrl)/magnet/delete", queryItems: queryItems))
+        var request = try URLRequest(url: buildRequestURL(urlString: "\(baseApiUrl)/magnet/delete", queryItems: queryItems))
 
         try await performRequest(request: &request, requestName: #function)
     }
 
     func getUserDownloads() async throws {
-        var request = URLRequest(url: try buildRequestURL(urlString: "\(baseApiUrl)/user/links"))
+        var request = try URLRequest(url: buildRequestURL(urlString: "\(baseApiUrl)/user/links"))
 
         let data = try await performRequest(request: &request, requestName: #function)
         let rawResponse = try jsonDecoder.decode(ADResponse<SavedLinksResponse>.self, from: data).data
@@ -362,7 +362,7 @@ class AllDebrid: PollingDebridSource, ObservableObject {
         let queryItems = [
             URLQueryItem(name: "link", value: downloadId)
         ]
-        var request = URLRequest(url: try buildRequestURL(urlString: "\(baseApiUrl)/user/links/delete", queryItems: queryItems))
+        var request = try URLRequest(url: buildRequestURL(urlString: "\(baseApiUrl)/user/links/delete", queryItems: queryItems))
 
         try await performRequest(request: &request, requestName: #function)
     }

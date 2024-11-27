@@ -1,5 +1,5 @@
 //
-//  DebridInfoView.swift
+//  SettingsDebridInfoView.swift
 //  Ferrite
 //
 //  Created by Brian Dashore on 3/5/23.

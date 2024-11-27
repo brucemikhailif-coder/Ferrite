@@ -32,8 +32,7 @@ struct PluginInfoMetaView<P: Plugin>: View {
                     Group {
                         Text("ID: \(selectedPlugin.id)")
 
-                        if let pluginList = pluginLists.first(where: { $0.id == selectedPlugin.listId })
-                        {
+                        if let pluginList = pluginLists.first(where: { $0.id == selectedPlugin.listId }) {
                             Text("List: \(pluginList.name)")
                             Text("List ID: \(pluginList.id.uuidString)")
                         } else {

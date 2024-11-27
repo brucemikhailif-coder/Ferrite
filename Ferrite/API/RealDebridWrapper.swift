@@ -17,7 +17,7 @@ class RealDebrid: PollingDebridSource, ObservableObject {
         "Ferrite's instant availability solely looks at a user's magnet library. \n\n" +
         "If you must use this service, it is recommended to download search results manually using the context menu. \n\n" +
         "This service does not inform if a magnet link is a batch before downloading."
-        
+
     let cachedStatus: [String] = ["downloaded"]
     var authTask: Task<Void, Error>?
 

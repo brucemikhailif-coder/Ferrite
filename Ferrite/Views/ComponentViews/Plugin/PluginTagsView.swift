@@ -1,5 +1,5 @@
 //
-//  PluginTagView.swift
+//  PluginTagsView.swift
 //  Ferrite
 //
 //  Created by Brian Dashore on 2/7/23.

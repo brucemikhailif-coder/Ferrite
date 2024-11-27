@@ -1,5 +1,5 @@
 //
-//  InstalledSourceButtonView.swift
+//  InstalledPluginButtonView.swift
 //  Ferrite
 //
 //  Created by Brian Dashore on 8/5/22.

@@ -21,13 +21,12 @@ struct IndeterminateProgressView: View {
                         .foregroundColor(Color.accentColor)
                         .frame(width: reader.size.width * 0.26, height: 6)
                         .clipShape(Capsule())
-
                         .offset(x: -reader.size.width * 0.6, y: 0)
-                        .offset(x: reader.size.width * 1.2 * self.offset, y: 0)
-                        .animation(.default.repeatForever().speed(0.5), value: self.offset)
+                        .offset(x: reader.size.width * 1.2 * offset, y: 0)
+                        .animation(.default.repeatForever().speed(0.5), value: offset)
                         .onAppear {
                             withAnimation {
-                                self.offset = 1
+                                offset = 1
                             }
                         }
                 )
