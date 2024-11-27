@@ -13,7 +13,11 @@ class RealDebrid: PollingDebridSource, ObservableObject {
     let website = "https://real-debrid.com"
     let description: String? = "RealDebrid is a debrid service that is used for downloads and media playback. " +
         "You must pay to access this service. \n\n" +
-        "This service does not inform if a magnet link in a user's cloud library is a batch before downloading."
+        "It is not recommended to use this service since media cache checks are not possible via the API. " +
+        "Ferrite's instant availability solely looks at a user's magnet library. \n\n" +
+        "If you must use this service, it is recommended to download search results manually using the context menu. \n\n" +
+        "This service does not inform if a magnet link is a batch before downloading."
+        
     let cachedStatus: [String] = ["downloaded"]
     var authTask: Task<Void, Error>?
 

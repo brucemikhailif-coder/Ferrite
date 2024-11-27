@@ -37,29 +37,7 @@ struct SearchResultButtonView: View {
                 case .full:
                     if debridManager.selectDebridResult(magnet: result.magnet) {
                         debridManager.currentDebridTask = Task {
-                            await debridManager.fetchDebridDownload(magnet: result.magnet)
-
-                            // Bump to batch
-                            if debridManager.requiresUnrestrict {
-                                navModel.selectedHistoryInfo = historyEntry
-                                navModel.currentChoiceSheet = .batch
-
-                                return
-                            }
-
-                            if !debridManager.downloadUrl.isEmpty {
-                                historyEntry.url = debridManager.downloadUrl
-                                PersistenceController.shared.createHistory(historyEntry, performSave: true)
-
-                                pluginManager.runDefaultAction(
-                                    urlString: debridManager.downloadUrl,
-                                    navModel: navModel
-                                )
-
-                                if navModel.currentChoiceSheet != .action {
-                                    debridManager.downloadUrl = ""
-                                }
-                            }
+                            await downloadToDebrid()
                         }
                     }
                 case .partial:
@@ -121,6 +99,28 @@ struct SearchResultButtonView: View {
                     }
                 }
             }
+
+            Button {
+                if debridManager.currentDebridTask == nil {
+                    if !debridManager.selectDebridResult(magnet: result.magnet) {
+                        debridManager.selectedDebridItem = DebridIA(
+                            magnet: result.magnet,
+                            expiryTimeStamp: Date().timeIntervalSince1970 + 200,
+                            files: []
+                        )
+                    }
+
+                    debridManager.currentDebridTask = Task {
+                        await downloadToDebrid()
+
+                        // Re-populate the IA cache
+                        await debridManager.populateDebridIA([result.magnet])
+                    }
+                }
+            } label: {
+                Text("Download to Debrid")
+                Image(systemName: "arrow.down.circle")
+            }
         }
         .alert("Caching file", isPresented: $debridManager.showDeleteAlert) {
             Button("Yes", role: .destructive) {
@@ -163,6 +163,37 @@ struct SearchResultButtonView: View {
                 }
 
                 runOnce = true
+            }
+        }
+    }
+
+    // Common function to download
+    func downloadToDebrid() async {
+        var historyEntry = HistoryEntryJson(
+            name: result.title,
+            source: result.source
+        )
+
+        await debridManager.fetchDebridDownload(magnet: result.magnet)
+        navModel.selectedTitle = result.title ?? ""
+
+        if debridManager.requiresUnrestrict {
+            navModel.currentChoiceSheet = .batch
+
+            return
+        }
+
+        if !debridManager.downloadUrl.isEmpty {
+            historyEntry.url = debridManager.downloadUrl
+            PersistenceController.shared.createHistory(historyEntry, performSave: true)
+
+            pluginManager.runDefaultAction(
+                urlString: debridManager.downloadUrl,
+                navModel: navModel
+            )
+
+            if navModel.currentChoiceSheet != .action {
+                debridManager.downloadUrl = ""
             }
         }
     }
