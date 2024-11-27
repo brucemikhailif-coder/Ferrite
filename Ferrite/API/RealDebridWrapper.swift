@@ -255,17 +255,34 @@ class RealDebrid: PollingDebridSource, ObservableObject {
     // Post-API changes
     // Use user magnets to check for IA instead
     func instantAvailability(magnets: [Magnet]) async throws {
+        let now = Date().timeIntervalSince1970
+
+        let sendMagnets = magnets.filter { magnet in
+            if let IAIndex = IAValues.firstIndex(where: { $0.magnet.hash == magnet.hash }) {
+                if now > IAValues[IAIndex].expiryTimeStamp {
+                    IAValues.remove(at: IAIndex)
+                    return true
+                } else {
+                    return false
+                }
+            } else {
+                return true
+            }
+        }
+
         // Fetch the user magnets to the latest version
         try await getUserMagnets()
 
         for cloudMagnet in cloudMagnets {
-            IAValues.append(
-                DebridIA(
-                    magnet: Magnet(hash: cloudMagnet.hash, link: nil),
-                    expiryTimeStamp: Date().timeIntervalSince1970 + 300,
-                    files: []
+            if sendMagnets.contains(where: { $0.hash == cloudMagnet.hash }) {
+                IAValues.append(
+                    DebridIA(
+                        magnet: Magnet(hash: cloudMagnet.hash, link: nil),
+                        expiryTimeStamp: Date().timeIntervalSince1970 + 300,
+                        files: []
+                    )
                 )
-            )
+            }
         }
     }
 
@@ -381,22 +398,6 @@ class RealDebrid: PollingDebridSource, ObservableObject {
         default:
             throw DebridError.EmptyUserMagnets
         }
-        /*
-         if rawResponse.status == "downloaded" {
-             //let cloudMagnetLink = rawResponse.links[safe: linkIndex ?? -1],
-             /*
-             return DebridIAFile(
-                 id: 0,
-                 name: rawResponse.filename,
-                 streamUrlString: cloudMagnetLink
-             )
-              */
-         } else if rawResponse.status == "downloading" || rawResponse.status == "queued" {
-             throw DebridError.IsCaching
-         } else {
-             throw DebridError.EmptyUserMagnets
-         }
-          */
     }
 
     // Downloads link from selectFiles for playback

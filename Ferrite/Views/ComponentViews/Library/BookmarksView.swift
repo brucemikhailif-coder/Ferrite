@@ -56,20 +56,27 @@ struct BookmarksView: View {
                 .frame(height: 15)
         }
         .task {
-            if !debridManager.enabledDebrids.isEmpty {
-                let magnets = bookmarks.compactMap {
-                    if let magnetHash = $0.magnetHash {
-                        return Magnet(hash: magnetHash, link: $0.magnetLink)
-                    } else {
-                        return nil
-                    }
-                }
-                await debridManager.populateDebridIA(magnets)
-            }
+            await matchAgainstIA()
+        }
+        .refreshable {
+            await matchAgainstIA()
         }
     }
 
     func fetchPredicate() {
         bookmarks.nsPredicate = searchText.isEmpty ? nil : NSPredicate(format: "title CONTAINS[cd] %@", searchText)
+    }
+
+    func matchAgainstIA() async {
+        if !debridManager.enabledDebrids.isEmpty {
+            let magnets = bookmarks.compactMap {
+                if let magnetHash = $0.magnetHash {
+                    return Magnet(hash: magnetHash, link: $0.magnetLink)
+                } else {
+                    return nil
+                }
+            }
+            await debridManager.populateDebridIA(magnets)
+        }
     }
 }

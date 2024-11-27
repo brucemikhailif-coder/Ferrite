@@ -174,7 +174,7 @@ class DebridManager: ObservableObject {
 
             return true
         } else {
-            logManager?.error("DebridManager: Could not find the associated \(selectedSource.id) entry for magnet hash \(magnetHash)")
+            logManager?.warn("DebridManager: Could not find the associated \(selectedSource.id) entry for magnet hash \(magnetHash)")
             return false
         }
     }

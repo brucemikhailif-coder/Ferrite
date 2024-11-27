@@ -102,10 +102,13 @@ struct SearchResultButtonView: View {
 
             Button {
                 if debridManager.currentDebridTask == nil {
-                    if !debridManager.selectDebridResult(magnet: result.magnet) {
+                    let foundIAResult = debridManager.selectDebridResult(magnet: result.magnet)
+
+                    // Add a fake IA because we don't know if the magnet is cached at this point
+                    if !foundIAResult {
                         debridManager.selectedDebridItem = DebridIA(
                             magnet: result.magnet,
-                            expiryTimeStamp: Date().timeIntervalSince1970 + 200,
+                            expiryTimeStamp: Date().timeIntervalSince1970,
                             files: []
                         )
                     }
@@ -113,8 +116,10 @@ struct SearchResultButtonView: View {
                     debridManager.currentDebridTask = Task {
                         await downloadToDebrid()
 
-                        // Re-populate the IA cache
-                        await debridManager.populateDebridIA([result.magnet])
+                        // Re-populate the IA cache if a result wasn't initially found
+                        if !foundIAResult {
+                            await debridManager.populateDebridIA([result.magnet])
+                        }
                     }
                 }
             } label: {
