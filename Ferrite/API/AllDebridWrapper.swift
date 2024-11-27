@@ -192,31 +192,22 @@ class AllDebrid: PollingDebridSource, ObservableObject {
             }
         }
 
-        if sendMagnets.isEmpty {
-            return
-        }
+        // Fetch the user magnets to the latest version
+        try await getUserMagnets()
 
-        let queryItems = sendMagnets.map { URLQueryItem(name: "magnets[]", value: $0.hash) }
-        var request = try URLRequest(url: buildRequestURL(urlString: "\(baseApiUrl)/magnet/instant", queryItems: queryItems))
-
-        let data = try await performRequest(request: &request, requestName: #function)
-        let rawResponse = try jsonDecoder.decode(ADResponse<InstantAvailabilityResponse>.self, from: data).data
-
-        let filteredMagnets = rawResponse.magnets.filter { $0.instant == true && $0.files != nil }
-        let availableHashes = filteredMagnets.map { magnetResp in
-            // Force unwrap is OK here since the filter caught any nil values
-            let files = magnetResp.files!.enumerated().map { index, magnetFile in
-                DebridIAFile(id: index, name: magnetFile.name)
+        for cloudMagnet in cloudMagnets {
+            if cachedStatus.contains(cloudMagnet.status),
+               sendMagnets.contains(where: { $0.hash == cloudMagnet.hash })
+            {
+                IAValues.append(
+                    DebridIA(
+                        magnet: Magnet(hash: cloudMagnet.hash, link: nil),
+                        expiryTimeStamp: Date().timeIntervalSince1970 + 300,
+                        files: []
+                    )
+                )
             }
-
-            return DebridIA(
-                magnet: Magnet(hash: magnetResp.hash, link: magnetResp.magnet),
-                expiryTimeStamp: Date().timeIntervalSince1970 + 300,
-                files: files
-            )
         }
-
-        IAValues += availableHashes
     }
 
     // MARK: - Downloading
@@ -225,7 +216,9 @@ class AllDebrid: PollingDebridSource, ObservableObject {
     func getRestrictedFile(magnet: Magnet, ia: DebridIA?, iaFile: DebridIAFile?) async throws -> (restrictedFile: DebridIAFile?, newIA: DebridIA?) {
         let selectedMagnetId: String
 
-        if let existingMagnet = cloudMagnets.first(where: { $0.hash == magnet.hash && cachedStatus.contains($0.status) }) {
+        if let existingMagnet = cloudMagnets.first(where: {
+            $0.hash == magnet.hash && cachedStatus.contains($0.status)
+        }) {
             selectedMagnetId = existingMagnet.id
         } else {
             let magnetId = try await addMagnet(magnet: magnet)
@@ -261,6 +254,10 @@ class AllDebrid: PollingDebridSource, ObservableObject {
         let rawResponse = try jsonDecoder.decode(ADResponse<AddMagnetResponse>.self, from: data).data
 
         if let magnet = rawResponse.magnets[safe: 0] {
+            if !magnet.ready {
+                throw DebridError.IsCaching
+            }
+
             return magnet.id
         } else {
             throw DebridError.InvalidResponse

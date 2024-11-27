@@ -274,7 +274,9 @@ class RealDebrid: PollingDebridSource, ObservableObject {
         try await getUserMagnets()
 
         for cloudMagnet in cloudMagnets {
-            if sendMagnets.contains(where: { $0.hash == cloudMagnet.hash }) {
+            if cachedStatus.contains(cloudMagnet.status),
+               sendMagnets.contains(where: { $0.hash == cloudMagnet.hash })
+            {
                 IAValues.append(
                     DebridIA(
                         magnet: Magnet(hash: cloudMagnet.hash, link: nil),
@@ -294,7 +296,9 @@ class RealDebrid: PollingDebridSource, ObservableObject {
 
         do {
             // Don't queue a new job if the magnet already exists in the user's library
-            if let existingCloudMagnet = cloudMagnets.first(where: { $0.hash == magnet.hash && $0.status == "downloaded" }) {
+            if let existingCloudMagnet = cloudMagnets.first(where: {
+                $0.hash == magnet.hash && cachedStatus.contains($0.status)
+            }) {
                 selectedMagnetId = existingCloudMagnet.id
             } else {
                 selectedMagnetId = try await addMagnet(magnet: magnet)
