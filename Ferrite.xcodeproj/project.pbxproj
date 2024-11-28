@@ -104,6 +104,7 @@
 		0C8DC35429CE2AB5008A83AD /* SourceSettingsBaseUrlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C8DC35329CE2AB5008A83AD /* SourceSettingsBaseUrlView.swift */; };
 		0C8DC35629CE2ABF008A83AD /* SourceSettingsApiView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C8DC35529CE2ABF008A83AD /* SourceSettingsApiView.swift */; };
 		0C8DC35829CE2ACA008A83AD /* SourceSettingsMethodView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C8DC35729CE2ACA008A83AD /* SourceSettingsMethodView.swift */; };
+		0C93DED82CF80101009EA8D2 /* SettingsDebridLinkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C93DED72CF80101009EA8D2 /* SettingsDebridLinkView.swift */; };
 		0C95D8D828A55B03005E22B3 /* DefaultActionPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C95D8D728A55B03005E22B3 /* DefaultActionPickerView.swift */; };
 		0CA05457288EE58200850554 /* SettingsPluginListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CA05456288EE58200850554 /* SettingsPluginListView.swift */; };
 		0CA05459288EE9E600850554 /* PluginManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CA05458288EE9E600850554 /* PluginManager.swift */; };
@@ -259,6 +260,7 @@
 		0C8DC35329CE2AB5008A83AD /* SourceSettingsBaseUrlView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceSettingsBaseUrlView.swift; sourceTree = "<group>"; };
 		0C8DC35529CE2ABF008A83AD /* SourceSettingsApiView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceSettingsApiView.swift; sourceTree = "<group>"; };
 		0C8DC35729CE2ACA008A83AD /* SourceSettingsMethodView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceSettingsMethodView.swift; sourceTree = "<group>"; };
+		0C93DED72CF80101009EA8D2 /* SettingsDebridLinkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsDebridLinkView.swift; sourceTree = "<group>"; };
 		0C95D8D728A55B03005E22B3 /* DefaultActionPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultActionPickerView.swift; sourceTree = "<group>"; };
 		0CA05456288EE58200850554 /* SettingsPluginListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsPluginListView.swift; sourceTree = "<group>"; };
 		0CA05458288EE9E600850554 /* PluginManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PluginManager.swift; sourceTree = "<group>"; };
@@ -555,6 +557,7 @@
 				0C10848A28BD9A38008F0BA6 /* SettingsAppVersionView.swift */,
 				0C6771FD29B521F1005D38D2 /* SettingsDebridInfoView.swift */,
 				0C5708EA29B8F89300BE07F9 /* SettingsLogView.swift */,
+				0C93DED72CF80101009EA8D2 /* SettingsDebridLinkView.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -981,6 +984,7 @@
 				0C32FB572890D1F2002BD219 /* ListRowViews.swift in Sources */,
 				0CEC8AAE299B31B6007BFE8F /* SearchFilterHeaderView.swift in Sources */,
 				0C84F4822895BFED0074B7C9 /* Source+CoreDataClass.swift in Sources */,
+				0C93DED82CF80101009EA8D2 /* SettingsDebridLinkView.swift in Sources */,
 				0C3DD43F29B6968D006429DB /* KodiEditorView.swift in Sources */,
 				0CB725322C123E6F0047FC0B /* CloudDownloadView.swift in Sources */,
 				0C3DD44329B6ACD9006429DB /* KodiServer+CoreDataProperties.swift in Sources */,
