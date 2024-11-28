@@ -225,12 +225,40 @@ class AllDebrid: PollingDebridSource, ObservableObject {
             selectedMagnetId = String(magnetId)
         }
 
-        let lockedLink = try await fetchMagnetStatus(
+        let rawResponse = try await fetchMagnetStatus(
             magnetId: selectedMagnetId,
             selectedIndex: iaFile?.id ?? 0
         )
+        guard let magnets = rawResponse.magnets[safe: 0] else {
+            throw DebridError.EmptyUserMagnets
+        }
 
-        return (lockedLink, nil)
+        // Batches require an unrestrict from the user
+        if magnets.links.count > 1, iaFile == nil {
+            var copiedIA = ia
+
+            copiedIA?.files = magnets.links.enumerated().compactMap { index, file in
+                DebridIAFile(
+                    id: index,
+                    name: file.filename,
+                    streamUrlString: file.link
+                )
+            }
+
+            return (nil, copiedIA)
+        }
+
+        if let cloudMagnetFile = magnets.links[safe: iaFile?.id ?? 0] {
+            let restrictedFile = DebridIAFile(
+                id: 0,
+                name: cloudMagnetFile.filename,
+                streamUrlString: cloudMagnetFile.link
+            )
+
+            return (restrictedFile, nil)
+        } else {
+            throw DebridError.EmptyUserMagnets
+        }
     }
 
     // Adds a magnet link to the user's AD account
@@ -264,7 +292,7 @@ class AllDebrid: PollingDebridSource, ObservableObject {
         }
     }
 
-    func fetchMagnetStatus(magnetId: String, selectedIndex: Int?) async throws -> DebridIAFile {
+    func fetchMagnetStatus(magnetId: String, selectedIndex: Int?) async throws -> MagnetStatusResponse {
         let queryItems = [
             URLQueryItem(name: "id", value: magnetId)
         ]
@@ -273,12 +301,7 @@ class AllDebrid: PollingDebridSource, ObservableObject {
         let data = try await performRequest(request: &request, requestName: #function)
         let rawResponse = try jsonDecoder.decode(ADResponse<MagnetStatusResponse>.self, from: data).data
 
-        // Better to fetch no link at all than the wrong link
-        if let cloudMagnetFile = rawResponse.magnets[safe: 0]?.links[safe: selectedIndex ?? -1] {
-            return DebridIAFile(id: 0, name: cloudMagnetFile.filename, streamUrlString: cloudMagnetFile.link)
-        } else {
-            throw DebridError.EmptyUserMagnets
-        }
+        return rawResponse
     }
 
     // Known as unlockLink in AD's API
