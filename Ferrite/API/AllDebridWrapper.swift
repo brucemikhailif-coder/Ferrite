@@ -11,6 +11,13 @@ class AllDebrid: PollingDebridSource, ObservableObject {
     let id = "AllDebrid"
     let abbreviation = "AD"
     let website = "https://alldebrid.com"
+    let description: String? = "AllDebrid is a debrid service that is used for downloads and media playback. " +
+        "You must pay to access this service. \n\n" +
+        "It is not recommended to use this service since media cache checks are not possible via the API. " +
+        "Ferrite's instant availability solely looks at a user's magnet library. \n\n" +
+        "If you must use this service, it is recommended to download search results manually using the context menu. \n\n" +
+        "This service does not inform if a magnet link is a batch before downloading."
+
     let cachedStatus: [String] = ["Ready"]
     var authTask: Task<Void, Error>?
 
