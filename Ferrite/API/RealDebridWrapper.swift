@@ -309,9 +309,8 @@ class RealDebrid: PollingDebridSource, ObservableObject {
             let response = try await torrentInfo(debridID: selectedMagnetId)
             let filteredFiles = response.files.filter { $0.selected == 1 }
 
+            // Need to return this to the user
             if filteredFiles.count > 1, iaFile == nil {
-                // Need to return this to the user
-
                 var copiedIA = ia
 
                 copiedIA?.files = response.files.enumerated().compactMap { index, file in
