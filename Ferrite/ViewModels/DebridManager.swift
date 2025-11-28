@@ -13,12 +13,12 @@ class DebridManager: ObservableObject {
     // Linked classes
     var logManager: LoggingManager?
     @Published var realDebrid: RealDebrid = .init()
+    @Published var torbox: TorBox = .init()
     @Published var allDebrid: AllDebrid = .init()
     @Published var premiumize: Premiumize = .init()
-    @Published var torbox: TorBox = .init()
     @Published var offcloud: OffCloud = .init()
 
-    lazy var debridSources: [DebridSource] = [realDebrid, allDebrid, premiumize, torbox, offcloud]
+    lazy var debridSources: [DebridSource] = [realDebrid, torbox, allDebrid, premiumize, offcloud]
 
     // UI Variables
     @Published var showWebView: Bool = false
