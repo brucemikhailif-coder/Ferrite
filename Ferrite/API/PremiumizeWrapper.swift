@@ -209,7 +209,7 @@ class Premiumize: OAuthDebridSource, ObservableObject {
         var bodyComponents = URLComponents()
         bodyComponents.queryItems = [URLQueryItem(name: "src", value: magnet.link)]
 
-        request.httpBody = bodyComponents.query?.data(using: .utf8)
+        request.httpBody = bodyComponents.percentEncodedQuery?.data(using: .utf8)
 
         let data = try await performRequest(request: &request, requestName: #function)
         let rawResponse = try jsonDecoder.decode(DDLResponse.self, from: data)
@@ -318,7 +318,7 @@ class Premiumize: OAuthDebridSource, ObservableObject {
         var bodyComponents = URLComponents()
         bodyComponents.queryItems = [URLQueryItem(name: "src", value: magnetLink)]
 
-        request.httpBody = bodyComponents.query?.data(using: .utf8)
+        request.httpBody = bodyComponents.percentEncodedQuery?.data(using: .utf8)
 
         try await performRequest(request: &request, requestName: #function)
     }
@@ -369,7 +369,7 @@ class Premiumize: OAuthDebridSource, ObservableObject {
         var bodyComponents = URLComponents()
         bodyComponents.queryItems = [URLQueryItem(name: "id", value: downloadId)]
 
-        request.httpBody = bodyComponents.query?.data(using: .utf8)
+        request.httpBody = bodyComponents.percentEncodedQuery?.data(using: .utf8)
 
         try await performRequest(request: &request, requestName: #function)
     }

@@ -167,7 +167,7 @@ class RealDebrid: PollingDebridSource, ObservableObject {
             URLQueryItem(name: "grant_type", value: "http://oauth.net/grant_type/device/1.0")
         ]
 
-        request.httpBody = bodyComponents.query?.data(using: .utf8)
+        request.httpBody = bodyComponents.percentEncodedQuery?.data(using: .utf8)
 
         let (data, _) = try await URLSession.shared.data(for: request)
 
@@ -357,7 +357,7 @@ class RealDebrid: PollingDebridSource, ObservableObject {
         var bodyComponents = URLComponents()
         bodyComponents.queryItems = [URLQueryItem(name: "magnet", value: magnetLink)]
 
-        request.httpBody = bodyComponents.query?.data(using: .utf8)
+        request.httpBody = bodyComponents.percentEncodedQuery?.data(using: .utf8)
 
         let data = try await performRequest(request: &request, requestName: #function)
         let rawResponse = try jsonDecoder.decode(AddMagnetResponse.self, from: data)
@@ -380,7 +380,7 @@ class RealDebrid: PollingDebridSource, ObservableObject {
             bodyComponents.queryItems = [URLQueryItem(name: "files", value: joinedIds)]
         }
 
-        request.httpBody = bodyComponents.query?.data(using: .utf8)
+        request.httpBody = bodyComponents.percentEncodedQuery?.data(using: .utf8)
 
         try await performRequest(request: &request, requestName: #function)
     }
@@ -412,7 +412,7 @@ class RealDebrid: PollingDebridSource, ObservableObject {
         var bodyComponents = URLComponents()
         bodyComponents.queryItems = [URLQueryItem(name: "link", value: restrictedFile.streamUrlString)]
 
-        request.httpBody = bodyComponents.query?.data(using: .utf8)
+        request.httpBody = bodyComponents.percentEncodedQuery?.data(using: .utf8)
 
         let data = try await performRequest(request: &request, requestName: #function)
         let rawResponse = try jsonDecoder.decode(UnrestrictLinkResponse.self, from: data)

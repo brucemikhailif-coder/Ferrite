@@ -283,7 +283,7 @@ class AllDebrid: PollingDebridSource, ObservableObject {
             URLQueryItem(name: "magnets[]", value: magnetLink)
         ]
 
-        request.httpBody = bodyComponents.query?.data(using: .utf8)
+        request.httpBody = bodyComponents.percentEncodedQuery?.data(using: .utf8)
 
         let data = try await performRequest(request: &request, requestName: #function)
         let rawResponse = try jsonDecoder.decode(ADResponse<AddMagnetResponse>.self, from: data).data
