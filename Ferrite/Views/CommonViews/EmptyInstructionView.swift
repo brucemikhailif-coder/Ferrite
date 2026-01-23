@@ -12,15 +12,21 @@ struct EmptyInstructionView: View {
     let message: String
 
     var body: some View {
-        VStack(spacing: 5) {
+        VStack(spacing: 12) {
+            Image(systemName: "sparkles")
+                .font(.system(size: 24, weight: .semibold))
+
             Text(title)
-                .font(.system(size: 25, weight: .semibold))
+                .font(.system(size: 22, weight: .semibold))
 
             Text(message)
                 .padding(.horizontal, 50)
+                .font(.footnote)
         }
         .multilineTextAlignment(.center)
         .foregroundColor(.init(uiColor: .secondaryLabel))
+        .padding(20)
+        .liquidGlass(cornerRadius: 18)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .ignoresSafeArea()
     }

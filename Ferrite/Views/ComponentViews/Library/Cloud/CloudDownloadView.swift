@@ -24,7 +24,7 @@ struct CloudDownloadView: View {
             ForEach(debridSource.cloudDownloads.filter {
                 searchText.isEmpty ? true : $0.fileName.lowercased().contains(searchText.lowercased())
             }, id: \.self) { cloudDownload in
-                Button(cloudDownload.fileName) {
+                Button {
                     navModel.resultFromCloud = true
                     navModel.selectedTitle = cloudDownload.fileName
                     navModel.selectedMagnet = nil
@@ -40,10 +40,31 @@ struct CloudDownloadView: View {
                     transferHandle = DebridTransferHandle(id: cloudDownload.id, kind: .webDownload)
                     transferTitle = cloudDownload.fileName
                     showTransferBrowser = true
+                } label: {
+                    HStack(spacing: 12) {
+                        Image(systemName: "arrow.down.circle.fill")
+                            .font(.system(size: 20))
+                            .foregroundStyle(.accent)
+
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text(cloudDownload.fileName)
+                                .font(.callout)
+                                .lineLimit(2)
+
+                            Text("Web download")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+
+                        Spacer()
+                    }
+                    .padding(10)
+                    .liquidGlass(cornerRadius: 14)
                 }
                 .disabledAppearance(navModel.currentChoiceSheet != nil, dimmedOpacity: 0.7, animation: .easeOut(duration: 0.2))
                 .tint(.primary)
                 .tag(cloudDownload)
+                .listRowBackground(Color.clear)
                 .contextMenu {
                     Button {
                         UIPasteboard.general.string = cloudDownload.link

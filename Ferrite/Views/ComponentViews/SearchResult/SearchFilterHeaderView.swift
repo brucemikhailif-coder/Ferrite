@@ -38,7 +38,7 @@ struct SearchFilterHeaderView: View {
                             .caption
                                 .weight(.medium)
                         )
-                        .background(Capsule().foregroundColor(.init(uiColor: .secondarySystemFill)))
+                        .liquidGlass(cornerRadius: 999, interactive: true)
                     }
 
                     Divider()

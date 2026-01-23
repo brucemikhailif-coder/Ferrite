@@ -53,13 +53,31 @@ struct SearchResultButtonView: View {
             }
         } label: {
             VStack(alignment: .leading, spacing: 10) {
-                Text(result.title ?? "No title")
-                    .font(.callout)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .lineLimit(4)
+                HStack(spacing: 8) {
+                    Text(result.title ?? "No title")
+                        .font(.callout)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .lineLimit(4)
+
+                    Spacer(minLength: 0)
+
+                    if let badge = cacheBadgeText() {
+                        Text(badge)
+                            .font(.caption2.weight(.semibold))
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(
+                                Capsule()
+                                    .fill(Color.accentColor.opacity(0.2))
+                            )
+                    }
+                }
 
                 SearchResultInfoView(result: result)
             }
+            .padding(12)
+            .liquidGlass(cornerRadius: 14)
+            .listRowBackground(Color.clear)
             .disabledAppearance(navModel.currentChoiceSheet != nil, dimmedOpacity: 0.7, animation: .easeOut(duration: 0.2))
         }
         .disableInteraction(navModel.currentChoiceSheet != nil)
@@ -189,6 +207,18 @@ struct SearchResultButtonView: View {
             PersistenceController.shared.createHistory(historyEntry, performSave: true)
 
             navModel.currentChoiceSheet = .action
+        }
+    }
+
+    private func cacheBadgeText() -> String? {
+        let status = debridIAStatus ?? debridManager.matchMagnetHash(result.magnet)
+        switch status {
+        case .full:
+            return "Cached"
+        case .partial:
+            return "Batch"
+        case .none:
+            return nil
         }
     }
 }

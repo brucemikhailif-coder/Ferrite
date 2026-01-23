@@ -33,12 +33,10 @@ struct FilterLabelView: View {
             .caption
                 .weight(.medium)
         )
-        .background(
-            Capsule()
-                .foregroundColor(
-                    count ?? 0 > 0 ? .accentColor : .init(uiColor: .secondarySystemFill)
-                )
-                .opacity(count ?? 0 > 0 && colorScheme == .light ? 0.1 : 1)
+        .liquidGlass(
+            cornerRadius: 999,
+            tint: count ?? 0 > 0 ? .accentColor.opacity(0.25) : nil,
+            interactive: true
         )
     }
 }

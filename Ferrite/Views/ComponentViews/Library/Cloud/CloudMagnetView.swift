@@ -33,23 +33,35 @@ struct CloudMagnetView: View {
                         showTransferBrowser = true
                     }
                 } label: {
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text(cloudMagnet.fileName)
-                            .font(.callout)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .lineLimit(4)
+                    HStack(spacing: 12) {
+                        Circle()
+                            .fill(statusColor(cloudMagnet.status))
+                            .frame(width: 10, height: 10)
 
-                        HStack {
-                            Text(cloudMagnet.status.capitalizingFirstLetter())
-                            Spacer()
-                            DebridLabelView(debridSource: debridSource, cloudLinks: cloudMagnet.links)
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text(cloudMagnet.fileName)
+                                .font(.callout)
+                                .lineLimit(2)
+
+                            HStack(spacing: 8) {
+                                Text(cloudMagnet.status.capitalizingFirstLetter())
+                                Text("\(cloudMagnet.links.count) files")
+                            }
+                            .font(.caption)
+                            .foregroundColor(.secondary)
                         }
-                        .font(.caption)
+
+                        Spacer()
+
+                        DebridLabelView(debridSource: debridSource, cloudLinks: cloudMagnet.links)
                     }
+                    .padding(10)
+                    .liquidGlass(cornerRadius: 14)
                 }
                 .disabledAppearance(navModel.currentChoiceSheet != nil, dimmedOpacity: 0.7, animation: .easeOut(duration: 0.2))
                 .tint(.primary)
                 .tag(cloudMagnet)
+                .listRowBackground(Color.clear)
                 .contextMenu {
                     Button {
                         UIPasteboard.general.string = cloudMagnet.hash
@@ -88,5 +100,17 @@ struct CloudMagnetView: View {
                 )
             }
         }
+    }
+
+    private func statusColor(_ status: String) -> Color {
+        if debridSource.cachedStatus.contains(status) {
+            return .green
+        }
+
+        if status.lowercased().contains("error") {
+            return .red
+        }
+
+        return .orange
     }
 }
