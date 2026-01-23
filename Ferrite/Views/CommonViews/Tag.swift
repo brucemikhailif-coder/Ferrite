@@ -19,10 +19,9 @@ struct Tag: View {
             .opacity(0.8)
             .padding(.horizontal, horizontalPadding)
             .padding(.vertical, verticalPadding)
-            .background(
-                RoundedRectangle(cornerRadius: 5)
-                    .foregroundColor(color.map { $0 } ?? .init(uiColor: .tertiaryLabel))
-                    .opacity(0.3)
+            .liquidGlass(
+                cornerRadius: 5,
+                tint: (color ?? Color(uiColor: .tertiaryLabel)).opacity(0.15)
             )
     }
 }

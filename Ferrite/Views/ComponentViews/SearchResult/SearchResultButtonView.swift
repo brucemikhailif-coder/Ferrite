@@ -66,10 +66,7 @@ struct SearchResultButtonView: View {
                             .font(.caption2.weight(.semibold))
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
-                            .background(
-                                Capsule()
-                                    .fill(Color.accentColor.opacity(0.2))
-                            )
+                            .liquidGlass(cornerRadius: 12, tint: badgeColor(for: badge).opacity(0.2))
                     }
                 }
 
@@ -219,6 +216,17 @@ struct SearchResultButtonView: View {
             return "Batch"
         case .none:
             return nil
+        }
+    }
+
+    private func badgeColor(for badgeText: String) -> Color {
+        switch badgeText {
+        case "Cached":
+            return .green
+        case "Batch":
+            return .accentColor
+        default:
+            return .secondary
         }
     }
 }
