@@ -5,6 +5,7 @@
 //  Created by Brian Dashore on 7/25/22.
 //
 
+import Ferrite
 import Foundation
 import SwiftUI
 import Yams

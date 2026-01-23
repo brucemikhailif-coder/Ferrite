@@ -5,6 +5,7 @@
 //  Created by Ferrite Agent on 24/01/2026.
 //
 
+import Ferrite
 import Foundation
 
 class UnchainedAdapter {
