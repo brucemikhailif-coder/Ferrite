@@ -856,6 +856,7 @@
 				0C07C6042C1A859B00808A46 /* FormDataBody.swift in Sources */,
 				0C7ED14328D65518009E29AD /* FileManager.swift in Sources */,
 				0C03EB71296F619900162E9A /* PluginList+CoreDataClass.swift in Sources */,
+				0C1234567890ABCDEF123459 /* UnchainedModels.swift in Sources */,
 				0C6771FA29B3D1AE005D38D2 /* KodiModels.swift in Sources */,
 				0C0D50E5288DFE7F0035ECC8 /* SourceModels.swift in Sources */,
 				0CB6516528C5A5D700DCA721 /* InlinedList.swift in Sources */,
