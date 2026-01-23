@@ -50,6 +50,16 @@ struct SettingsView: View {
                     }
                 }
 
+                Section("Plugins") {
+                    NavigationLink("Installed Plugins") {
+                        PluginsView()
+                    }
+                    
+                    NavigationLink("Manage Repositories") {
+                        SettingsPluginListView()
+                    }
+                }
+
                 Section("Playback services") {
                     NavigationLink {
                         SettingsKodiView(kodiServers: kodiServers)
@@ -111,11 +121,7 @@ struct SettingsView: View {
                     }
                 }
 
-                Section("Plugin management") {
-                    NavigationLink("Plugin lists") {
-                        SettingsPluginListView()
-                    }
-                }
+
 
                 Section("Default actions") {
                     if !debridManager.enabledDebrids.isEmpty {

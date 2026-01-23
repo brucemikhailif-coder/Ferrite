@@ -30,23 +30,22 @@ struct PluginsView: View {
     @State private var searchText: String = ""
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                if checkedForPlugins {
-                    switch navModel.pluginPickerSelection {
-                    case .sources:
-                        PluginAggregateView<Source, SourceJson>(
-                            installedPlugins: installedSources,
-                            searchText: $searchText
-                        )
-                    case .actions:
-                        PluginAggregateView<Action, ActionJson>(
-                            installedPlugins: installedActions,
-                            searchText: $searchText
-                        )
-                    }
+        ZStack {
+            if checkedForPlugins {
+                switch navModel.pluginPickerSelection {
+                case .sources:
+                    PluginAggregateView<Source, SourceJson>(
+                        installedPlugins: installedSources,
+                        searchText: $searchText
+                    )
+                case .actions:
+                    PluginAggregateView<Action, ActionJson>(
+                        installedPlugins: installedActions,
+                        searchText: $searchText
+                    )
                 }
             }
+        }
             .overlay {
                 if !isSearching {
                     if checkedForPlugins {
@@ -72,16 +71,15 @@ struct PluginsView: View {
             .onDisappear {
                 checkedForPlugins = false
             }
-            .navigationTitle("Plugins")
-            .expandedSearchable(
-                text: $searchText,
-                scopeBarContent: {
-                    PluginPickerView()
-                }
-            )
-            .autocorrectionDisabled(!autocorrectSearch)
-            .esAutocapitalization(autocorrectSearch ? .sentences : .none)
-        }
+        .navigationTitle("Plugins")
+        .expandedSearchable(
+            text: $searchText,
+            scopeBarContent: {
+                PluginPickerView()
+            }
+        )
+        .autocorrectionDisabled(!autocorrectSearch)
+        .esAutocapitalization(autocorrectSearch ? .sentences : .none)
     }
 }
 

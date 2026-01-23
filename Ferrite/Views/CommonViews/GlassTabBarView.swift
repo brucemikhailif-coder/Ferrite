@@ -14,7 +14,6 @@ struct GlassTabBarView: View {
         (.search, "Search", "magnifyingglass"),
         (.library, "Library", "book.closed"),
         (.add, "Add", "plus.circle"),
-        (.plugins, "Plugins", "doc.text"),
         (.settings, "Settings", "gear")
     ]
 
@@ -40,7 +39,7 @@ struct GlassTabBarView: View {
             }
         }
         .padding(8)
-        .liquidGlass(cornerRadius: 20)
+        .liquidGlass(cornerRadius: 99)
     }
 }
 

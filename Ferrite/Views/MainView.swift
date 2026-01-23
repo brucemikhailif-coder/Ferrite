@@ -33,9 +33,6 @@ struct MainView: View {
                 AddView()
                     .tag(NavigationViewModel.ViewTab.add)
 
-                PluginsView()
-                    .tag(NavigationViewModel.ViewTab.plugins)
-
                 SettingsView()
                     .tag(NavigationViewModel.ViewTab.settings)
             }

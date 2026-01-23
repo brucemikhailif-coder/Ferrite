@@ -24,7 +24,6 @@ class NavigationViewModel: ObservableObject {
 
     enum ViewTab {
         case search
-        case plugins
         case settings
         case library
         case add
