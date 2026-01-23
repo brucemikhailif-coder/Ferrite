@@ -8,7 +8,7 @@
 import Foundation
 
 extension TorBox {
-    struct TBResponse<TBData: Codable>: Codable {
+    struct TBResponse<TBData: Decodable>: Decodable {
         let success: Bool
         let detail: String
         let data: TBData?
@@ -119,7 +119,7 @@ extension TorBox {
         }
     }
 
-    struct WebDownloadCreateResponse: Codable, Sendable {
+    struct WebDownloadCreateResponse: Decodable, Sendable {
         let id: Int?
 
         init(from decoder: Decoder) throws {
@@ -142,7 +142,7 @@ extension TorBox {
         }
     }
 
-    struct WebDownloadListResponse: Codable, Sendable {
+    struct WebDownloadListResponse: Decodable, Sendable {
         let id: Int?
         let name: String?
         let downloadState: String?

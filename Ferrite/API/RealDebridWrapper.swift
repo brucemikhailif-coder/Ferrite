@@ -603,7 +603,7 @@ class RealDebrid: PollingDebridSource, ObservableObject {
     }
 
     private func addTorrent(fileUrl: URL) async throws -> String {
-        var request = URLRequest(url: try addTorrentUrl())
+        var request = URLRequest(url: try await addTorrentUrl())
         request.httpMethod = "PUT"
 
         let (body, boundary) = try buildTorrentUploadBody(fileUrl: fileUrl)
