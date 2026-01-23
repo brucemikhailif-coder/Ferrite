@@ -136,7 +136,7 @@ private struct CloudDownloadRow: View {
             HStack(spacing: 12) {
                 Image(systemName: "arrow.down.circle.fill")
                     .font(.system(size: 20))
-                    .foregroundStyle(.accent)
+                    .foregroundStyle(.accentColor)
 
                 VStack(alignment: .leading, spacing: 6) {
                     Text(cloudDownload.fileName)
