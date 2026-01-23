@@ -63,12 +63,10 @@ struct LibraryView: View {
 
                         switch navModel.libraryPickerSelection {
                         case .debridCloud:
-                            SelectedDebridFilterView {
-                                Text(debridManager.selectedDebridSource?.abbreviation ?? "Debrid")
-                            }
-                            .transaction {
-                                $0.animation = .none
-                            }
+                            DebridServiceToggle()
+                                .transaction {
+                                    $0.animation = .none
+                                }
                         case .history:
                             HistoryActionsView()
                         }
