@@ -11,7 +11,6 @@ struct HistoryButtonView: View {
     @EnvironmentObject var logManager: LoggingManager
     @EnvironmentObject var navModel: NavigationViewModel
     @EnvironmentObject var debridManager: DebridManager
-    @EnvironmentObject var pluginManager: PluginManager
 
     let entry: HistoryEntry
 
@@ -21,24 +20,16 @@ struct HistoryButtonView: View {
             navModel.selectedBatchTitle = entry.subName ?? ""
 
             if let url = entry.url {
-                if url.starts(with: "https://") {
-                    Task {
-                        debridManager.downloadUrl = url
-                        pluginManager.runDefaultAction(
-                            urlString: url,
-                            navModel: navModel
-                        )
-
-                        if navModel.currentChoiceSheet != .action {
-                            debridManager.downloadUrl = ""
-                        }
-                    }
+                if url.starts(with: "magnet:") {
+                    navModel.selectedMagnet = Magnet(hash: nil, link: url)
+                    navModel.resultFromCloud = false
                 } else {
-                    pluginManager.runDefaultAction(
-                        urlString: url,
-                        navModel: navModel
-                    )
+                    navModel.selectedMagnet = nil
+                    debridManager.downloadUrl = url
+                    navModel.resultFromCloud = true
                 }
+
+                navModel.currentChoiceSheet = .action
             } else {
                 logManager.error(
                     "History: URL for name \(String(describing: entry.name)) is invalid",

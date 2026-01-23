@@ -31,6 +31,12 @@ protocol DebridSource: AnyObservableObject {
     var cloudMagnets: [DebridCloudMagnet] { get set }
     var cloudTTL: Double { get set }
 
+    // Capability flags
+    var supportsWebLinks: Bool { get }
+    var supportsMagnetUnrestrict: Bool { get }
+    var supportsTorrentUpload: Bool { get }
+    var supportsTransferFileListing: Bool { get }
+
     // Common authentication functions
     func setApiKey(_ key: String)
     func logout() async
@@ -54,6 +60,13 @@ protocol DebridSource: AnyObservableObject {
     // User magnet functions
     func getUserMagnets() async throws
     func deleteUserMagnet(cloudMagnetId: String?) async throws
+
+    // Transfer functions for Add/Cloud browsing
+    func addWebLink(_ link: String) async throws -> DebridTransferHandle
+    func addMagnetLink(_ link: String) async throws -> DebridTransferHandle
+    func uploadTorrentFile(_ fileUrl: URL) async throws -> DebridTransferHandle
+    func fetchTransferFiles(_ handle: DebridTransferHandle) async throws -> [DebridTransferFile]
+    func unrestrictTransferFile(_ handle: DebridTransferHandle, file: DebridTransferFile) async throws -> DebridUnrestrictResult
 }
 
 extension DebridSource {
@@ -63,6 +76,45 @@ extension DebridSource {
 
     var cachedStatus: [String] {
         []
+    }
+
+    var supportsWebLinks: Bool {
+        false
+    }
+
+    var supportsMagnetUnrestrict: Bool {
+        false
+    }
+
+    var supportsTorrentUpload: Bool {
+        false
+    }
+
+    var supportsTransferFileListing: Bool {
+        false
+    }
+
+    func addWebLink(_ link: String) async throws -> DebridTransferHandle {
+        throw DebridError.NotImplemented
+    }
+
+    func addMagnetLink(_ link: String) async throws -> DebridTransferHandle {
+        throw DebridError.NotImplemented
+    }
+
+    func uploadTorrentFile(_ fileUrl: URL) async throws -> DebridTransferHandle {
+        throw DebridError.NotImplemented
+    }
+
+    func fetchTransferFiles(_ handle: DebridTransferHandle) async throws -> [DebridTransferFile] {
+        throw DebridError.NotImplemented
+    }
+
+    func unrestrictTransferFile(
+        _ handle: DebridTransferHandle,
+        file: DebridTransferFile
+    ) async throws -> DebridUnrestrictResult {
+        throw DebridError.NotImplemented
     }
 }
 

@@ -12,7 +12,6 @@ struct SearchResultButtonView: View {
 
     @EnvironmentObject var navModel: NavigationViewModel
     @EnvironmentObject var debridManager: DebridManager
-    @EnvironmentObject var pluginManager: PluginManager
 
     var result: SearchResult
     var debridIAStatus: IAStatus?
@@ -49,10 +48,7 @@ struct SearchResultButtonView: View {
                     historyEntry.url = result.magnet.link
                     PersistenceController.shared.createHistory(historyEntry, performSave: true)
 
-                    pluginManager.runDefaultAction(
-                        urlString: result.magnet.link,
-                        navModel: navModel
-                    )
+                    navModel.currentChoiceSheet = .action
                 }
             }
         } label: {
@@ -192,14 +188,7 @@ struct SearchResultButtonView: View {
             historyEntry.url = debridManager.downloadUrl
             PersistenceController.shared.createHistory(historyEntry, performSave: true)
 
-            pluginManager.runDefaultAction(
-                urlString: debridManager.downloadUrl,
-                navModel: navModel
-            )
-
-            if navModel.currentChoiceSheet != .action {
-                debridManager.downloadUrl = ""
-            }
+            navModel.currentChoiceSheet = .action
         }
     }
 }

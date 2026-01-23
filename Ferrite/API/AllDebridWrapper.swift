@@ -380,7 +380,7 @@ class AllDebrid: PollingDebridSource, ObservableObject {
     }
 
     // Not used
-    func checkUserDownloads(link: String) -> String? {
+    func checkUserDownloads(link: String) async throws -> String? {
         link
     }
 

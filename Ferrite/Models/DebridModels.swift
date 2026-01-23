@@ -41,6 +41,39 @@ struct DebridCloudMagnet: Hashable, Sendable {
     let links: [String]
 }
 
+enum DebridTransferKind: String, Sendable {
+    case torrent
+    case webDownload
+}
+
+struct DebridTransferHandle: Hashable, Sendable {
+    let id: String
+    let kind: DebridTransferKind
+}
+
+struct DebridTransferFile: Hashable, Sendable {
+    let id: String
+    let name: String
+    let path: String?
+    let size: Int?
+    let link: String?
+
+    init(id: String, name: String, path: String? = nil, size: Int? = nil, link: String? = nil) {
+        self.id = id
+        self.name = name
+        self.path = path
+        self.size = size
+        self.link = link
+    }
+}
+
+struct DebridUnrestrictResult: Hashable, Sendable {
+    let name: String
+    let urlString: String
+    let size: Int?
+    let mimeType: String?
+}
+
 enum DebridError: Error {
     case InvalidUrl
     case InvalidPostBody

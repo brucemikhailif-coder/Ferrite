@@ -35,6 +35,12 @@ struct MainView: View {
                 }
                 .tag(NavigationViewModel.ViewTab.library)
 
+            AddView()
+                .tabItem {
+                    Label("Add", systemImage: "plus.circle")
+                }
+                .tag(NavigationViewModel.ViewTab.add)
+
             PluginsView()
                 .tabItem {
                     Label("Plugins", systemImage: "doc.text")
@@ -109,6 +115,12 @@ struct MainView: View {
         }
         .onOpenURL { url in
             if url.scheme == "file" {
+                if url.pathExtension.lowercased() == "torrent" {
+                    navModel.pendingTorrentUrl = url
+                    navModel.selectedTab = .add
+                    return
+                }
+
                 // Attempt to copy to backups directory if backup doesn't exist
                 backupManager.copyBackup(backupUrl: url)
 

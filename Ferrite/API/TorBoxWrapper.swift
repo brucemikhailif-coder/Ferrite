@@ -20,6 +20,11 @@ class TorBox: DebridSource, ObservableObject {
         getToken() != nil
     }
 
+    var supportsWebLinks: Bool { true }
+    var supportsMagnetUnrestrict: Bool { true }
+    var supportsTorrentUpload: Bool { true }
+    var supportsTransferFileListing: Bool { true }
+
     var manualToken: String? {
         if UserDefaults.standard.bool(forKey: "TorBox.UseManualKey") {
             return getToken()
@@ -230,13 +235,35 @@ class TorBox: DebridSource, ObservableObject {
     // MARK: - Cloud methods
 
     // Unused
-    func getUserDownloads() {}
+    func getUserDownloads() async throws {
+        let webDownloads = try await myWebDownloadList()
+        cloudDownloads = webDownloads.compactMap { item in
+            guard let id = item.id else {
+                return nil
+            }
 
-    func checkUserDownloads(link: String) -> String? {
+            return DebridCloudDownload(
+                id: String(id),
+                fileName: item.name ?? "Web download",
+                link: item.link ?? ""
+            )
+        }
+    }
+
+    func checkUserDownloads(link: String) async throws -> String? {
         link
     }
 
-    func deleteUserDownload(downloadId: String) {}
+    func deleteUserDownload(downloadId: String) async throws {
+        var request = URLRequest(url: URL(string: "\(baseApiUrl)/webdl/controlwebdownload")!)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        let body = ControlWebDownloadRequest(webdownloadId: downloadId, operation: "Delete")
+        request.httpBody = try jsonEncoder.encode(body)
+
+        try await performRequest(request: &request, requestName: #function)
+    }
 
     func getUserMagnets() async throws {
         let cloudMagnetList = try await myTorrentList()
@@ -266,5 +293,200 @@ class TorBox: DebridSource, ObservableObject {
         request.httpBody = try jsonEncoder.encode(body)
 
         try await performRequest(request: &request, requestName: "controltorrent")
+    }
+
+    // MARK: - Transfer methods (Add tab / Cloud browsing)
+
+    func addWebLink(_ link: String) async throws -> DebridTransferHandle {
+        guard URL(string: link) != nil else {
+            throw DebridError.InvalidUrl
+        }
+
+        let webdownloadId = try await createWebDownload(link: link)
+        return DebridTransferHandle(id: String(webdownloadId), kind: .webDownload)
+    }
+
+    func addMagnetLink(_ link: String) async throws -> DebridTransferHandle {
+        let magnet = Magnet(hash: nil, link: link)
+        guard magnet.link != nil else {
+            throw DebridError.InvalidUrl
+        }
+
+        let torrentId = try await createTorrent(magnet: magnet)
+        return DebridTransferHandle(id: String(torrentId), kind: .torrent)
+    }
+
+    func uploadTorrentFile(_ fileUrl: URL) async throws -> DebridTransferHandle {
+        let torrentId = try await createTorrent(fileUrl: fileUrl)
+        return DebridTransferHandle(id: String(torrentId), kind: .torrent)
+    }
+
+    func fetchTransferFiles(_ handle: DebridTransferHandle) async throws -> [DebridTransferFile] {
+        switch handle.kind {
+        case .webDownload:
+            let webDownloads = try await myWebDownloadList()
+            guard let item = webDownloads.first(where: { String($0.id ?? -1) == handle.id }) else {
+                return []
+            }
+
+            return [
+                DebridTransferFile(
+                    id: handle.id,
+                    name: item.name ?? "Web download",
+                    size: item.size,
+                    link: item.link
+                )
+            ]
+        case .torrent:
+            let torrentList = try await myTorrentList()
+            guard let torrent = torrentList.first(where: { String($0.id) == handle.id }) else {
+                return []
+            }
+
+            return torrent.files.map { file in
+                DebridTransferFile(
+                    id: String(file.id),
+                    name: file.shortName.isEmpty ? file.name : file.shortName,
+                    path: file.name,
+                    size: nil
+                )
+            }
+        }
+    }
+
+    func unrestrictTransferFile(
+        _ handle: DebridTransferHandle,
+        file: DebridTransferFile
+    ) async throws -> DebridUnrestrictResult {
+        switch handle.kind {
+        case .webDownload:
+            let downloadLink = try await requestWebDownload(webdownloadId: handle.id)
+            return DebridUnrestrictResult(
+                name: file.name,
+                urlString: downloadLink,
+                size: file.size,
+                mimeType: nil
+            )
+        case .torrent:
+            guard let fileId = Int(file.id) else {
+                throw DebridError.InvalidPostBody
+            }
+
+            let downloadLink = try await requestTorrentDownload(torrentId: handle.id, fileId: fileId)
+            return DebridUnrestrictResult(
+                name: file.name,
+                urlString: downloadLink,
+                size: file.size,
+                mimeType: nil
+            )
+        }
+    }
+
+    private func createWebDownload(link: String) async throws -> Int {
+        var request = URLRequest(url: URL(string: "\(baseApiUrl)/webdl/createwebdownload")!)
+        request.httpMethod = "POST"
+
+        let formData = FormDataBody(params: ["link": link])
+        request.setValue("multipart/form-data; boundary=\(formData.boundary)", forHTTPHeaderField: "Content-Type")
+        request.httpBody = formData.body
+
+        let data = try await performRequest(request: &request, requestName: #function)
+        let rawResponse = try jsonDecoder.decode(TBResponse<WebDownloadCreateResponse>.self, from: data)
+
+        guard let webdownloadId = rawResponse.data?.id else {
+            throw DebridError.EmptyData
+        }
+
+        return webdownloadId
+    }
+
+    private func myWebDownloadList() async throws -> [WebDownloadListResponse] {
+        var request = URLRequest(url: URL(string: "\(baseApiUrl)/webdl/mylist")!)
+
+        let data = try await performRequest(request: &request, requestName: #function)
+        let rawResponse = try jsonDecoder.decode(TBResponse<[WebDownloadListResponse]>.self, from: data)
+
+        return rawResponse.data ?? []
+    }
+
+    private func requestWebDownload(webdownloadId: String) async throws -> String {
+        var components = URLComponents(string: "\(baseApiUrl)/webdl/requestdl")!
+        components.queryItems = [
+            URLQueryItem(name: "token", value: getToken()),
+            URLQueryItem(name: "webdl_id", value: webdownloadId)
+        ]
+
+        guard let url = components.url else {
+            throw DebridError.InvalidUrl
+        }
+
+        var request = URLRequest(url: url)
+
+        let data = try await performRequest(request: &request, requestName: #function)
+        let rawResponse = try jsonDecoder.decode(TBResponse<RequestWebDLResponse>.self, from: data)
+
+        guard let unrestrictedLink = rawResponse.data else {
+            throw DebridError.FailedRequest(description: "Could not get a web download URL from TorBox.")
+        }
+
+        return unrestrictedLink
+    }
+
+    private func requestTorrentDownload(torrentId: String, fileId: Int) async throws -> String {
+        var components = URLComponents(string: "\(baseApiUrl)/torrents/requestdl")!
+        components.queryItems = [
+            URLQueryItem(name: "token", value: getToken()),
+            URLQueryItem(name: "torrent_id", value: torrentId),
+            URLQueryItem(name: "file_id", value: String(fileId))
+        ]
+
+        guard let url = components.url else {
+            throw DebridError.InvalidUrl
+        }
+
+        var request = URLRequest(url: url)
+
+        let data = try await performRequest(request: &request, requestName: #function)
+        let rawResponse = try jsonDecoder.decode(TBResponse<RequestDLResponse>.self, from: data)
+
+        guard let unrestrictedLink = rawResponse.data else {
+            throw DebridError.FailedRequest(description: "Could not get an unrestricted URL from TorBox.")
+        }
+
+        return unrestrictedLink
+    }
+
+    private func createTorrent(fileUrl: URL) async throws -> Int {
+        var request = URLRequest(url: URL(string: "\(baseApiUrl)/torrents/createtorrent")!)
+        request.httpMethod = "POST"
+
+        let (body, boundary) = try buildTorrentUploadBody(fileUrl: fileUrl)
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        request.httpBody = body
+
+        let data = try await performRequest(request: &request, requestName: #function)
+        let rawResponse = try jsonDecoder.decode(TBResponse<CreateTorrentResponse>.self, from: data)
+
+        guard let torrentId = rawResponse.data?.torrentId else {
+            throw DebridError.EmptyData
+        }
+
+        return torrentId
+    }
+
+    private func buildTorrentUploadBody(fileUrl: URL) throws -> (Data, String) {
+        let boundary = UUID().uuidString
+        let fileName = fileUrl.lastPathComponent
+        let fileData = try Data(contentsOf: fileUrl)
+
+        var body = Data()
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"file\"; filename=\"\(fileName)\"\r\n".data(using: .utf8)!)
+        body.append("Content-Type: application/x-bittorrent\r\n\r\n".data(using: .utf8)!)
+        body.append(fileData)
+        body.append("\r\n".data(using: .utf8)!)
+        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
+
+        return (body, boundary)
     }
 }

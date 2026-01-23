@@ -238,7 +238,7 @@ class OffCloud: DebridSource, ObservableObject {
 
     func getUserDownloads() {}
 
-    func checkUserDownloads(link: String) -> String? {
+    func checkUserDownloads(link: String) async throws -> String? {
         link
     }
 

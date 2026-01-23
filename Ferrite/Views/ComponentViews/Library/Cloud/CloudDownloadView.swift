@@ -10,11 +10,14 @@ import SwiftUI
 struct CloudDownloadView: View {
     @EnvironmentObject var navModel: NavigationViewModel
     @EnvironmentObject var debridManager: DebridManager
-    @EnvironmentObject var pluginManager: PluginManager
 
     @Store var debridSource: DebridSource
 
     @Binding var searchText: String
+    @State private var showTransferBrowser = false
+    @State private var transferHandle: DebridTransferHandle?
+    @State private var transferFiles: [DebridTransferFile] = []
+    @State private var transferTitle: String = ""
 
     var body: some View {
         DisclosureGroup("Downloads") {
@@ -24,27 +27,58 @@ struct CloudDownloadView: View {
                 Button(cloudDownload.fileName) {
                     navModel.resultFromCloud = true
                     navModel.selectedTitle = cloudDownload.fileName
-                    var historyEntry = HistoryEntryJson(
-                        name: cloudDownload.fileName,
-                        source: debridSource.id
-                    )
+                    navModel.selectedMagnet = nil
 
-                    debridManager.currentDebridTask = Task {
-                        await debridManager.fetchDebridDownload(magnet: nil, cloudInfo: cloudDownload.link)
-
-                        if !debridManager.downloadUrl.isEmpty {
-                            historyEntry.url = debridManager.downloadUrl
-                            PersistenceController.shared.createHistory(historyEntry, performSave: true)
-
-                            pluginManager.runDefaultAction(
-                                urlString: debridManager.downloadUrl,
-                                navModel: navModel
-                            )
-                        }
-                    }
+                    let fileLink = cloudDownload.link.isEmpty ? nil : cloudDownload.link
+                    transferFiles = [
+                        DebridTransferFile(
+                            id: cloudDownload.id,
+                            name: cloudDownload.fileName,
+                            link: fileLink
+                        )
+                    ]
+                    transferHandle = DebridTransferHandle(id: cloudDownload.id, kind: .webDownload)
+                    transferTitle = cloudDownload.fileName
+                    showTransferBrowser = true
                 }
                 .disabledAppearance(navModel.currentChoiceSheet != nil, dimmedOpacity: 0.7, animation: .easeOut(duration: 0.2))
                 .tint(.primary)
+                .contextMenu {
+                    Button {
+                        UIPasteboard.general.string = cloudDownload.link
+                    } label: {
+                        Text("Copy download URL")
+                        Image(systemName: "doc.on.doc.fill")
+                    }
+
+                    Button {
+                        if let url = URL(string: cloudDownload.link) {
+                            navModel.activityItems = [url]
+                            navModel.currentChoiceSheet = .activity
+                        }
+                    } label: {
+                        Text("Share download URL")
+                        Image(systemName: "square.and.arrow.up.fill")
+                    }
+
+                    Button {
+                        if let url = URL(string: cloudDownload.link) {
+                            UIApplication.shared.open(url)
+                        }
+                    } label: {
+                        Text("Open in Safari")
+                        Image(systemName: "safari.fill")
+                    }
+
+                    Button(role: .destructive) {
+                        Task {
+                            await debridManager.deleteCloudDownload(cloudDownload)
+                        }
+                    } label: {
+                        Text("Delete download")
+                        Image(systemName: "trash.fill")
+                    }
+                }
             }
             .onDelete { offsets in
                 for index in offsets {
@@ -54,6 +88,17 @@ struct CloudDownloadView: View {
                         }
                     }
                 }
+            }
+        }
+        .sheet(isPresented: $showTransferBrowser) {
+            if let transferHandle {
+                DebridTransferBrowserView(
+                    debridSource: debridSource,
+                    handle: transferHandle,
+                    initialFiles: transferFiles,
+                    title: transferTitle,
+                    resultFromCloud: true
+                )
             }
         }
     }

@@ -23,6 +23,11 @@ class RealDebrid: PollingDebridSource, ObservableObject {
 
     @Published var authProcessing: Bool = false
 
+    var supportsWebLinks: Bool { true }
+    var supportsMagnetUnrestrict: Bool { true }
+    var supportsTorrentUpload: Bool { true }
+    var supportsTransferFileListing: Bool { true }
+
     // Check the manual token since getTokens() is async
     var isLoggedIn: Bool {
         FerriteKeychain.shared.get("RealDebrid.AccessToken") != nil
@@ -474,7 +479,7 @@ class RealDebrid: PollingDebridSource, ObservableObject {
     }
 
     // Not used
-    func checkUserDownloads(link: String) -> String? {
+    func checkUserDownloads(link: String) async throws -> String? {
         link
     }
 
@@ -483,5 +488,174 @@ class RealDebrid: PollingDebridSource, ObservableObject {
         request.httpMethod = "DELETE"
 
         try await performRequest(request: &request, requestName: #function)
+    }
+
+    // MARK: - Transfer methods (Add tab / Cloud browsing)
+
+    func addWebLink(_ link: String) async throws -> DebridTransferHandle {
+        guard URL(string: link) != nil else {
+            throw DebridError.InvalidUrl
+        }
+
+        return DebridTransferHandle(id: link, kind: .webDownload)
+    }
+
+    func addMagnetLink(_ link: String) async throws -> DebridTransferHandle {
+        let magnet = Magnet(hash: nil, link: link)
+        guard magnet.link != nil else {
+            throw DebridError.InvalidUrl
+        }
+
+        let torrentId = try await addMagnet(magnet: magnet)
+        return DebridTransferHandle(id: torrentId, kind: .torrent)
+    }
+
+    func uploadTorrentFile(_ fileUrl: URL) async throws -> DebridTransferHandle {
+        let torrentId = try await addTorrent(fileUrl: fileUrl)
+        return DebridTransferHandle(id: torrentId, kind: .torrent)
+    }
+
+    func fetchTransferFiles(_ handle: DebridTransferHandle) async throws -> [DebridTransferFile] {
+        switch handle.kind {
+        case .webDownload:
+            let response = try await unrestrictWebLink(link: handle.id)
+            return [
+                DebridTransferFile(
+                    id: response.id,
+                    name: response.filename,
+                    size: response.filesize,
+                    link: response.download
+                )
+            ]
+        case .torrent:
+            let response = try await torrentInfoAllowCaching(debridID: handle.id)
+            return response.files.map { file in
+                DebridTransferFile(
+                    id: String(file.id),
+                    name: file.path,
+                    path: file.path,
+                    size: file.bytes
+                )
+            }
+        }
+    }
+
+    func unrestrictTransferFile(
+        _ handle: DebridTransferHandle,
+        file: DebridTransferFile
+    ) async throws -> DebridUnrestrictResult {
+        switch handle.kind {
+        case .webDownload:
+            if let link = file.link {
+                return DebridUnrestrictResult(
+                    name: file.name,
+                    urlString: link,
+                    size: file.size,
+                    mimeType: nil
+                )
+            }
+
+            let response = try await unrestrictWebLink(link: handle.id)
+            return DebridUnrestrictResult(
+                name: response.filename,
+                urlString: response.download,
+                size: response.filesize,
+                mimeType: response.mimeType
+            )
+        case .torrent:
+            guard let fileId = Int(file.id) else {
+                throw DebridError.InvalidPostBody
+            }
+
+            try await selectFiles(debridID: handle.id, fileIds: [fileId])
+            let response = try await torrentInfo(debridID: handle.id)
+            let linkIndex = response.files.firstIndex { $0.id == fileId }
+            guard let restrictedLink = response.links[safe: linkIndex ?? -1] else {
+                throw DebridError.EmptyUserMagnets
+            }
+
+            let restrictedFile = DebridIAFile(
+                id: 0,
+                name: response.filename,
+                streamUrlString: restrictedLink
+            )
+            let downloadLink = try await unrestrictFile(restrictedFile)
+            return DebridUnrestrictResult(
+                name: file.name,
+                urlString: downloadLink,
+                size: file.size,
+                mimeType: nil
+            )
+        }
+    }
+
+    private func unrestrictWebLink(link: String) async throws -> UnrestrictLinkResponse {
+        var request = URLRequest(url: URL(string: "\(baseApiUrl)/unrestrict/link")!)
+        request.httpMethod = "POST"
+        request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+
+        var bodyComponents = URLComponents()
+        bodyComponents.queryItems = [URLQueryItem(name: "link", value: link)]
+        request.httpBody = bodyComponents.percentEncodedQuery?.data(using: .utf8)
+
+        let data = try await performRequest(request: &request, requestName: #function)
+        return try jsonDecoder.decode(UnrestrictLinkResponse.self, from: data)
+    }
+
+    private func addTorrent(fileUrl: URL) async throws -> String {
+        var request = URLRequest(url: try addTorrentUrl())
+        request.httpMethod = "PUT"
+
+        let (body, boundary) = try buildTorrentUploadBody(fileUrl: fileUrl)
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        request.httpBody = body
+
+        let data = try await performRequest(request: &request, requestName: #function)
+        let rawResponse = try jsonDecoder.decode(AddMagnetResponse.self, from: data)
+        return rawResponse.id
+    }
+
+    private func addTorrentUrl() async throws -> URL {
+        var urlComponents = URLComponents(string: "\(baseApiUrl)/torrents/addTorrent")!
+        if let host = try await availableHost() {
+            urlComponents.queryItems = [URLQueryItem(name: "host", value: host)]
+        }
+
+        guard let url = urlComponents.url else {
+            throw DebridError.InvalidUrl
+        }
+
+        return url
+    }
+
+    private func availableHost() async throws -> String? {
+        var request = URLRequest(url: URL(string: "\(baseApiUrl)/torrents/availableHosts")!)
+        let data = try await performRequest(request: &request, requestName: #function)
+        let hosts = try jsonDecoder.decode([AvailableHostResponse].self, from: data)
+        return hosts.first?.host
+    }
+
+    private func buildTorrentUploadBody(fileUrl: URL) throws -> (Data, String) {
+        let boundary = UUID().uuidString
+        let fileName = fileUrl.lastPathComponent
+        let fileData = try Data(contentsOf: fileUrl)
+
+        var body = Data()
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"file\"; filename=\"\(fileName)\"\r\n".data(using: .utf8)!)
+        body.append("Content-Type: application/x-bittorrent\r\n\r\n".data(using: .utf8)!)
+        body.append(fileData)
+        body.append("\r\n".data(using: .utf8)!)
+        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
+
+        return (body, boundary)
+    }
+
+    private func torrentInfoAllowCaching(debridID: String) async throws -> TorrentInfoResponse {
+        var request = URLRequest(url: URL(string: "\(baseApiUrl)/torrents/info/\(debridID)")!)
+
+        let data = try await performRequest(request: &request, requestName: #function)
+        let rawResponse = try jsonDecoder.decode(TorrentInfoResponse.self, from: data)
+        return rawResponse
     }
 }

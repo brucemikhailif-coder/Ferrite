@@ -27,6 +27,7 @@ class NavigationViewModel: ObservableObject {
         case plugins
         case settings
         case library
+        case add
     }
 
     enum LibraryPickerSegment {
@@ -43,6 +44,7 @@ class NavigationViewModel: ObservableObject {
     @Published var selectedMagnet: Magnet?
     @Published var selectedHistoryInfo: HistoryEntryJson?
     @Published var resultFromCloud: Bool = false
+    @Published var pendingTorrentUrl: URL?
 
     // For giving information in magnet choice sheet
     @Published var selectedTitle: String = ""

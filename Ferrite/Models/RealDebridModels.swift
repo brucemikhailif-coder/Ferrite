@@ -134,6 +134,18 @@ extension RealDebrid {
         let ended: String?
     }
 
+    // MARK: - availableHosts endpoint
+
+    struct AvailableHostResponse: Codable, Sendable {
+        let host: String
+        let maxFileSize: Int
+
+        enum CodingKeys: String, CodingKey {
+            case host
+            case maxFileSize = "max_file_size"
+        }
+    }
+
     // MARK: - unrestrictLink endpoint
 
     struct UnrestrictLinkResponse: Codable, Sendable {

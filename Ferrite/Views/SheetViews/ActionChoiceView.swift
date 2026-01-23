@@ -47,11 +47,26 @@ struct ActionChoiceView: View {
 
                 if !debridManager.downloadUrl.isEmpty {
                     Section("Debrid options") {
+                        ListRowButtonView("Default action", systemImage: "sparkles") {
+                            pluginManager.runDefaultAction(
+                                urlString: debridManager.downloadUrl,
+                                navModel: navModel
+                            )
+                        }
+
                         ForEach(actions, id: \.id) { action in
                             if action.requires.contains(ActionRequirement.debrid.rawValue) {
                                 ListRowButtonView(action.name, systemImage: "arrow.up.forward.app.fill") {
                                     pluginManager.runDeeplinkAction(action, urlString: debridManager.downloadUrl)
                                 }
+                            }
+                        }
+
+                        ListRowButtonView("Open in Safari", systemImage: "safari.fill") {
+                            if let url = URL(string: debridManager.downloadUrl),
+                               ["http", "https"].contains(url.scheme?.lowercased() ?? "")
+                            {
+                                UIApplication.shared.open(url)
                             }
                         }
 

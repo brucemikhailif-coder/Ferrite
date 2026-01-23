@@ -97,6 +97,7 @@ extension TorBox {
     }
 
     typealias RequestDLResponse = String
+    typealias RequestWebDLResponse = String
 
     struct ControlTorrentRequest: Codable, Sendable {
         let torrentId: String
@@ -105,6 +106,70 @@ extension TorBox {
         enum CodingKeys: String, CodingKey {
             case operation
             case torrentId = "torrent_id"
+        }
+    }
+
+    struct ControlWebDownloadRequest: Codable, Sendable {
+        let webdownloadId: String
+        let operation: String
+
+        enum CodingKeys: String, CodingKey {
+            case operation
+            case webdownloadId = "webdownload_id"
+        }
+    }
+
+    struct WebDownloadCreateResponse: Codable, Sendable {
+        let id: Int?
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            if let webdownloadId = try container.decodeIfPresent(Int.self, forKey: .webdownloadId) {
+                id = webdownloadId
+            } else if let webdlId = try container.decodeIfPresent(Int.self, forKey: .webdlId) {
+                id = webdlId
+            } else if let fallbackId = try container.decodeIfPresent(Int.self, forKey: .id) {
+                id = fallbackId
+            } else {
+                id = nil
+            }
+        }
+
+        enum CodingKeys: String, CodingKey {
+            case webdownloadId = "webdownload_id"
+            case webdlId = "webdl_id"
+            case id
+        }
+    }
+
+    struct WebDownloadListResponse: Codable, Sendable {
+        let id: Int?
+        let name: String?
+        let downloadState: String?
+        let size: Int?
+        let link: String?
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            id = try container.decodeIfPresent(Int.self, forKey: .id)
+            name = try container.decodeIfPresent(String.self, forKey: .name)
+                ?? container.decodeIfPresent(String.self, forKey: .fileName)
+            downloadState = try container.decodeIfPresent(String.self, forKey: .downloadState)
+                ?? container.decodeIfPresent(String.self, forKey: .state)
+            size = try container.decodeIfPresent(Int.self, forKey: .size)
+            link = try container.decodeIfPresent(String.self, forKey: .link)
+                ?? container.decodeIfPresent(String.self, forKey: .download)
+        }
+
+        enum CodingKeys: String, CodingKey {
+            case id
+            case name
+            case fileName = "file_name"
+            case downloadState = "download_state"
+            case state
+            case size
+            case link
+            case download
         }
     }
 }
