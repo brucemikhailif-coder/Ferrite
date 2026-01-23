@@ -16,7 +16,6 @@ struct LibraryPickerView: View {
     var body: some View {
         HStack {
             Picker("Segments", selection: $navModel.libraryPickerSelection) {
-                Text("Bookmarks").tag(NavigationViewModel.LibraryPickerSegment.bookmarks)
                 Text("History").tag(NavigationViewModel.LibraryPickerSegment.history)
 
                 if !debridManager.enabledDebrids.isEmpty {

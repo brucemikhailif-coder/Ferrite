@@ -30,7 +30,6 @@ class NavigationViewModel: ObservableObject {
     }
 
     enum LibraryPickerSegment {
-        case bookmarks
         case history
         case debridCloud
     }
@@ -95,7 +94,7 @@ class NavigationViewModel: ObservableObject {
     @Published var selectedPluginList: PluginList?
     @Published var selectedKodiServer: KodiServer?
 
-    @Published var libraryPickerSelection: LibraryPickerSegment = .bookmarks
+    @Published var libraryPickerSelection: LibraryPickerSegment = .history
     @Published var pluginPickerSelection: PluginPickerSegment = .sources
 
     @Published var searchPrompt: String = "Search"

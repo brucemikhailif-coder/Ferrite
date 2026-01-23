@@ -12,11 +12,6 @@ struct LibraryView: View {
     @EnvironmentObject var navModel: NavigationViewModel
 
     @FetchRequest(
-        entity: Bookmark.entity(),
-        sortDescriptors: [NSSortDescriptor(keyPath: \Bookmark.orderNum, ascending: true)]
-    ) var bookmarks: FetchedResults<Bookmark>
-
-    @FetchRequest(
         entity: HistoryEntry.entity(),
         sortDescriptors: []
     ) var allHistoryEntries: FetchedResults<HistoryEntry>
@@ -33,8 +28,6 @@ struct LibraryView: View {
         NavigationStack {
             ZStack {
                 switch navModel.libraryPickerSelection {
-                case .bookmarks:
-                    BookmarksView(searchText: $searchText, bookmarks: bookmarks)
                 case .history:
                     HistoryView(allHistoryEntries: allHistoryEntries, searchText: $searchText)
                 case .debridCloud:
@@ -50,10 +43,6 @@ struct LibraryView: View {
             .overlay {
                 if !isSearching {
                     switch navModel.libraryPickerSelection {
-                    case .bookmarks:
-                        if bookmarks.isEmpty {
-                            EmptyInstructionView(title: "No Bookmarks", message: "Add a bookmark from search results")
-                        }
                     case .history:
                         if allHistoryEntries.isEmpty {
                             EmptyInstructionView(title: "No History", message: "Start watching to build history")
@@ -73,7 +62,7 @@ struct LibraryView: View {
                         EditButton()
 
                         switch navModel.libraryPickerSelection {
-                        case .bookmarks, .debridCloud:
+                        case .debridCloud:
                             SelectedDebridFilterView {
                                 Text(debridManager.selectedDebridSource?.abbreviation ?? "Debrid")
                             }
