@@ -33,7 +33,7 @@ struct DebridCloudDownload: Hashable, Sendable {
     let link: String
 }
 
-struct DebridCloudMagnet: Hashable, Sendable {
+struct DebridCloudMagnet: Hashable, Sendable, Identifiable {
     let id: String
     let fileName: String
     let status: String

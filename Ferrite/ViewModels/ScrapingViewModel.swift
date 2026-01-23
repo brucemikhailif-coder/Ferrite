@@ -616,7 +616,10 @@ class ScrapingViewModel: ObservableObject {
         }
 
         let result = SearchRequestResult(results: tempResults, magnets: magnets)
-        searchCache[key] = SearchCacheEntry(timestamp: Date().timeIntervalSince1970, result: result)
+        searchCache[cacheKey(source: source)] = SearchCacheEntry(
+            timestamp: Date().timeIntervalSince1970,
+            result: result
+        )
         return result
     }
 

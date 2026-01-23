@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension Set: RawRepresentable where Element: Codable {
+extension Set: @retroactive RawRepresentable where Element: Codable {
     public init?(rawValue: String) {
         guard let data = rawValue.data(using: .utf8),
               let result = try? JSONDecoder().decode(Set<Element>.self, from: data)
