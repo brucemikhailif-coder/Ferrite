@@ -98,16 +98,32 @@ class PluginManager: ObservableObject {
     }
 
     private func fetchPluginList(pluginList: PluginList, url: URL) async throws -> AvailablePlugins? {
+        // Try to fetch as Unchained repository first if the extension is JSON or contains "unchained"
+        // Or if the standard decode fails. For now, let's try a heuristic.
+        // If the decode of Ferrite format fails, we can try Unchained format.
+        
+        let request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData)
+        let (data, _) = try await URLSession.shared.data(for: request)
+
+        // Attempt to decode as Ferrite PluginListJson (JSON or YAML)
+        if let availablePlugins = try? decodeFerritePluginList(data: data, url: url, pluginList: pluginList) {
+            return availablePlugins
+        }
+
+        // If that fails, try decoding as Unchained Repository
+        if let unchainedPlugins = try? await fetchUnchainedPluginList(data: data, pluginList: pluginList) {
+            return unchainedPlugins
+        }
+        
+        throw PluginManagerError.PluginFetch(description: "Could not decode plugin list data (tried Ferrite and Unchained formats)")
+    }
+
+    private func decodeFerritePluginList(data: Data, url: URL, pluginList: PluginList) throws -> AvailablePlugins? {
         var tempSources: [SourceJson] = []
         var tempActions: [ActionJson] = []
 
-        // Always get the up-to-date source list
-        let request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData)
-
-        let (data, _) = try await URLSession.shared.data(for: request)
         let pluginResponse: PluginListJson?
 
-        // If the URL is a yaml file, decode as such. Otherwise assume legacy JSON
         if url.pathExtension == "yaml" || url.pathExtension == "yml" {
             pluginResponse = try YAMLDecoder().decode(PluginListJson.self, from: data)
         } else {
@@ -115,11 +131,11 @@ class PluginManager: ObservableObject {
         }
 
         guard let pluginResponse else {
-            throw PluginManagerError.PluginFetch(description: "Could not decode plugin list data")
+            return nil
         }
-
+        
+        // ... (existing logic for sources and actions)
         if let sources = pluginResponse.sources {
-            // Faster and more performant to map instead of a for loop
             tempSources += sources.compactMap { inputJson in
                 if checkAppVersion(minVersion: inputJson.minVersion) {
                     return SourceJson(
@@ -171,9 +187,63 @@ class PluginManager: ObservableObject {
                 }
             }
         }
-
+        
         return AvailablePlugins(availableSources: tempSources, availableActions: tempActions)
     }
+
+    private func fetchUnchainedPluginList(data: Data, pluginList: PluginList) async throws -> AvailablePlugins? {
+        // Decode repository index
+        let repository = try JSONDecoder().decode(UnchainedRepository.self, from: data)
+        
+        var sources: [SourceJson] = []
+        
+        // Fetch each plugin definition
+        // Parallel fetch for performance?
+        await withTaskGroup(of: SourceJson?.self) { group in
+            for pluginRef in repository.plugins {
+                group.addTask {
+                    guard let url = URL(string: pluginRef.url) else { return nil }
+                    do {
+                        let (data, _) = try await URLSession.shared.data(from: url)
+                        let unchainedPlugin = try JSONDecoder().decode(UnchainedPlugin.self, from: data)
+                        let sourceJson = UnchainedAdapter.adapt(unchained: unchainedPlugin)
+                        
+                        // Inject list metadata
+                        return SourceJson(
+                            name: sourceJson.name,
+                            version: sourceJson.version,
+                            minVersion: sourceJson.minVersion,
+                            about: sourceJson.about,
+                            website: sourceJson.website,
+                            dynamicWebsite: sourceJson.dynamicWebsite,
+                            fallbackUrls: sourceJson.fallbackUrls,
+                            trackers: sourceJson.trackers,
+                            api: sourceJson.api,
+                            jsonParser: sourceJson.jsonParser,
+                            rssParser: sourceJson.rssParser,
+                            htmlParser: sourceJson.htmlParser,
+                            author: pluginList.author,
+                            listId: pluginList.id,
+                            listName: pluginList.name,
+                            tags: sourceJson.tags
+                        )
+                    } catch {
+                        print("Failed to fetch/decode Unchained plugin at \(url): \(error)")
+                        return nil
+                    }
+                }
+            }
+            
+            for await source in group {
+                if let source {
+                    sources.append(source)
+                }
+            }
+        }
+        
+        return AvailablePlugins(availableSources: sources, availableActions: [])
+    }
+
 
     // Checks if a deeplink action is present and if there's a single action for the OS (or fallback)
     private func getFilteredDeeplinks(_ deeplinks: [DeeplinkActionJson]) -> [DeeplinkActionJson]? {
