@@ -52,7 +52,7 @@ A media search engine for iOS with a plugin API to extend its functionality.
 
 ### Light Mode
 
-| Search | Bookmarks | History |
+| Search | Bookmarks | library |
 | ------------- | -------- | -------- |
 | ![1](Misc/Media/Demo/Light/Search.png) | ![2](Misc/Media/Demo/Light/Bookmarks.png) | ![3](Misc/Media/Demo/Light/History.png) |
 
