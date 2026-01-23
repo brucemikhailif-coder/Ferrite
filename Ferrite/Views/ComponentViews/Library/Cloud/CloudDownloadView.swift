@@ -43,6 +43,7 @@ struct CloudDownloadView: View {
                 }
                 .disabledAppearance(navModel.currentChoiceSheet != nil, dimmedOpacity: 0.7, animation: .easeOut(duration: 0.2))
                 .tint(.primary)
+                .tag(cloudDownload)
                 .contextMenu {
                     Button {
                         UIPasteboard.general.string = cloudDownload.link

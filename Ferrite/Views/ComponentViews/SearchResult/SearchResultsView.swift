@@ -21,12 +21,17 @@ struct SearchResultsView: View {
     @Binding var searchText: String
 
     var body: some View {
-        ForEach(
-            scrapingModel.searchResults.sorted {
-                navModel.compareSearchResult(lhs: $0, rhs: $1)
-            },
-            id: \.self
-        ) { result in
+        let sortedResults = scrapingModel.searchResults.sorted { lhs, rhs in
+            if navModel.currentSortFilter == .best {
+                let lhsScore = bestScore(for: lhs)
+                let rhsScore = bestScore(for: rhs)
+                return navModel.currentSortOrder == .forward ? lhsScore > rhsScore : lhsScore < rhsScore
+            }
+
+            return navModel.compareSearchResult(lhs: lhs, rhs: rhs)
+        }
+
+        ForEach(sortedResults, id: \.self) { result in
             let debridIAStatus = debridManager.matchMagnetHash(result.magnet)
             if
                 pluginManager.filteredInstalledSources.isEmpty ||
@@ -64,5 +69,23 @@ struct SearchResultsView: View {
                 scrapingModel.runningSearchTask = nil
             }
         }
+    }
+
+    private func bestScore(for result: SearchResult) -> Double {
+        let iaStatus = debridManager.matchMagnetHash(result.magnet)
+        let cacheScore: Double
+        switch iaStatus {
+        case .full:
+            cacheScore = 2
+        case .partial:
+            cacheScore = 1
+        case .none:
+            cacheScore = 0
+        }
+
+        let seedersScore = Double(result.seeders ?? "") ?? 0
+        let sizeScore = result.rawSize() ?? 0
+
+        return (cacheScore * 1_000_000) + (seedersScore * 1000) + sizeScore
     }
 }

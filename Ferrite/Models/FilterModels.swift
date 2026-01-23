@@ -14,6 +14,7 @@ enum FilterType {
 }
 
 enum SortFilter: String, Hashable, CaseIterable {
+    case best = "Best"
     case seeders = "Seeders"
     case leechers = "Leechers"
     case size = "Size"

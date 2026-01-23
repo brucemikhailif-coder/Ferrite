@@ -22,36 +22,28 @@ struct MainView: View {
     @State private var releaseUrlString: String = ""
 
     var body: some View {
-        TabView(selection: $navModel.selectedTab) {
-            ContentView()
-                .tabItem {
-                    Label("Search", systemImage: "magnifyingglass")
-                }
-                .tag(NavigationViewModel.ViewTab.search)
+        ZStack(alignment: .bottom) {
+            TabView(selection: $navModel.selectedTab) {
+                ContentView()
+                    .tag(NavigationViewModel.ViewTab.search)
 
-            LibraryView()
-                .tabItem {
-                    Label("Library", systemImage: "book.closed")
-                }
-                .tag(NavigationViewModel.ViewTab.library)
+                LibraryView()
+                    .tag(NavigationViewModel.ViewTab.library)
 
-            AddView()
-                .tabItem {
-                    Label("Add", systemImage: "plus.circle")
-                }
-                .tag(NavigationViewModel.ViewTab.add)
+                AddView()
+                    .tag(NavigationViewModel.ViewTab.add)
 
-            PluginsView()
-                .tabItem {
-                    Label("Plugins", systemImage: "doc.text")
-                }
-                .tag(NavigationViewModel.ViewTab.plugins)
+                PluginsView()
+                    .tag(NavigationViewModel.ViewTab.plugins)
 
-            SettingsView()
-                .tabItem {
-                    Label("Settings", systemImage: "gear")
-                }
-                .tag(NavigationViewModel.ViewTab.settings)
+                SettingsView()
+                    .tag(NavigationViewModel.ViewTab.settings)
+            }
+            .toolbar(.hidden, for: .tabBar)
+
+            GlassTabBarView(selection: $navModel.selectedTab)
+                .padding(.horizontal, 16)
+                .padding(.bottom, 10)
         }
         .sheet(item: $navModel.currentChoiceSheet) { item in
             switch item {

@@ -15,6 +15,7 @@ struct ContentView: View {
     @EnvironmentObject var logManager: LoggingManager
 
     @AppStorage("Behavior.AutocorrectSearch") var autocorrectSearch: Bool = false
+    @AppStorage("Search.LastQuery") var lastSearchQuery: String = ""
 
     @FetchRequest(
         entity: Source.entity(),
@@ -25,10 +26,30 @@ struct ContentView: View {
     @State private var isSearching = false
     @State private var isEditingSearch = false
     @State private var dismissAction: () -> Void = {}
+    @State private var searchDebounceTask: Task<Void, Never>?
 
     var body: some View {
         NavigationStack {
             List {
+                if !scrapingModel.sessionErrors.isEmpty {
+                    Section("Source errors") {
+                        ForEach(scrapingModel.sessionErrors, id: \.self) { error in
+                            Text(error)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+
+                if searchText.isEmpty, !lastSearchQuery.isEmpty {
+                    Section("Quick actions") {
+                        Button("Repeat last search: \(lastSearchQuery)") {
+                            searchText = lastSearchQuery
+                            executeSearch()
+                        }
+                    }
+                }
+
                 SearchResultsView(searchText: $searchText)
             }
             .listStyle(.insetGrouped)
@@ -78,10 +99,46 @@ struct ContentView: View {
             .onAppear {
                 navModel.getSearchPrompt()
             }
+            .onChange(of: searchText) { newValue in
+                guard isSearching else {
+                    return
+                }
+
+                if newValue.isEmpty {
+                    searchDebounceTask?.cancel()
+                    return
+                }
+
+                searchDebounceTask?.cancel()
+                searchDebounceTask = Task {
+                    try? await Task.sleep(seconds: 0.4)
+                    if Task.isCancelled {
+                        return
+                    }
+                    await MainActor.run {
+                        executeSearch()
+                    }
+                }
+            }
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    if scrapingModel.runningSearchTask != nil {
+                        Button("Cancel") {
+                            scrapingModel.cancelCurrentTask()
+                            logManager.hideIndeterminateToast()
+                        }
+                    }
+                }
+            }
         }
     }
 
     func executeSearch() {
+        lastSearchQuery = searchText
+        if let runningSearchTask = scrapingModel.runningSearchTask {
+            runningSearchTask.cancel()
+            scrapingModel.runningSearchTask = nil
+        }
         scrapingModel.runningSearchTask = Task {
             await scrapingModel.scanSources(
                 sources: pluginManager.fetchInstalledSources(

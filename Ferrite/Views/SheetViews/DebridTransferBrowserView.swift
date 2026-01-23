@@ -105,8 +105,12 @@ struct DebridTransferBrowserView: View {
         isLoading = true
         do {
             files = try await debridSource.fetchTransferFiles(handle)
+            if files.isEmpty {
+                errorMessage = "No files were found for this transfer."
+                showErrorAlert = true
+            }
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = friendlyErrorMessage(error)
             showErrorAlert = true
         }
         isLoading = false
@@ -137,8 +141,27 @@ struct DebridTransferBrowserView: View {
             dismiss()
         } catch {
             logManager.error("Debrid transfer error: \(error.localizedDescription)")
-            errorMessage = error.localizedDescription
+            errorMessage = friendlyErrorMessage(error)
             showErrorAlert = true
+        }
+    }
+
+    private func friendlyErrorMessage(_ error: Error) -> String {
+        switch error {
+        case DebridError.IsCaching:
+            return "This item is still caching on the provider. Try again later."
+        case DebridError.EmptyUserMagnets, DebridError.EmptyData:
+            return "No files were found for this transfer."
+        case DebridError.FailedRequest(let description):
+            return description
+        case DebridError.InvalidPostBody:
+            return "Could not process the selected file. Try another file."
+        case DebridError.InvalidToken:
+            return "You're not authenticated with this provider."
+        case DebridError.InvalidUrl:
+            return "The provider returned an invalid URL."
+        default:
+            return error.localizedDescription
         }
     }
 }

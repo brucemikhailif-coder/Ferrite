@@ -9,13 +9,22 @@ import SwiftUI
 
 struct DebridCloudView: View {
     @EnvironmentObject var debridManager: DebridManager
+    @EnvironmentObject var navModel: NavigationViewModel
+    @EnvironmentObject var logManager: LoggingManager
 
     @Store var debridSource: DebridSource
 
     @Binding var searchText: String
+    @State private var selectedDownloads: Set<DebridCloudDownload> = []
+    @State private var selectedMagnets: Set<DebridCloudMagnet> = []
+    @State private var showBulkAlert = false
+    @State private var bulkAlertMessage = ""
+    @State private var skippedMagnets: [DebridCloudMagnet] = []
+    @State private var showSkippedMagnetsSheet = false
+    @State private var selectedSkippedMagnet: DebridCloudMagnet?
 
     var body: some View {
-        List {
+        List(selection: listSelection) {
             CloudDownloadView(debridSource: debridSource, searchText: $searchText)
             CloudMagnetView(debridSource: debridSource, searchText: $searchText)
         }
@@ -28,8 +37,209 @@ struct DebridCloudView: View {
         }
         .onChange(of: debridManager.selectedDebridSource?.id) { newType in
             if newType != nil {
+                selectedDownloads.removeAll()
+                selectedMagnets.removeAll()
                 Task {
                     await debridManager.fetchDebridCloud()
+                }
+            }
+        }
+        .toolbar {
+            ToolbarItemGroup(placement: .navigationBarTrailing) {
+                Menu("Bulk Actions") {
+                    Button("Select all downloads") {
+                        selectedDownloads = Set(debridSource.cloudDownloads)
+                    }
+
+                    Button("Select all magnets") {
+                        selectedMagnets = Set(debridSource.cloudMagnets)
+                    }
+
+                    if !selectedDownloads.isEmpty || !selectedMagnets.isEmpty {
+                        Button("Bulk unrestrict") {
+                            Task {
+                                await bulkUnrestrict()
+                            }
+                        }
+                    }
+
+                    if !selectedDownloads.isEmpty {
+                        Button("Share downloads") {
+                            let urls = selectedDownloads.compactMap { URL(string: $0.link) }
+                            if !urls.isEmpty {
+                                navModel.activityItems = urls
+                                navModel.currentChoiceSheet = .activity
+                            }
+                        }
+
+                        Button("Copy download URLs") {
+                            let urls = selectedDownloads.map { $0.link }.filter { !$0.isEmpty }
+                            UIPasteboard.general.string = urls.joined(separator: "\n")
+                        }
+
+                        Button("Delete downloads", role: .destructive) {
+                            Task {
+                                for download in selectedDownloads {
+                                    await debridManager.deleteCloudDownload(download)
+                                }
+                                selectedDownloads.removeAll()
+                            }
+                        }
+                    }
+
+                    if !selectedMagnets.isEmpty {
+                        Button("Copy magnet hashes") {
+                            let hashes = selectedMagnets.map { $0.hash }
+                            UIPasteboard.general.string = hashes.joined(separator: "\n")
+                        }
+
+                        Button("Delete magnets", role: .destructive) {
+                            Task {
+                                for magnet in selectedMagnets {
+                                    await debridManager.deleteUserMagnet(magnet)
+                                }
+                                selectedMagnets.removeAll()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .alert("Bulk unrestrict", isPresented: $showBulkAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(bulkAlertMessage)
+        }
+        .sheet(isPresented: $showSkippedMagnetsSheet) {
+            BulkMagnetPickerView(
+                debridSource: debridSource,
+                magnets: skippedMagnets,
+                selectedMagnet: $selectedSkippedMagnet
+            )
+        }
+        .sheet(item: $selectedSkippedMagnet) { magnet in
+            DebridTransferBrowserView(
+                debridSource: debridSource,
+                handle: DebridTransferHandle(id: magnet.id, kind: .torrent),
+                title: magnet.fileName,
+                resultFromCloud: true
+            )
+        }
+    }
+
+    private var listSelection: Binding<Set<AnyHashable>> {
+        Binding(
+            get: {
+                var combined = Set<AnyHashable>()
+                combined.formUnion(selectedDownloads.map { AnyHashable($0) })
+                combined.formUnion(selectedMagnets.map { AnyHashable($0) })
+                return combined
+            },
+            set: { newValue in
+                selectedDownloads = Set(newValue.compactMap { $0.base as? DebridCloudDownload })
+                selectedMagnets = Set(newValue.compactMap { $0.base as? DebridCloudMagnet })
+            }
+        )
+    }
+
+    private func bulkUnrestrict() async {
+        logManager.updateIndeterminateToast("Resolving links", cancelAction: nil)
+
+        var resolvedUrls: [URL] = []
+        var skippedNeedsSelection = 0
+        var skippedErrors = 0
+        var skippedMagnetsList: [DebridCloudMagnet] = []
+
+        for download in selectedDownloads {
+            do {
+                let resolved = try await debridSource.checkUserDownloads(link: download.link) ?? download.link
+                if let url = URL(string: resolved) {
+                    resolvedUrls.append(url)
+                } else {
+                    skippedErrors += 1
+                }
+            } catch {
+                skippedErrors += 1
+            }
+        }
+
+        for magnet in selectedMagnets {
+            let handle = DebridTransferHandle(id: magnet.id, kind: .torrent)
+            do {
+                let files = try await debridSource.fetchTransferFiles(handle)
+                if files.count == 1, let file = files.first {
+                    let result = try await debridSource.unrestrictTransferFile(handle, file: file)
+                    if let url = URL(string: result.urlString) {
+                        resolvedUrls.append(url)
+                    } else {
+                        skippedErrors += 1
+                    }
+                } else {
+                    skippedNeedsSelection += 1
+                    skippedMagnetsList.append(magnet)
+                }
+            } catch {
+                skippedErrors += 1
+            }
+        }
+
+        logManager.hideIndeterminateToast()
+
+        if !resolvedUrls.isEmpty {
+            navModel.activityItems = resolvedUrls
+            navModel.currentChoiceSheet = .activity
+        }
+
+        if skippedNeedsSelection > 0 || skippedErrors > 0 {
+            var messageParts: [String] = []
+            if skippedNeedsSelection > 0 {
+                messageParts.append("\(skippedNeedsSelection) item(s) need file selection.")
+            }
+            if skippedErrors > 0 {
+                messageParts.append("\(skippedErrors) item(s) failed to resolve.")
+            }
+            bulkAlertMessage = messageParts.joined(separator: " ")
+            showBulkAlert = true
+        }
+
+        if !skippedMagnetsList.isEmpty {
+            skippedMagnets = skippedMagnetsList
+            showSkippedMagnetsSheet = true
+        }
+    }
+}
+
+private struct BulkMagnetPickerView: View {
+    @Environment(\.dismiss) var dismiss
+
+    let debridSource: DebridSource
+    let magnets: [DebridCloudMagnet]
+    @Binding var selectedMagnet: DebridCloudMagnet?
+
+    var body: some View {
+        NavigationStack {
+            List(magnets, id: \.self) { magnet in
+                Button {
+                    selectedMagnet = magnet
+                } label: {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(magnet.fileName)
+                            .font(.callout)
+                            .lineLimit(2)
+                        Text(magnet.status.capitalizingFirstLetter())
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .tint(.primary)
+            }
+            .navigationTitle("Pick Files")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
                 }
             }
         }

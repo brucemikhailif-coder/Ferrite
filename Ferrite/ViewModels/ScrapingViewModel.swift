@@ -16,6 +16,10 @@ class ScrapingViewModel: ObservableObject {
     var logManager: LoggingManager?
     let byteCountFormatter: ByteCountFormatter = .init()
 
+    private let maxConcurrentSources = 5
+    private let perSourceTimeoutSeconds: Double = 12
+    private let searchCacheTTL: Double = 60
+
     var runningSearchTask: Task<Void, Error>?
     func cancelCurrentTask() {
         runningSearchTask?.cancel()
@@ -24,6 +28,32 @@ class ScrapingViewModel: ObservableObject {
 
     var cleanedSearchText: String = ""
     @Published var searchResults: [SearchResult] = []
+    @Published var sessionErrors: [String] = []
+
+    private struct SearchCacheEntry {
+        let timestamp: Double
+        let result: SearchRequestResult
+    }
+
+    private struct SourceStats {
+        var successCount: Int = 0
+        var failureCount: Int = 0
+        var averageMs: Double = 0
+
+        mutating func addSample(success: Bool, durationMs: Double) {
+            if success {
+                successCount += 1
+            } else {
+                failureCount += 1
+            }
+
+            let totalSamples = Double(successCount + failureCount)
+            averageMs = ((averageMs * (totalSamples - 1)) + durationMs) / totalSamples
+        }
+    }
+
+    private var searchCache: [String: SearchCacheEntry] = [:]
+    private var sourceStats: [String: SourceStats] = [:]
 
     // Only add results with valid magnet hashes to the search results array
     @MainActor
@@ -34,6 +64,16 @@ class ScrapingViewModel: ObservableObject {
     @MainActor
     private func clearSearchResults() {
         searchResults = []
+    }
+
+    @MainActor
+    private func clearSessionErrors() {
+        sessionErrors = []
+    }
+
+    @MainActor
+    private func addSessionError(_ description: String) {
+        sessionErrors.append(description)
     }
 
     @Published var currentSourceNames: Set<String> = []
@@ -64,6 +104,7 @@ class ScrapingViewModel: ObservableObject {
     // Utility function to print source specific errors
     private func sendSourceError(_ description: String) async {
         await logManager?.error(description, showToast: false)
+        await addSessionError(description)
     }
 
     // Substitutes the given string with an arbitrary parameter dictionary
@@ -106,6 +147,7 @@ class ScrapingViewModel: ObservableObject {
             await debridManager.clearIAValues()
         }
 
+        await clearSessionErrors()
         await clearCurrentSourceNames()
         await clearSearchResults()
 
@@ -113,47 +155,64 @@ class ScrapingViewModel: ObservableObject {
             self.cancelCurrentTask()
         })
 
-        // Run all tasks in parallel for speed
-        await withTaskGroup(of: (SearchRequestResult?, String).self) { group in
-            // TODO: Maybe chunk sources to groups of 5 to not overwhelm the app
-            for source in sources {
-                // If the search is cancelled, return
-                if let runningSearchTask, runningSearchTask.isCancelled {
-                    return
-                }
+        let enabledSources = sources.filter { $0.enabled }
+        var seenResultKeys: Set<String> = []
 
-                if source.enabled {
+        // Run tasks in controlled batches for stability
+        var index = 0
+        while index < enabledSources.count {
+            let upperBound = min(index + maxConcurrentSources, enabledSources.count)
+            let batch = enabledSources[index..<upperBound]
+            index = upperBound
+
+            await withTaskGroup(of: (SearchRequestResult?, String, Double).self) { group in
+                for source in batch {
+                    if let runningSearchTask, runningSearchTask.isCancelled {
+                        return
+                    }
+
                     group.addTask {
                         await self.updateCurrentSourceNames(source.name)
-                        let requestResult = await self.executeParser(source: source)
-
-                        return (requestResult, source.name)
+                        let startTime = Date().timeIntervalSince1970
+                        let requestResult = await self.executeParserWithTimeout(source: source)
+                        let durationMs = (Date().timeIntervalSince1970 - startTime) * 1000
+                        return (requestResult, source.name, durationMs)
                     }
                 }
-            }
 
-            // Let the user know that there was an error in the source
-            var failedSourceNames: [String] = []
-            for await (requestResult, sourceName) in group {
-                if let requestResult {
-                    if await !debridManager.enabledDebrids.isEmpty {
-                        await debridManager.populateDebridIA(requestResult.magnets)
+                var failedSourceNames: [String] = []
+                for await (requestResult, sourceName, durationMs) in group {
+                    if let requestResult {
+                        if await !debridManager.enabledDebrids.isEmpty {
+                            await debridManager.populateDebridIA(requestResult.magnets)
+                        }
+
+                        let uniqueResults = requestResult.results.filter { result in
+                            let key = dedupeKey(for: result)
+                            if seenResultKeys.contains(key) {
+                                return false
+                            }
+                            seenResultKeys.insert(key)
+                            return true
+                        }
+
+                        await self.updateSearchResults(newResults: uniqueResults)
+                        updateSourceStats(sourceName, success: true, durationMs: durationMs)
+                    } else {
+                        failedSourceNames.append(sourceName)
+                        updateSourceStats(sourceName, success: false, durationMs: durationMs)
                     }
 
-                    await self.updateSearchResults(newResults: requestResult.results)
-                } else {
-                    failedSourceNames.append(sourceName)
+                    await removeCurrentSourceName(sourceName)
                 }
 
-                await removeCurrentSourceName(sourceName)
-            }
-
-            if !failedSourceNames.isEmpty {
-                let joinedSourceNames = failedSourceNames.joined(separator: ", ")
-                await logManager?.info(
-                    "Scraping: Errors in sources \(joinedSourceNames). See above.",
-                    description: "There were errors in sources \(joinedSourceNames). Check the logs for more details."
-                )
+                if !failedSourceNames.isEmpty {
+                    let joinedSourceNames = failedSourceNames.joined(separator: ", ")
+                    await logManager?.info(
+                        "Scraping: Errors in sources \(joinedSourceNames). See above.",
+                        description: "There were errors in sources \(joinedSourceNames). Check the logs for more details."
+                    )
+                }
             }
         }
 
@@ -166,7 +225,46 @@ class ScrapingViewModel: ObservableObject {
         }
     }
 
+    private func executeParserWithTimeout(source: Source) async -> SearchRequestResult? {
+        await withTaskGroup(of: SearchRequestResult?.self) { group in
+            group.addTask {
+                await self.executeParser(source: source)
+            }
+
+            group.addTask {
+                try? await Task.sleep(seconds: self.perSourceTimeoutSeconds)
+                return nil
+            }
+
+            let result = await group.next() ?? nil
+            group.cancelAll()
+            return result
+        }
+    }
+
+    private func cacheKey(source: Source) -> String {
+        "\(source.name.lowercased())|\(cleanedSearchText)"
+    }
+
+    private func dedupeKey(for result: SearchResult) -> String {
+        let magnetKey = result.magnet.hash ?? result.magnet.link ?? UUID().uuidString
+        return "\(result.source.lowercased())|\(magnetKey)"
+    }
+
+    private func updateSourceStats(_ sourceName: String, success: Bool, durationMs: Double) {
+        var stats = sourceStats[sourceName, default: SourceStats()]
+        stats.addSample(success: success, durationMs: durationMs)
+        sourceStats[sourceName] = stats
+    }
+
     private func executeParser(source: Source) async -> SearchRequestResult? {
+        let key = cacheKey(source: source)
+        if let cached = searchCache[key],
+           Date().timeIntervalSince1970 - cached.timestamp < searchCacheTTL
+        {
+            return cached.result
+        }
+
         guard let website = source.website else {
             await logManager?.error("Scraping: The base URL could not be found for source \(source.name)")
 
@@ -517,7 +615,9 @@ class ScrapingViewModel: ObservableObject {
             }
         }
 
-        return SearchRequestResult(results: tempResults, magnets: magnets)
+        let result = SearchRequestResult(results: tempResults, magnets: magnets)
+        searchCache[key] = SearchCacheEntry(timestamp: Date().timeIntervalSince1970, result: result)
+        return result
     }
 
     // TODO: Add regex parsing for API

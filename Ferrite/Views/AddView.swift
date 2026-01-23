@@ -176,6 +176,11 @@ struct AddView: View {
         guard selectedDebrid.supportsWebLinks else {
             return
         }
+        guard isValidWebLink(webLinkText) else {
+            errorMessage = "Please enter a valid web link."
+            showErrorAlert = true
+            return
+        }
 
         do {
             transferHandle = try await selectedDebrid.addWebLink(webLinkText)
@@ -193,6 +198,11 @@ struct AddView: View {
             return
         }
         guard selectedDebrid.supportsMagnetUnrestrict else {
+            return
+        }
+        guard isValidMagnet(magnetText) else {
+            errorMessage = "Please enter a valid magnet link."
+            showErrorAlert = true
             return
         }
 
@@ -214,6 +224,11 @@ struct AddView: View {
         guard selectedDebrid.supportsTorrentUpload else {
             return
         }
+        guard pendingTorrentUrl.pathExtension.lowercased() == "torrent" else {
+            errorMessage = "Please select a .torrent file."
+            showErrorAlert = true
+            return
+        }
 
         do {
             transferHandle = try await selectedDebrid.uploadTorrentFile(pendingTorrentUrl)
@@ -224,6 +239,17 @@ struct AddView: View {
             errorMessage = error.localizedDescription
             showErrorAlert = true
         }
+    }
+
+    private func isValidWebLink(_ link: String) -> Bool {
+        guard let url = URL(string: link) else {
+            return false
+        }
+        return ["http", "https"].contains(url.scheme?.lowercased() ?? "")
+    }
+
+    private func isValidMagnet(_ link: String) -> Bool {
+        link.lowercased().starts(with: "magnet:?xt=urn:btih:")
     }
 }
 

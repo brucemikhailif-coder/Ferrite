@@ -57,6 +57,8 @@ class NavigationViewModel: ObservableObject {
 
     func compareSearchResult(lhs: SearchResult, rhs: SearchResult) -> Bool {
         switch currentSortFilter {
+        case .best:
+            return false
         case .leechers:
             guard let lhsLeechers = lhs.leechers, let rhsLeechers = rhs.leechers else {
                 return false
