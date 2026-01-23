@@ -30,4 +30,28 @@ extension View {
     func inlinedList(inset: CGFloat) -> some View {
         modifier(InlinedListModifier(inset: inset))
     }
+
+    @ViewBuilder
+    func liquidGlass(
+        cornerRadius: CGFloat = 16,
+        tint: Color? = nil,
+        interactive: Bool = false
+    ) -> some View {
+        if #available(iOS 26.0, *) {
+            if let tint {
+                if interactive {
+                    glassEffect(.regular.tint(tint).interactive(), in: .rect(cornerRadius: cornerRadius))
+                } else {
+                    glassEffect(.regular.tint(tint), in: .rect(cornerRadius: cornerRadius))
+                }
+            } else if interactive {
+                glassEffect(.regular.interactive(), in: .rect(cornerRadius: cornerRadius))
+            } else {
+                glassEffect(.regular, in: .rect(cornerRadius: cornerRadius))
+            }
+        } else {
+            background(.thinMaterial)
+                .cornerRadius(cornerRadius)
+        }
+    }
 }
