@@ -42,83 +42,8 @@ struct CloudDownloadView: View {
                 }
             }
 
-            import SwiftUI
-
-            // MARK: - Previews for CloudDownloadRow and CloudDownloadView (multiple Dynamic Type sizes)
-            struct CloudDownloadView_Previews: PreviewProvider {
-                static let sampleDownload = DebridCloudDownload(
-                    id: "1",
-                    fileName: "Example Video — S01E01 — A very long title to exercise wrapping and accessibility dynamic type scaling",
-                    link: "https://example.com/video.mp4"
-                )
-
-                static let debridManager = DebridManager()
-                static let navModel = NavigationViewModel()
-                static let logManager = LoggingManager()
-
-                static var previews: some View {
-                    Group {
-                        // CloudDownloadRow - Default size
-                        CloudDownloadRow(
-                            cloudDownload: sampleDownload,
-                            onSelect: {},
-                            onCopy: { _ in },
-                            onOpen: { _ in },
-                            onDelete: { _ in },
-                            onStreamable: { _ in }
-                        )
-                        .previewDisplayName("Row — Default")
-                        .previewLayout(.sizeThatFits)
-                        .environmentObject(debridManager)
-
-                        // CloudDownloadRow - Large Dynamic Type
-                        CloudDownloadRow(
-                            cloudDownload: sampleDownload,
-                            onSelect: {},
-                            onCopy: { _ in },
-                            onOpen: { _ in },
-                            onDelete: { _ in },
-                            onStreamable: { _ in }
-                        )
-                        .previewDisplayName("Row — Large Dynamic Type")
-                        .previewLayout(.sizeThatFits)
-                        .environmentObject(debridManager)
-                        .environment(\.sizeCategory, .accessibilityExtraLarge)
-
-                        // CloudDownloadRow - Accessibility XXL
-                        CloudDownloadRow(
-                            cloudDownload: sampleDownload,
-                            onSelect: {},
-                            onCopy: { _ in },
-                            onOpen: { _ in },
-                            onDelete: { _ in },
-                            onStreamable: { _ in }
-                        )
-                        .previewDisplayName("Row — Accessibility XXL")
-                        .previewLayout(.sizeThatFits)
-                        .environmentObject(debridManager)
-                        .environment(\.sizeCategory, .accessibilityExtraExtraExtraLarge)
-
-                        // CloudDownloadView - Default
-                        CloudDownloadView(searchText: .constant(""))
-                            .previewDisplayName("View — Default")
-                            .environmentObject(debridManager)
-                            .environmentObject(navModel)
-                            .environmentObject(logManager)
-
-                        // CloudDownloadView - Large Dynamic Type
-                        CloudDownloadView(searchText: .constant(""))
-                            .previewDisplayName("View — Large Dynamic Type")
-                            .environmentObject(debridManager)
-                            .environmentObject(navModel)
-                            .environmentObject(logManager)
-                            .environment(\.sizeCategory, .accessibilityExtraLarge)
-                    }
-                    .padding()
-                    .previewLayout(.sizeThatFits)
-                }
-            }
             .onDelete(perform: deleteDownloads)
+
         }
         .sheet(isPresented: $showTransferBrowser) {
             transferBrowserView
@@ -314,3 +239,19 @@ private struct CloudDownloadRow: View {
         }
     }
 }
+
+ // MARK: - Previews (file scope)
+ struct CloudDownloadView_Previews: PreviewProvider {
+     static var previews: some View {
+         let debridManager = DebridManager()
+         let navModel = NavigationViewModel()
+         let logManager = LoggingManager()
+
+         CloudDownloadView(searchText: .constant(""))
+             .environmentObject(debridManager)
+             .environmentObject(navModel)
+             .environmentObject(logManager)
+             .padding()
+             .previewLayout(.sizeThatFits)
+     }
+ }

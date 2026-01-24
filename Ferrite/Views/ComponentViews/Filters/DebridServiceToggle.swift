@@ -49,7 +49,6 @@ struct DebridServiceToggle: View {
                     .stroke(isDisabled ? Color.primary.opacity(0.02) : Color.accentColor.opacity(0.12), lineWidth: 0.5)
             )
             .contentShape(RoundedRectangle(cornerRadius: 999))
-            )
         }
         .disabled(isDisabled)
         .accessibilityLabel("Debrid service")
