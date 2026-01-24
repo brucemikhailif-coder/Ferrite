@@ -66,14 +66,18 @@ struct SearchResultButtonView: View {
                             .font(.caption2.weight(.semibold))
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
-                            .liquidGlass(cornerRadius: 12, tint: badgeColor(for: badge).opacity(0.2))
+                            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(badgeColor(for: badge).opacity(0.16), lineWidth: 0.5)
+                            )
                     }
                 }
 
                 SearchResultInfoView(result: result)
             }
-            .padding(12)
-            .liquidGlass(cornerRadius: 14)
+            .padding(DesignTokens.Spacing.medium)
+            .liquidGlass(cornerRadius: DesignTokens.CornerRadius.medium, shadow: false)
             .listRowBackground(Color.clear)
             .disabledAppearance(navModel.currentChoiceSheet != nil, dimmedOpacity: 0.7, animation: .easeOut(duration: 0.2))
         }

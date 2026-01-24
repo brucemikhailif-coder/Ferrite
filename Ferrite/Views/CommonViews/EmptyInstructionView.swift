@@ -20,13 +20,15 @@ struct EmptyInstructionView: View {
                 .font(.system(size: 22, weight: .semibold))
 
             Text(message)
-                .padding(.horizontal, 50)
+                .padding(.horizontal, DesignTokens.Spacing.xlarge * 2)
                 .font(.footnote)
         }
         .multilineTextAlignment(.center)
         .foregroundColor(.init(uiColor: .secondaryLabel))
-        .padding(20)
-        .liquidGlass(cornerRadius: 18)
+        .padding(DesignTokens.Spacing.xlarge)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.large))
+        .overlay(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.large).stroke(Color.primary.opacity(0.04), lineWidth: DesignTokens.Stroke.ultraThin))
+        .clipShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.large))
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .ignoresSafeArea()
     }

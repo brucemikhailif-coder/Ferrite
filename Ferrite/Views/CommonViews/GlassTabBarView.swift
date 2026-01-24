@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct GlassTabBarView: View {
     @Binding var selection: NavigationViewModel.ViewTab
@@ -21,6 +22,9 @@ struct GlassTabBarView: View {
         HStack(spacing: 10) {
             ForEach(tabs, id: \.0) { tab in
                 Button {
+                    // subtle haptic feedback on selection
+                    let generator = UIImpactFeedbackGenerator(style: .light)
+                    generator.impactOccurred()
                     withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                         selection = tab.0
                     }
@@ -32,14 +36,27 @@ struct GlassTabBarView: View {
                             .font(.caption2)
                     }
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 8)
+                    .padding(.vertical, DesignTokens.Spacing.small)
                 }
                 .tint(selection == tab.0 ? .primary : .secondary)
-                .liquidGlass(cornerRadius: 14, tint: selection == tab.0 ? .accentColor.opacity(0.25) : nil, interactive: true)
+                .background(
+                    Group {
+                        if selection == tab.0 {
+                            RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium)
+                                .fill(Color.accentColor.opacity(0.18))
+                                .overlay(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium).stroke(Color.accentColor.opacity(0.22), lineWidth: DesignTokens.Stroke.ultraThin))
+                        } else {
+                            RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium)
+                                .fill(.ultraThinMaterial)
+                                .overlay(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium).stroke(Color.primary.opacity(0.02), lineWidth: DesignTokens.Stroke.ultraThin))
+                        }
+                    }
+                )
+                .contentShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium))
             }
         }
-        .padding(8)
-        .liquidGlass(cornerRadius: 99)
+        .padding(DesignTokens.Spacing.small)
+        .liquidGlass(cornerRadius: DesignTokens.CornerRadius.pill)
     }
 }
 

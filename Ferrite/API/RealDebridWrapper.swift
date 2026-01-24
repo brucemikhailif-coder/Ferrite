@@ -602,6 +602,18 @@ class RealDebrid: PollingDebridSource, ObservableObject {
         return try jsonDecoder.decode(UnrestrictLinkResponse.self, from: data)
     }
 
+    /// Public helper: obtain a streamable/transcoded link from Real-Debrid for a given web-hosted media URL.
+    /// This method re-uses the existing `unrestrictWebLink` endpoint and returns the provider `download` URL.
+    /// If the provider marks the resource as streamable, the returned URL is commonly suitable for streaming (HLS / progressive) depending on the provider.
+    /// Note: the exact semantics depend on the provider response; callers should validate returned MIME/type or use the URL in a player that supports the stream type.
+    func getStreamableLink(for link: String) async throws -> String {
+        let response = try await unrestrictWebLink(link: link)
+
+        // The `UnrestrictLinkResponse` contains `download` (direct link) and a `streamable` flag.
+        // Return the `download` entry — it is typically the best candidate for streaming playback when `streamable == 1`.
+        return response.download
+    }
+
     private func addTorrent(fileUrl: URL) async throws -> String {
         var request = URLRequest(url: try await addTorrentUrl())
         request.httpMethod = "PUT"

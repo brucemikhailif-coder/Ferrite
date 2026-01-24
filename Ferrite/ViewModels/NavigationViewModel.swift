@@ -11,6 +11,9 @@ import SwiftUI
 class NavigationViewModel: ObservableObject {
     var logManager: LoggingManager?
 
+    // Tab bar visibility state for scroll-hide behavior
+    @Published var isTabBarHidden: Bool = false
+
     // Used between SearchResultsView and MagnetChoiceView
     enum ChoiceSheetType: Identifiable {
         var id: Int {

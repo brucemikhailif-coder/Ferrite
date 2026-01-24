@@ -17,11 +17,18 @@ struct MainView: View {
 
     @AppStorage("Updates.AutomaticNotifs") var autoUpdateNotifs = true
 
+
     @State private var showUpdateAlert = false
+
     @State private var releaseVersionString: String = ""
+
     @State private var releaseUrlString: String = ""
 
+    // Observe keyboard so the bottom tab bar can move out of the way
+    @StateObject private var keyboard = KeyboardObserver()
+
     var body: some View {
+
         ZStack(alignment: .bottom) {
             TabView(selection: $navModel.selectedTab) {
                 ContentView()
@@ -30,18 +37,37 @@ struct MainView: View {
                 LibraryView()
                     .tag(NavigationViewModel.ViewTab.library)
 
+
                 AddView()
+
                     .tag(NavigationViewModel.ViewTab.add)
+
+
 
                 SettingsView()
                     .tag(NavigationViewModel.ViewTab.settings)
-            }
+             }
+
             .toolbar(.hidden, for: .tabBar)
 
+
+
+
             GlassTabBarView(selection: $navModel.selectedTab)
-                .padding(.horizontal, 16)
-                .padding(.bottom, 10)
+
+                .padding(.horizontal, DesignTokens.TabBar.horizontalPadding)
+
+                .padding(.bottom, DesignTokens.TabBar.bottomPadding)
+
+                .frame(height: DesignTokens.TabBar.height)
+
+                // Hide tab bar when keyboard is visible or when scrolling down
+                .opacity((keyboard.isVisible || navModel.isTabBarHidden) ? 0 : 1)
+                .offset(y: (keyboard.isVisible || navModel.isTabBarHidden) ? 100 : 0)
+                .animation(.easeOut(duration: 0.25), value: keyboard.isVisible || navModel.isTabBarHidden)
+
         }
+
         .sheet(item: $navModel.currentChoiceSheet) { item in
             switch item {
             case .action:
@@ -201,12 +227,20 @@ struct MainView: View {
                     .font(.caption)
                     .liquidGlass(cornerRadius: 10)
                     .frame(width: 200)
-                }
 
-                Rectangle()
-                    .foregroundColor(.clear)
-                    .frame(height: 60)
-            }
+                                }
+
+
+
+
+                                Rectangle()
+
+                                    .foregroundColor(.clear)
+
+                                    .frame(height: 60)
+                            }
+
+
             .animation(.easeInOut(duration: 0.3), value: logManager.showToast || logManager.showIndeterminateToast)
         }
     }

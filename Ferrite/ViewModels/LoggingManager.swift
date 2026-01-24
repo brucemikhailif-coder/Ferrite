@@ -42,10 +42,19 @@ class LoggingManager: ObservableObject {
                 try? await Task.sleep(seconds: 0.1)
                 showToast = true
 
-                try? await Task.sleep(seconds: 3)
+                // If an undoAction is present, give a slightly longer undo window so users can react.
+                if undoAction != nil {
+                    // Longer undo window when an undo action is available
+                    try? await Task.sleep(seconds: 6)
+                } else {
+                    try? await Task.sleep(seconds: 3)
+                }
 
                 showToast = false
                 toastType = .error
+
+                // Clear undo state after the toast hides
+                undoAction = nil
             }
         }
     }
@@ -53,6 +62,12 @@ class LoggingManager: ObservableObject {
     @Published var showToast: Bool = false
     // Default the toast type to error since the majority of toasts are errors
     @Published var toastType: LogLevel = .error
+
+    // Optional undo action for the toast (used by scheduled delete flows).
+    // This is an async closure so callers may perform async cancellation work (e.g. cancel remote delete).
+    @Published var undoAction: (() async -> Void)? = nil
+    @Published var undoLabel: String = "Undo"
+
     var showErrorToasts: Bool {
         UserDefaults.standard.bool(forKey: "Debug.ShowErrorToasts")
     }
@@ -176,6 +191,37 @@ class LoggingManager: ObservableObject {
                 "Log export for file \(logFileName): \(error)",
                 description: "Exporting your log file failed. Please check the logs page."
             )
+        }
+    }
+
+    // MARK: - Undo toast helper
+
+    /// Show an undo toast with a description and an async undo action.
+    /// Callers can await this function, though it only sets state and returns immediately.
+    /// - Parameters:
+    ///   - description: Text to show in the toast.
+    ///   - undoLabel: Label for the undo action (defaults to \"Undo\").
+    ///   - undoAction: An async closure that will be executed if the user taps Undo.
+    func showUndoToast(_ description: String, undoLabel: String = "Undo", undoAction: @escaping () async -> Void) async {
+        // Use info type for undo-able toasts
+        toastType = .info
+        self.undoLabel = undoLabel
+        self.undoAction = undoAction
+        self.toastDescription = description
+    }
+
+    /// Called by UI when the user taps the Undo button on the toast.
+    /// Executes the stored async undo action and clears the toast/undo state.
+    func performUndoAction() {
+        Task {
+            if let action = self.undoAction {
+                await action()
+            }
+
+            await MainActor.run {
+                self.undoAction = nil
+                self.showToast = false
+            }
         }
     }
 }

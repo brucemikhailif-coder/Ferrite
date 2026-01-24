@@ -58,7 +58,7 @@ struct HistoryButtonView: View {
 
                     Text("DEBRID")
                         .fontWeight(.bold)
-                        .padding(3)
+                        .padding(DesignTokens.Spacing.tiny)
                         .background {
                             Group {
                                 if let url = entry.url, url.starts(with: "https://") {
@@ -67,7 +67,7 @@ struct HistoryButtonView: View {
                                     Color.red
                                 }
                             }
-                            .cornerRadius(4)
+                            .cornerRadius(DesignTokens.CornerRadius.micro)
                             .opacity(0.5)
                         }
                 }

@@ -14,7 +14,7 @@ struct FilterAmountLabelView: View {
 
     var body: some View {
         Text(String(amount))
-            .padding(5)
+            .padding(DesignTokens.Spacing.small)
             .foregroundColor(colorScheme == .light ? .white : .accentColor)
             .background {
                 Circle()

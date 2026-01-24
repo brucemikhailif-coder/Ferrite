@@ -14,6 +14,9 @@ struct FilterLabelView: View {
     var fallbackName: String
     var count: Int?
 
+    // Pressed state for subtle feedback on touch
+    @State private var isPressed: Bool = false
+
     var body: some View {
         HStack(spacing: 4) {
             if let count, count > 1 {
@@ -33,10 +36,20 @@ struct FilterLabelView: View {
             .caption
                 .weight(.medium)
         )
-        .liquidGlass(
-            cornerRadius: 999,
-            tint: count ?? 0 > 0 ? .accentColor.opacity(0.25) : nil,
-            interactive: true
+        // Use a subtle material + stroke for small chips to reduce visual noise
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 999))
+        .overlay(
+            RoundedRectangle(cornerRadius: 999)
+                .stroke(count ?? 0 > 0 ? Color.accentColor.opacity(0.18) : Color.primary.opacity(0.04), lineWidth: 0.5)
+        )
+        .contentShape(RoundedRectangle(cornerRadius: 999))
+        // Subtle pressed feedback
+        .scaleEffect(isPressed ? 0.98 : 1)
+        .animation(.spring(response: 0.25, dampingFraction: 0.8), value: isPressed)
+        .gesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in isPressed = true }
+                .onEnded { _ in isPressed = false }
         )
     }
 }

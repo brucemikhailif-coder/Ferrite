@@ -9,12 +9,12 @@ import SwiftUI
 
 struct DebridServiceToggle: View {
     @EnvironmentObject var debridManager: DebridManager
-    
+
     // Get logged-in debrid sources
     private var loggedInDebridSources: [DebridSource] {
         debridManager.debridSources.filter { $0.isLoggedIn }
     }
-    
+
     // Current service abbreviation for display
     private var currentServiceDisplay: String {
         if let selected = debridManager.selectedDebridSource {
@@ -22,19 +22,19 @@ struct DebridServiceToggle: View {
         }
         return "None"
     }
-    
+
     // Whether the toggle should be disabled
     private var isDisabled: Bool {
         loggedInDebridSources.count <= 1
     }
-    
+
     var body: some View {
         Button(action: cycleToNextService) {
             HStack(spacing: 4) {
                 Text(currentServiceDisplay)
                     .font(.caption.weight(.medium))
                     .foregroundColor(isDisabled ? .secondary : .primary)
-                
+
                 if !isDisabled {
                     Image(systemName: "chevron.forward")
                         .font(.caption2)
@@ -43,9 +43,12 @@ struct DebridServiceToggle: View {
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
-            .liquidGlass(
-                cornerRadius: 999,
-                interactive: !isDisabled
+            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 999))
+            .overlay(
+                RoundedRectangle(cornerRadius: 999)
+                    .stroke(isDisabled ? Color.primary.opacity(0.02) : Color.accentColor.opacity(0.12), lineWidth: 0.5)
+            )
+            .contentShape(RoundedRectangle(cornerRadius: 999))
             )
         }
         .disabled(isDisabled)
@@ -53,18 +56,18 @@ struct DebridServiceToggle: View {
         .accessibilityValue(currentServiceDisplay)
         .accessibilityHint(isDisabled ? "No other debrid services available" : "Tap to cycle through debrid services")
     }
-    
+
     private func cycleToNextService() {
         guard !isDisabled else { return }
-        
+
         let sources = loggedInDebridSources
-        
+
         // If no source is selected, select the first one
         guard let currentSource = debridManager.selectedDebridSource else {
             debridManager.selectedDebridSource = sources.first
             return
         }
-        
+
         // Find current source index and select the next one
         if let currentIndex = sources.firstIndex(where: { $0.id == currentSource.id }) {
             let nextIndex = (currentIndex + 1) % sources.count

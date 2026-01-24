@@ -28,8 +28,8 @@ struct TestHostingView: View {
                         Image(systemName: "chevron.down")
                             .foregroundColor(.tertiaryLabel)
                     }
-                    .padding(.horizontal, 9)
-                    .padding(.vertical, 7)
+                    .padding(.horizontal, DesignTokens.Spacing.small)
+                    .padding(.vertical, DesignTokens.Spacing.small)
                     .font(.caption, weight: .bold)
                     .background(Capsule().foregroundColor(.secondarySystemFill))
                 }
@@ -53,8 +53,8 @@ struct TestHostingView: View {
                         Image(systemName: "chevron.down")
                             .foregroundColor(.tertiaryLabel)
                     }
-                    .padding(.horizontal, 9)
-                    .padding(.vertical, 7)
+                    .padding(.horizontal, DesignTokens.Spacing.small)
+                    .padding(.vertical, DesignTokens.Spacing.small)
                     .font(.caption, weight: .bold)
                     .background(Capsule().foregroundColor(.secondarySystemFill))
                 }
@@ -63,7 +63,7 @@ struct TestHostingView: View {
                     $0.animation = .none
                 }
             }
-            .padding(.horizontal, 18)
+            .padding(.horizontal, DesignTokens.Spacing.large)
         }
     }
 }

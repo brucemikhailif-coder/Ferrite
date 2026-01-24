@@ -42,6 +42,14 @@ class DebridManager: ObservableObject {
 
     var currentDebridTask: Task<Void, Never>?
     var downloadUrl: String = ""
+    // Optional per-transfer progress dictionary (transfer id -> 0.0...1.0). UI may read this; default nil.
+    @Published var transferProgress: [String: Double]? = nil
+
+    // Scheduled remote delete tasks. Keyed by the provider object id (download/magnet id).
+    // Used to implement a short "undo" window before performing destructive API deletes.
+    private var scheduledDeletes: [String: Task<Void, Never>] = [:]
+
+    // Convenience accessor for auth URL (used by UI)
     var authUrl: URL?
 
     @Published var showDeleteAlert: Bool = false
@@ -71,6 +79,12 @@ class DebridManager: ObservableObject {
             } else {
                 UserDefaults.standard.removeObject(forKey: "Debrid.PreferredService")
             }
+        }
+
+        // Start background polling for transfer progress (e.g. RealDebrid).
+        // Runs on the actor and will continue until this manager is deallocated.
+        Task {
+            await self.pollTransfers()
         }
     }
 
@@ -115,6 +129,140 @@ class DebridManager: ObservableObject {
     func clearIAValues() {
         for debridSource in debridSources {
             debridSource.IAValues = []
+        }
+    }
+
+    // Periodically poll providers for transfer progress and update `transferProgress`.
+    // This implementation prefers batched provider endpoints where possible and avoids
+    // throwing APIs for active/ongoing transfers. For RealDebrid we use a cached info call
+    // that returns progress values without forcing an error state.
+    private func pollTransfers() async {
+        // Poll interval in seconds. This can be tuned or made adaptive in the future.
+        let intervalSeconds: UInt64 = 15
+
+        while true {
+            do {
+                var newProgressMap: [String: Double] = [:]
+
+                for source in debridSources {
+                    // RealDebrid: use batched magnet listing and a non-throwing info call to obtain progress.
+                    if let rd = source as? RealDebrid {
+                        // Refresh the provider's cloud/torrent lists so we have current IDs.
+                        try? await rd.getUserMagnets()
+
+                        // Use the allow-caching info method to read progress without treating 'downloading'
+                        // as an exceptional control flow. This reduces per-item error churn and rate pressure.
+                        for magnet in rd.cloudMagnets {
+                            if magnet.id.isEmpty { continue }
+
+                            do {
+                                let info = try await rd.torrentInfoAllowCaching(debridID: magnet.id)
+                                let normalized = Double(info.progress) / 100.0
+                                newProgressMap[magnet.id] = min(max(normalized, 0.0), 1.0)
+                            } catch {
+                                // Ignore failures for individual magnets; continue with the rest.
+                                continue
+                            }
+                        }
+
+                        // Refresh user downloads (web downloads). These are typically completed items;
+                        // we set them to 1.0 (fully available) so UI can show them as complete.
+                        try? await rd.getUserDownloads()
+                        for dl in rd.cloudDownloads {
+                            if !dl.id.isEmpty {
+                                newProgressMap[dl.id] = 1.0
+                            }
+                        }
+                    }
+
+                    // Future: add provider-specific batched endpoints for other providers here.
+                    // Example: if other providers implement a user/downloads or torrents listing,
+                    // call that here and merge progress values into newProgressMap.
+                }
+
+                // Publish the new map on the main actor
+                await MainActor.run {
+                    self.transferProgress = newProgressMap
+                }
+            } catch {
+                // Log and continue; we don't want polling to stop on transient errors
+                await MainActor.run {
+                    logManager?.error("Transfer polling error: \(error.localizedDescription)", showToast: false)
+                }
+            }
+
+            // Sleep for interval
+            try? await Task.sleep(nanoseconds: intervalSeconds * 1_000_000_000)
+        }
+    }
+
+    // Schedule a remote delete with a short undo window.
+    // Callers should show a local "Undo" toast and call `cancelScheduledDelete(_:)` if the user undoes.
+    func scheduleRemoteDelete(_ download: DebridCloudDownload, delaySeconds: UInt64 = 6) {
+        // Cancel any previously scheduled task for the same id
+        cancelScheduledDelete(download.id)
+
+        // Create a background task that will perform the deletion after the delay
+        let deletionTask = Task.detached { [weak self] in
+            // Sleep for the undo window
+            try? await Task.sleep(nanoseconds: delaySeconds * 1_000_000_000)
+
+            // If the task wasn't cancelled, perform the deletion on the main actor
+            await MainActor.run {
+                Task {
+                    await self?.deleteCloudDownload(download)
+                    // Remove from scheduledDeletes map on completion
+                    await MainActor.run {
+                        self?.scheduledDeletes.removeValue(forKey: download.id)
+                    }
+                }
+            }
+        }
+
+        scheduledDeletes[download.id] = deletionTask
+    }
+
+    // Cancel a previously scheduled remote delete (used when the user taps "Undo")
+    func cancelScheduledDelete(_ id: String) {
+        if let task = scheduledDeletes[id] {
+            task.cancel()
+            scheduledDeletes.removeValue(forKey: id)
+        }
+    }
+
+    /// Attempts to obtain a streamable/transcoded link from the given provider for `link`.
+    /// - If a provider id is supplied it will try to use that provider; otherwise uses the currently selected provider.
+    /// - On success this sets `downloadUrl` which existing UI (ActionChoiceView etc.) already observes.
+    func fetchStreamableLink(from link: String, providerId: String? = nil) async {
+        let source: DebridSource?
+        if let pid = providerId {
+            source = debridSources.first { $0.id == pid }
+        } else {
+            source = selectedDebridSource
+        }
+
+        guard let source else {
+            await MainActor.run {
+                logManager?.error("DebridManager: No provider available to fetch streamable link", showToast: false)
+            }
+            return
+        }
+
+        // Only RealDebrid currently exposes a helper to obtain a streamable/transcoded link.
+        if let rd = source as? RealDebrid {
+            do {
+                let streamable = try await rd.getStreamableLink(for: link)
+                await MainActor.run {
+                    self.downloadUrl = streamable
+                }
+            } catch {
+                await sendDebridError(error, prefix: "\(rd.id) streamable link error")
+            }
+        } else {
+            // Fallback: if provider doesn't implement a transcoding/unrestrict helper, expose original link.
+            await MainActor.run {
+                self.downloadUrl = link
+            }
         }
     }
 

@@ -19,9 +19,11 @@ struct Tag: View {
             .opacity(0.8)
             .padding(.horizontal, horizontalPadding)
             .padding(.vertical, verticalPadding)
-            .liquidGlass(
-                cornerRadius: 5,
-                tint: (color ?? Color(uiColor: .tertiaryLabel)).opacity(0.15)
+            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 5))
+            .overlay(
+                RoundedRectangle(cornerRadius: 5)
+                    .stroke((color ?? Color(uiColor: .tertiaryLabel)).opacity(0.12), lineWidth: 0.5)
             )
+            .contentShape(RoundedRectangle(cornerRadius: 5))
     }
 }
