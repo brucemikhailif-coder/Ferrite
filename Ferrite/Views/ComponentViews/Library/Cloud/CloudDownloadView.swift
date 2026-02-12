@@ -28,9 +28,9 @@ struct CloudDownloadView: View {
                 CloudDownloadRow(
                     cloudDownload: cloudDownload,
                     onSelect: { handleDownloadSelection(cloudDownload) },
-                    onCopy: { rowDownload in UIPasteboard.general.string = rowDownload.link },
-                    onOpen: { rowDownload in if let url = URL(string: rowDownload.link) { UIApplication.shared.open(url) } },
-                    onDelete: { rowDownload in pendingDeleteDownload = rowDownload; showDeleteConfirm = true }
+                    onCopy: { download in UIPasteboard.general.string = download.link },
+                    onOpen: { download in if let url = URL(string: download.link) { UIApplication.shared.open(url) } },
+                    onDelete: { download in pendingDeleteDownload = download; showDeleteConfirm = true }
                 )
                 .disabledAppearance(navModel.currentChoiceSheet != nil,
                                     dimmedOpacity: 0.7,
