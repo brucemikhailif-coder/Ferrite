@@ -104,6 +104,8 @@ extension View {
     }
 
     /// Toast-style liquid glass with small corner radius
+    /// Uses cornerRadius 10 for a slightly rounded but not pill-shaped appearance,
+    /// suitable for temporary notification overlays
     func liquidGlassToast(
         tint: Color? = nil,
         interactive: Bool = false,
