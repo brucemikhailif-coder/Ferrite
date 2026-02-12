@@ -69,6 +69,12 @@ struct DebridCloudView: View {
                 }
             }
         }
+        .onChange(of: debridSource.cloudDownloads) { _ in
+            updateFilteredHistory()
+        }
+        .onChange(of: debridSource.cloudMagnets) { _ in
+            updateFilteredHistory()
+        }
         .onChange(of: searchText) { _ in
             updateFilteredHistory()
         }
@@ -119,7 +125,7 @@ struct DebridCloudView: View {
     
     private var pastCloudView: some View {
         List {
-            ForEach(cachedFilteredHistory, id: \.id) { item in
+            ForEach(cachedFilteredHistory, id: \.historyKey) { item in
                 CloudHistoryRow(historyItem: item)
                     .listRowBackground(Color.clear)
             }
@@ -128,14 +134,14 @@ struct DebridCloudView: View {
     }
     
     private func updateFilteredHistory() {
-        let currentIds = debridManager.getCurrentCloudIds(for: debridSource.id)
+        let currentKeys = debridManager.getCurrentCloudHistoryKeys(for: debridSource.id)
         
         cachedFilteredHistory = debridManager.cloudHistory
             .filter { item in
                 // Filter by provider
                 item.providerId == debridSource.id &&
                 // Exclude items still in current cloud
-                !currentIds.contains(item.id) &&
+                !currentKeys.contains(item.historyKey) &&
                 // Filter by search text
                 (searchText.isEmpty || item.name.lowercased().contains(searchText.lowercased()))
             }
@@ -324,7 +330,7 @@ private struct CloudHistoryRow: View {
                 .font(.caption)
                 .foregroundColor(.secondary)
                 
-                if historyItem.kind == .torrent {
+                if !historyItem.linkOrHash.isEmpty {
                     Text(historyItem.linkOrHash)
                         .font(.caption2)
                         .foregroundColor(.secondary)

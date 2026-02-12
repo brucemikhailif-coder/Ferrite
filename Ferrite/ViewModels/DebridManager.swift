@@ -669,16 +669,16 @@ class DebridManager: ObservableObject {
         }
     }
     
-    /// Get current cloud IDs for a provider (for filtering history)
-    func getCurrentCloudIds(for providerId: String) -> Set<String> {
+    /// Get current cloud history keys for a provider (for filtering history)
+    func getCurrentCloudHistoryKeys(for providerId: String) -> Set<String> {
         guard let source = debridSources.first(where: { $0.id == providerId }) else {
             return []
         }
         
-        var ids = Set<String>()
-        ids.formUnion(source.cloudDownloads.map { $0.id })
-        ids.formUnion(source.cloudMagnets.map { $0.id })
-        return ids
+        var keys = Set<String>()
+        keys.formUnion(source.cloudDownloads.map { "\(providerId)_\(DebridTransferKind.webDownload.rawValue)_\($0.id)" })
+        keys.formUnion(source.cloudMagnets.map { "\(providerId)_\(DebridTransferKind.torrent.rawValue)_\($0.id)" })
+        return keys
     }
     
     /// Merge current cloud items into history
@@ -687,13 +687,13 @@ class DebridManager: ObservableObject {
         
         // Build dictionary from existing history (keyed by provider+id)
         for item in cloudHistory {
-            let key = "\(item.providerId)_\(item.id)"
+            let key = item.historyKey
             historyDict[key] = item
         }
         
         // Merge downloads
         for download in source.cloudDownloads {
-            let key = "\(source.id)_\(download.id)"
+            let key = "\(source.id)_\(DebridTransferKind.webDownload.rawValue)_\(download.id)"
             if historyDict[key] == nil {
                 // New item, add to history with current date
                 let historyItem = DebridCloudHistoryItem(
@@ -711,7 +711,7 @@ class DebridManager: ObservableObject {
         
         // Merge magnets
         for magnet in source.cloudMagnets {
-            let key = "\(source.id)_\(magnet.id)"
+            let key = "\(source.id)_\(DebridTransferKind.torrent.rawValue)_\(magnet.id)"
             if historyDict[key] == nil {
                 // New item, add to history with current date
                 let historyItem = DebridCloudHistoryItem(

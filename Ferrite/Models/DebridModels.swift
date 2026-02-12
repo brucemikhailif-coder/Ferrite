@@ -58,6 +58,10 @@ struct DebridCloudHistoryItem: Codable, Hashable, Identifiable {
         self.linkOrHash = linkOrHash
         self.dateAdded = dateAdded
     }
+    
+    var historyKey: String {
+        "\(providerId)_\(kind.rawValue)_\(id)"
+    }
 }
 
 enum DebridTransferKind: String, Codable, Sendable {
