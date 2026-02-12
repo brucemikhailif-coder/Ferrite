@@ -204,7 +204,7 @@ struct MainView: View {
                     }
                     .padding(12)
                     .font(.caption)
-                    .liquidGlass(cornerRadius: 10)
+                    .liquidGlassToast()
                 }
 
                 if logManager.showIndeterminateToast {
@@ -225,7 +225,7 @@ struct MainView: View {
                     }
                     .padding(12)
                     .font(.caption)
-                    .liquidGlass(cornerRadius: 10)
+                    .liquidGlassToast()
                     .frame(width: 200)
 
                                 }

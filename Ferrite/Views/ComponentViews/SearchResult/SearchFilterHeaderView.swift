@@ -38,12 +38,7 @@ struct SearchFilterHeaderView: View {
                             .caption
                                 .weight(.medium)
                         )
-                        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 999))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 999)
-                                .stroke(Color.primary.opacity(0.04), lineWidth: 0.5)
-                        )
-                        .contentShape(RoundedRectangle(cornerRadius: 999))
+                        .liquidGlassPill(shadow: false)
                     }
 
                     Divider()

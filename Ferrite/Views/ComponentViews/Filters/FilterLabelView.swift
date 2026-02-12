@@ -36,13 +36,10 @@ struct FilterLabelView: View {
             .caption
                 .weight(.medium)
         )
-        // Use a subtle material + stroke for small chips to reduce visual noise
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 999))
-        .overlay(
-            RoundedRectangle(cornerRadius: 999)
-                .stroke(count ?? 0 > 0 ? Color.accentColor.opacity(0.18) : Color.primary.opacity(0.04), lineWidth: 0.5)
+        .liquidGlassPill(
+            tint: count ?? 0 > 0 ? Color.accentColor.opacity(0.1) : nil,
+            shadow: false
         )
-        .contentShape(RoundedRectangle(cornerRadius: 999))
         // Subtle pressed feedback
         .scaleEffect(isPressed ? 0.98 : 1)
         .animation(.spring(response: 0.25, dampingFraction: 0.8), value: isPressed)
