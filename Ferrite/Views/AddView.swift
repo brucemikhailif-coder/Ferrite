@@ -21,6 +21,7 @@ struct AddView: View {
     @State private var transferHandle: DebridTransferHandle?
     @State private var transferTitle: String = ""
     @State private var isProcessing = false
+    @State private var processingProgress: String = ""
 
     @State private var showErrorAlert = false
     @State private var errorMessage = ""
@@ -88,7 +89,7 @@ struct AddView: View {
                             TextEditor(text: $multiEntryText)
                                 .textInputAutocapitalization(.never)
                                 .autocorrectionDisabled()
-                                .font(.system(.body, design: .monospaced))
+                                .font(.body)
                                 .frame(minHeight: 120)
                                 .padding(DesignTokens.Spacing.small)
                                 .background(Color.secondary.opacity(0.05))
@@ -236,6 +237,18 @@ struct AddView: View {
             } message: {
                 Text(errorMessage)
             }
+            .overlay {
+                if isProcessing && !processingProgress.isEmpty {
+                    VStack {
+                        Text(processingProgress)
+                            .font(.caption)
+                            .padding(DesignTokens.Spacing.medium)
+                            .liquidGlass(cornerRadius: DesignTokens.CornerRadius.medium)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                    .padding(.bottom, 100)
+                }
+            }
             .onAppear {
                 if selectedDebridId.isEmpty {
                     selectedDebridId = debridManager.enabledDebrids.first?.id ?? ""
@@ -302,7 +315,10 @@ struct AddView: View {
         }
         
         isProcessing = true
-        defer { isProcessing = false }
+        defer { 
+            isProcessing = false
+            processingProgress = ""
+        }
         
         let entries = multiEntryText
             .components(separatedBy: .newlines)
@@ -313,12 +329,14 @@ struct AddView: View {
         var lastTitle: String?
         var errorCount = 0
         
-        for entry in entries {
+        for (index, entry) in entries.enumerated() {
+            processingProgress = "Processing \(index + 1) of \(entries.count)"
+            
             do {
                 if isValidMagnet(entry), selectedDebrid.supportsMagnetUnrestrict {
                     let handle = try await selectedDebrid.addMagnetLink(entry)
                     lastHandle = handle
-                    lastTitle = "Magnet"
+                    lastTitle = extractMagnetName(entry) ?? "Magnet Link"
                     logManager.info("Added magnet link")
                 } else if isValidWebLink(entry), selectedDebrid.supportsWebLinks {
                     let handle = try await selectedDebrid.addWebLink(entry)
@@ -363,13 +381,18 @@ struct AddView: View {
         }
         
         isProcessing = true
-        defer { isProcessing = false }
+        defer { 
+            isProcessing = false
+            processingProgress = ""
+        }
         
         var lastHandle: DebridTransferHandle?
         var lastTitle: String?
         var errorCount = 0
         
-        for url in pendingTorrentUrls {
+        for (index, url) in pendingTorrentUrls.enumerated() {
+            processingProgress = "Uploading \(index + 1) of \(pendingTorrentUrls.count)"
+            
             guard url.pathExtension.lowercased() == "torrent" else {
                 errorCount += 1
                 logManager.warn("Skipped non-torrent file: \(url.lastPathComponent)")
@@ -402,6 +425,19 @@ struct AddView: View {
         
         // Clear torrent list after processing
         pendingTorrentUrls.removeAll()
+    }
+    
+    // Extract display name from magnet link (from dn parameter if available)
+    private func extractMagnetName(_ magnetLink: String) -> String? {
+        guard let dnRange = magnetLink.range(of: "&dn=") else {
+            return nil
+        }
+        
+        let afterDn = magnetLink[dnRange.upperBound...]
+        let endRange = afterDn.range(of: "&") ?? afterDn.endIndex..<afterDn.endIndex
+        let encodedName = String(afterDn[..<endRange.lowerBound])
+        
+        return encodedName.removingPercentEncoding
     }
 
     private func isValidWebLink(_ link: String) -> Bool {

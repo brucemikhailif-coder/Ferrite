@@ -26,6 +26,9 @@ struct DebridCloudView: View {
     // Segmented control state
     @State private var selectedSegment: CloudSegment = .current
     
+    // Cached filtered history for performance
+    @State private var cachedFilteredHistory: [DebridCloudHistoryItem] = []
+    
     enum CloudSegment: String, CaseIterable {
         case current = "Current"
         case past = "Past"
@@ -60,10 +63,20 @@ struct DebridCloudView: View {
             if newType != nil {
                 selectedDownloads.removeAll()
                 selectedMagnets.removeAll()
+                updateFilteredHistory()
                 Task {
                     await debridManager.fetchDebridCloud()
                 }
             }
+        }
+        .onChange(of: searchText) { _ in
+            updateFilteredHistory()
+        }
+        .onChange(of: debridManager.cloudHistory) { _ in
+            updateFilteredHistory()
+        }
+        .onAppear {
+            updateFilteredHistory()
         }
         .toolbar {
             if selectedSegment == .current {
@@ -106,7 +119,7 @@ struct DebridCloudView: View {
     
     private var pastCloudView: some View {
         List {
-            ForEach(filteredHistoryItems, id: \.id) { item in
+            ForEach(cachedFilteredHistory, id: \.id) { item in
                 CloudHistoryRow(historyItem: item)
                     .listRowBackground(Color.clear)
             }
@@ -114,10 +127,10 @@ struct DebridCloudView: View {
         .listStyle(.plain)
     }
     
-    private var filteredHistoryItems: [DebridCloudHistoryItem] {
+    private func updateFilteredHistory() {
         let currentIds = debridManager.getCurrentCloudIds(for: debridSource.id)
         
-        return debridManager.cloudHistory
+        cachedFilteredHistory = debridManager.cloudHistory
             .filter { item in
                 // Filter by provider
                 item.providerId == debridSource.id &&
@@ -126,6 +139,10 @@ struct DebridCloudView: View {
                 // Filter by search text
                 (searchText.isEmpty || item.name.lowercased().contains(searchText.lowercased()))
             }
+    }
+    
+    private var filteredHistoryItems: [DebridCloudHistoryItem] {
+        cachedFilteredHistory
     }
     
     // MARK: - Toolbar
