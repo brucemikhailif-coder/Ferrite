@@ -618,9 +618,9 @@ class RealDebrid: PollingDebridSource, ObservableObject {
         var request = URLRequest(url: try await addTorrentUrl())
         request.httpMethod = "PUT"
 
-        let (body, boundary) = try buildTorrentUploadBody(fileUrl: fileUrl)
-        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-        request.httpBody = body
+        let formData = try FormDataBody(fileUrl: fileUrl)
+        request.setValue("multipart/form-data; boundary=\(formData.boundary)", forHTTPHeaderField: "Content-Type")
+        request.httpBody = formData.body
 
         let data = try await performRequest(request: &request, requestName: #function)
         let rawResponse = try jsonDecoder.decode(AddMagnetResponse.self, from: data)
@@ -645,22 +645,6 @@ class RealDebrid: PollingDebridSource, ObservableObject {
         let data = try await performRequest(request: &request, requestName: #function)
         let hosts = try jsonDecoder.decode([AvailableHostResponse].self, from: data)
         return hosts.first?.host
-    }
-
-    private func buildTorrentUploadBody(fileUrl: URL) throws -> (Data, String) {
-        let boundary = UUID().uuidString
-        let fileName = fileUrl.lastPathComponent
-        let fileData = try Data(contentsOf: fileUrl)
-
-        var body = Data()
-        body.append("--\(boundary)\r\n".data(using: .utf8)!)
-        body.append("Content-Disposition: form-data; name=\"file\"; filename=\"\(fileName)\"\r\n".data(using: .utf8)!)
-        body.append("Content-Type: application/x-bittorrent\r\n\r\n".data(using: .utf8)!)
-        body.append(fileData)
-        body.append("\r\n".data(using: .utf8)!)
-        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
-
-        return (body, boundary)
     }
 
     private func torrentInfoAllowCaching(debridID: String) async throws -> TorrentInfoResponse {
