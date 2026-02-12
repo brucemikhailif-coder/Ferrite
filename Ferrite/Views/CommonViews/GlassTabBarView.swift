@@ -14,7 +14,7 @@ struct GlassTabBarView: View {
     private let tabs: [(NavigationViewModel.ViewTab, String, String)] = [
         (.search, "Search", "magnifyingglass"),
         (.library, "Library", "book.closed"),
-        (.add, "Add", "plus.circle"),
+        (.add, "Download", "plus.circle"),
         (.settings, "Settings", "gear")
     ]
 

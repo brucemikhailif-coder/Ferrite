@@ -14,13 +14,13 @@ struct AddView: View {
     @EnvironmentObject var logManager: LoggingManager
 
     @State private var selectedDebridId: String = ""
-    @State private var webLinkText: String = ""
-    @State private var magnetText: String = ""
-    @State private var pendingTorrentUrl: URL?
+    @State private var multiEntryText: String = ""
+    @State private var pendingTorrentUrls: [URL] = []
     @State private var showFileImporter = false
     @State private var showTransferBrowser = false
     @State private var transferHandle: DebridTransferHandle?
     @State private var transferTitle: String = ""
+    @State private var isProcessing = false
 
     @State private var showErrorAlert = false
     @State private var errorMessage = ""
@@ -31,88 +31,191 @@ struct AddView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section("Provider") {
-                    if debridManager.enabledDebrids.isEmpty {
-                        Text("No debrid providers are enabled.")
-                            .foregroundColor(.secondary)
-                    } else {
-                        Picker("Service", selection: $selectedDebridId) {
-                            ForEach(debridManager.enabledDebrids, id: \.id) { debrid in
-                                Text(debrid.id).tag(debrid.id)
+            ScrollView {
+                VStack(spacing: DesignTokens.Spacing.medium) {
+                    // Provider Section
+                    VStack(alignment: .leading, spacing: DesignTokens.Spacing.small) {
+                        Text("Provider")
+                            .font(DesignTokens.Typography.headline)
+                            .padding(.horizontal, DesignTokens.Spacing.medium)
+                        
+                        if debridManager.enabledDebrids.isEmpty {
+                            Text("No debrid providers are enabled.")
+                                .foregroundColor(.secondary)
+                                .padding(DesignTokens.Spacing.medium)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .liquidGlass(cornerRadius: DesignTokens.CornerRadius.medium)
+                                .padding(.horizontal, DesignTokens.Spacing.medium)
+                        } else {
+                            VStack(spacing: DesignTokens.Spacing.small) {
+                                Picker("Service", selection: $selectedDebridId) {
+                                    ForEach(debridManager.enabledDebrids, id: \.id) { debrid in
+                                        Text(debrid.id).tag(debrid.id)
+                                    }
+                                }
+                                .pickerStyle(.menu)
+                                .padding(DesignTokens.Spacing.small)
+
+                                if let selectedDebrid {
+                                    HStack(spacing: 12) {
+                                        capabilityLabel("Web", supported: selectedDebrid.supportsWebLinks)
+                                        capabilityLabel("Magnet", supported: selectedDebrid.supportsMagnetUnrestrict)
+                                        capabilityLabel("Torrent", supported: selectedDebrid.supportsTorrentUpload)
+                                    }
+                                    .padding(.horizontal, DesignTokens.Spacing.small)
+                                    .padding(.bottom, DesignTokens.Spacing.small)
+                                }
                             }
+                            .liquidGlass(cornerRadius: DesignTokens.CornerRadius.medium)
+                            .padding(.horizontal, DesignTokens.Spacing.medium)
                         }
+                    }
 
-                        if let selectedDebrid {
-                            HStack(spacing: 12) {
-                                capabilityLabel("Web", supported: selectedDebrid.supportsWebLinks)
-                                capabilityLabel("Magnet", supported: selectedDebrid.supportsMagnetUnrestrict)
-                                capabilityLabel("Torrent", supported: selectedDebrid.supportsTorrentUpload)
+                    // Multi-entry input Section
+                    VStack(alignment: .leading, spacing: DesignTokens.Spacing.small) {
+                        Text("Web Links or Magnets")
+                            .font(DesignTokens.Typography.headline)
+                            .padding(.horizontal, DesignTokens.Spacing.medium)
+                        
+                        VStack(spacing: DesignTokens.Spacing.small) {
+                            Text("Enter one web link or magnet per line")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.horizontal, DesignTokens.Spacing.small)
+                                .padding(.top, DesignTokens.Spacing.small)
+                            
+                            TextEditor(text: $multiEntryText)
+                                .textInputAutocapitalization(.never)
+                                .autocorrectionDisabled()
+                                .font(.system(.body, design: .monospaced))
+                                .frame(minHeight: 120)
+                                .padding(DesignTokens.Spacing.small)
+                                .background(Color.secondary.opacity(0.05))
+                                .cornerRadius(DesignTokens.CornerRadius.small)
+                                .padding(.horizontal, DesignTokens.Spacing.small)
+
+                            Button {
+                                Task {
+                                    await processMultiEntries()
+                                }
+                            } label: {
+                                HStack {
+                                    if isProcessing {
+                                        ProgressView()
+                                            .tint(.white)
+                                    }
+                                    Text(isProcessing ? "Processing..." : "Process Entries")
+                                        .font(.headline)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(DesignTokens.Spacing.small)
                             }
+                            .buttonStyle(PressableButtonStyle())
+                            .background(Color.accentColor)
+                            .foregroundColor(.white)
+                            .cornerRadius(DesignTokens.CornerRadius.medium)
+                            .padding(.horizontal, DesignTokens.Spacing.small)
+                            .padding(.bottom, DesignTokens.Spacing.small)
+                            .disabled(multiEntryText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isProcessing)
                         }
+                        .liquidGlass(cornerRadius: DesignTokens.CornerRadius.medium)
+                        .padding(.horizontal, DesignTokens.Spacing.medium)
+                    }
+
+                    // Torrent File Section
+                    VStack(alignment: .leading, spacing: DesignTokens.Spacing.small) {
+                        Text("Torrent Files")
+                            .font(DesignTokens.Typography.headline)
+                            .padding(.horizontal, DesignTokens.Spacing.medium)
+                        
+                        VStack(spacing: DesignTokens.Spacing.small) {
+                            if pendingTorrentUrls.isEmpty {
+                                Text("No torrent files selected")
+                                    .foregroundColor(.secondary)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding(DesignTokens.Spacing.medium)
+                            } else {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    ForEach(Array(pendingTorrentUrls.enumerated()), id: \.offset) { index, url in
+                                        HStack {
+                                            Image(systemName: "doc.fill")
+                                                .foregroundColor(.accentColor)
+                                            Text(url.lastPathComponent)
+                                                .font(.caption)
+                                                .lineLimit(1)
+                                            Spacer()
+                                            Button {
+                                                pendingTorrentUrls.remove(at: index)
+                                            } label: {
+                                                Image(systemName: "xmark.circle.fill")
+                                                    .foregroundColor(.secondary)
+                                            }
+                                        }
+                                        .padding(.horizontal, DesignTokens.Spacing.small)
+                                    }
+                                }
+                                .padding(.vertical, DesignTokens.Spacing.small)
+                            }
+
+                            Button {
+                                showFileImporter.toggle()
+                            } label: {
+                                HStack {
+                                    Image(systemName: "folder")
+                                    Text("Choose Torrent Files")
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(DesignTokens.Spacing.small)
+                            }
+                            .buttonStyle(PressableButtonStyle())
+                            .background(Color.secondary.opacity(0.2))
+                            .cornerRadius(DesignTokens.CornerRadius.medium)
+                            .padding(.horizontal, DesignTokens.Spacing.small)
+                            .disabled(!(selectedDebrid?.supportsTorrentUpload ?? false))
+
+                            Button {
+                                Task {
+                                    await processTorrentUploads()
+                                }
+                            } label: {
+                                HStack {
+                                    if isProcessing {
+                                        ProgressView()
+                                            .tint(.white)
+                                    }
+                                    Text(isProcessing ? "Uploading..." : "Upload Torrents")
+                                        .font(.headline)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(DesignTokens.Spacing.small)
+                            }
+                            .buttonStyle(PressableButtonStyle())
+                            .background(Color.accentColor)
+                            .foregroundColor(.white)
+                            .cornerRadius(DesignTokens.CornerRadius.medium)
+                            .padding(.horizontal, DesignTokens.Spacing.small)
+                            .padding(.bottom, DesignTokens.Spacing.small)
+                            .disabled(!(selectedDebrid?.supportsTorrentUpload ?? false) || pendingTorrentUrls.isEmpty || isProcessing)
+                        }
+                        .liquidGlass(cornerRadius: DesignTokens.CornerRadius.medium)
+                        .padding(.horizontal, DesignTokens.Spacing.medium)
                     }
                 }
-
-                Section("Web link") {
-                    TextField("https://", text: $webLinkText)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                        .keyboardType(.URL)
-
-                    Button("Process web link") {
-                        Task {
-                            await startWebLink()
-                        }
-                    }
-                    .disabled(!(selectedDebrid?.supportsWebLinks ?? false) || webLinkText.isEmpty)
-                }
-
-                Section("Magnet") {
-                    TextField("magnet:?xt=urn:btih:...", text: $magnetText)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-
-                    Button("Unrestrict magnet") {
-                        Task {
-                            await startMagnet()
-                        }
-                    }
-                    .disabled(!(selectedDebrid?.supportsMagnetUnrestrict ?? false) || magnetText.isEmpty)
-                }
-
-                Section("Torrent") {
-                    if let pendingTorrentUrl {
-                        Text(pendingTorrentUrl.lastPathComponent)
-                            .font(.subheadline)
-                    } else {
-                        Text("No torrent selected")
-                            .foregroundColor(.secondary)
-                    }
-
-                    Button("Choose torrent file") {
-                        showFileImporter.toggle()
-                    }
-                    .disabled(!(selectedDebrid?.supportsTorrentUpload ?? false))
-
-                    Button("Upload torrent") {
-                        Task {
-                            await startTorrentUpload()
-                        }
-                    }
-                    .disabled(!(selectedDebrid?.supportsTorrentUpload ?? false) || pendingTorrentUrl == nil)
-                }
+                .padding(.vertical, DesignTokens.Spacing.medium)
             }
-            .navigationTitle("Add")
+            .navigationTitle("Download")
+            .navigationBarTitleDisplayMode(.inline)
             .fileImporter(
                 isPresented: $showFileImporter,
                 allowedContentTypes: [
                     UTType(filenameExtension: "torrent") ?? .data
                 ],
-                allowsMultipleSelection: false
+                allowsMultipleSelection: true
             ) { result in
                 switch result {
                 case let .success(urls):
-                    pendingTorrentUrl = urls.first
+                    pendingTorrentUrls.append(contentsOf: urls)
                 case let .failure(error):
                     errorMessage = error.localizedDescription
                     showErrorAlert = true
@@ -138,9 +241,22 @@ struct AddView: View {
                     selectedDebridId = debridManager.enabledDebrids.first?.id ?? ""
                 }
 
-                if let pendingTorrentUrl = navModel.pendingTorrentUrl {
-                    self.pendingTorrentUrl = pendingTorrentUrl
-                    navModel.pendingTorrentUrl = nil
+                // Auto-process pending torrents from deep link
+                if let pendingUrls = navModel.pendingTorrentUrls, !pendingUrls.isEmpty {
+                    pendingTorrentUrls = pendingUrls
+                    navModel.pendingTorrentUrls = nil
+                    Task {
+                        await processTorrentUploads()
+                    }
+                }
+                
+                // Auto-process pending magnet from deep link
+                if let magnetLink = navModel.pendingMagnetLink {
+                    multiEntryText = magnetLink
+                    navModel.pendingMagnetLink = nil
+                    Task {
+                        await processMultiEntries()
+                    }
                 }
             }
             .onChange(of: selectedDebridId) { newValue in
@@ -148,12 +264,21 @@ struct AddView: View {
                     debridManager.selectedDebridSource = match
                 }
             }
-            .onChange(of: navModel.pendingTorrentUrl) { newValue in
-                if let newValue {
-                    pendingTorrentUrl = newValue
-                    navModel.pendingTorrentUrl = nil
+            .onChange(of: navModel.pendingTorrentUrls) { newValue in
+                if let newValue, !newValue.isEmpty {
+                    pendingTorrentUrls.append(contentsOf: newValue)
+                    navModel.pendingTorrentUrls = nil
                     Task {
-                        await startTorrentUpload()
+                        await processTorrentUploads()
+                    }
+                }
+            }
+            .onChange(of: navModel.pendingMagnetLink) { newValue in
+                if let newValue {
+                    multiEntryText = newValue
+                    navModel.pendingMagnetLink = nil
+                    Task {
+                        await processMultiEntries()
                     }
                 }
             }
@@ -168,77 +293,115 @@ struct AddView: View {
         .font(.caption)
         .foregroundColor(supported ? .green : .secondary)
     }
+    
+    // MARK: - Multi-entry Processing
 
-    private func startWebLink() async {
+    private func processMultiEntries() async {
         guard let selectedDebrid else {
             return
         }
-        guard selectedDebrid.supportsWebLinks else {
-            return
+        
+        isProcessing = true
+        defer { isProcessing = false }
+        
+        let entries = multiEntryText
+            .components(separatedBy: .newlines)
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
+        
+        var lastHandle: DebridTransferHandle?
+        var lastTitle: String?
+        var errorCount = 0
+        
+        for entry in entries {
+            do {
+                if isValidMagnet(entry), selectedDebrid.supportsMagnetUnrestrict {
+                    let handle = try await selectedDebrid.addMagnetLink(entry)
+                    lastHandle = handle
+                    lastTitle = "Magnet"
+                    logManager.info("Added magnet link")
+                } else if isValidWebLink(entry), selectedDebrid.supportsWebLinks {
+                    let handle = try await selectedDebrid.addWebLink(entry)
+                    lastHandle = handle
+                    lastTitle = entry
+                    logManager.info("Added web link")
+                } else {
+                    errorCount += 1
+                    logManager.warn("Skipped invalid entry: \(entry)")
+                }
+            } catch {
+                errorCount += 1
+                logManager.error("Failed to process entry: \(error.localizedDescription)")
+            }
         }
-        guard isValidWebLink(webLinkText) else {
-            errorMessage = "Please enter a valid web link."
-            showErrorAlert = true
-            return
-        }
-
-        do {
-            transferHandle = try await selectedDebrid.addWebLink(webLinkText)
-            transferTitle = webLinkText
+        
+        // Show last transfer browser if any succeeded
+        if let lastHandle, let lastTitle {
+            transferHandle = lastHandle
+            transferTitle = lastTitle
             showTransferBrowser = true
-        } catch {
-            logManager.error("Add web link error: \(error.localizedDescription)")
-            errorMessage = error.localizedDescription
-            showErrorAlert = true
         }
+        
+        if errorCount > 0 {
+            logManager.info("\(entries.count - errorCount) succeeded, \(errorCount) failed")
+        } else {
+            logManager.info("All \(entries.count) entries processed successfully")
+        }
+        
+        // Clear the text field after processing
+        multiEntryText = ""
     }
+    
+    // MARK: - Torrent Upload Processing
 
-    private func startMagnet() async {
+    private func processTorrentUploads() async {
         guard let selectedDebrid else {
-            return
-        }
-        guard selectedDebrid.supportsMagnetUnrestrict else {
-            return
-        }
-        guard isValidMagnet(magnetText) else {
-            errorMessage = "Please enter a valid magnet link."
-            showErrorAlert = true
-            return
-        }
-
-        do {
-            transferHandle = try await selectedDebrid.addMagnetLink(magnetText)
-            transferTitle = "Magnet"
-            showTransferBrowser = true
-        } catch {
-            logManager.error("Add magnet error: \(error.localizedDescription)")
-            errorMessage = error.localizedDescription
-            showErrorAlert = true
-        }
-    }
-
-    private func startTorrentUpload() async {
-        guard let selectedDebrid, let pendingTorrentUrl else {
             return
         }
         guard selectedDebrid.supportsTorrentUpload else {
             return
         }
-        guard pendingTorrentUrl.pathExtension.lowercased() == "torrent" else {
-            errorMessage = "Please select a .torrent file."
-            showErrorAlert = true
-            return
+        
+        isProcessing = true
+        defer { isProcessing = false }
+        
+        var lastHandle: DebridTransferHandle?
+        var lastTitle: String?
+        var errorCount = 0
+        
+        for url in pendingTorrentUrls {
+            guard url.pathExtension.lowercased() == "torrent" else {
+                errorCount += 1
+                logManager.warn("Skipped non-torrent file: \(url.lastPathComponent)")
+                continue
+            }
+            
+            do {
+                let handle = try await selectedDebrid.uploadTorrentFile(url)
+                lastHandle = handle
+                lastTitle = url.lastPathComponent
+                logManager.info("Uploaded: \(url.lastPathComponent)")
+            } catch {
+                errorCount += 1
+                logManager.error("Upload failed for \(url.lastPathComponent): \(error.localizedDescription)")
+            }
         }
-
-        do {
-            transferHandle = try await selectedDebrid.uploadTorrentFile(pendingTorrentUrl)
-            transferTitle = pendingTorrentUrl.lastPathComponent
+        
+        // Show last transfer browser if any succeeded
+        if let lastHandle, let lastTitle {
+            transferHandle = lastHandle
+            transferTitle = lastTitle
             showTransferBrowser = true
-        } catch {
-            logManager.error("Torrent upload error: \(error.localizedDescription)")
-            errorMessage = error.localizedDescription
-            showErrorAlert = true
         }
+        
+        if errorCount > 0 {
+            logManager.info("\(pendingTorrentUrls.count - errorCount) succeeded, \(errorCount) failed")
+        } else {
+            logManager.info("All \(pendingTorrentUrls.count) torrents uploaded successfully")
+        }
+        
+        // Clear torrent list after processing
+        pendingTorrentUrls.removeAll()
     }
 
     private func isValidWebLink(_ link: String) -> Bool {

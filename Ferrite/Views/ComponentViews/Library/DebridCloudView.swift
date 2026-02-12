@@ -22,13 +22,34 @@ struct DebridCloudView: View {
     @State private var skippedMagnets: [DebridCloudMagnet] = []
     @State private var showSkippedMagnetsSheet = false
     @State private var selectedSkippedMagnet: DebridCloudMagnet?
+    
+    // Segmented control state
+    @State private var selectedSegment: CloudSegment = .current
+    
+    enum CloudSegment: String, CaseIterable {
+        case current = "Current"
+        case past = "Past"
+    }
 
     var body: some View {
-        List(selection: listSelection) {
-            CloudDownloadView(debridSource: debridSource, searchText: $searchText)
-            CloudMagnetView(debridSource: debridSource, searchText: $searchText)
+        VStack(spacing: 0) {
+            // Segmented control
+            Picker("View", selection: $selectedSegment) {
+                ForEach(CloudSegment.allCases, id: \.self) { segment in
+                    Text(segment.rawValue).tag(segment)
+                }
+            }
+            .pickerStyle(.segmented)
+            .padding(.horizontal, DesignTokens.Spacing.medium)
+            .padding(.vertical, DesignTokens.Spacing.small)
+            
+            // Content based on selection
+            if selectedSegment == .current {
+                currentCloudView
+            } else {
+                pastCloudView
+            }
         }
-        .listStyle(.plain)
         .task {
             await debridManager.fetchDebridCloud()
         }
@@ -45,64 +66,8 @@ struct DebridCloudView: View {
             }
         }
         .toolbar {
-            ToolbarItemGroup(placement: .navigationBarTrailing) {
-                Menu("Bulk Actions") {
-                    Button("Select all downloads") {
-                        selectedDownloads = Set(debridSource.cloudDownloads)
-                    }
-
-                    Button("Select all magnets") {
-                        selectedMagnets = Set(debridSource.cloudMagnets)
-                    }
-
-                    if !selectedDownloads.isEmpty || !selectedMagnets.isEmpty {
-                        Button("Bulk unrestrict") {
-                            Task {
-                                await bulkUnrestrict()
-                            }
-                        }
-                    }
-
-                    if !selectedDownloads.isEmpty {
-                        Button("Share downloads") {
-                            let urls = selectedDownloads.compactMap { URL(string: $0.link) }
-                            if !urls.isEmpty {
-                                navModel.activityItems = urls
-                                navModel.currentChoiceSheet = .activity
-                            }
-                        }
-
-                        Button("Copy download URLs") {
-                            let urls = selectedDownloads.map { $0.link }.filter { !$0.isEmpty }
-                            UIPasteboard.general.string = urls.joined(separator: "\n")
-                        }
-
-                        Button("Delete downloads", role: .destructive) {
-                            Task {
-                                for download in selectedDownloads {
-                                    await debridManager.deleteCloudDownload(download)
-                                }
-                                selectedDownloads.removeAll()
-                            }
-                        }
-                    }
-
-                    if !selectedMagnets.isEmpty {
-                        Button("Copy magnet hashes") {
-                            let hashes = selectedMagnets.map { $0.hash }
-                            UIPasteboard.general.string = hashes.joined(separator: "\n")
-                        }
-
-                        Button("Delete magnets", role: .destructive) {
-                            Task {
-                                for magnet in selectedMagnets {
-                                    await debridManager.deleteUserMagnet(magnet)
-                                }
-                                selectedMagnets.removeAll()
-                            }
-                        }
-                    }
-                }
+            if selectedSegment == .current {
+                currentToolbar
             }
         }
         .alert("Bulk unrestrict", isPresented: $showBulkAlert) {
@@ -124,6 +89,107 @@ struct DebridCloudView: View {
                 title: magnet.fileName,
                 resultFromCloud: true
             )
+        }
+    }
+    
+    // MARK: - Current Cloud View
+    
+    private var currentCloudView: some View {
+        List(selection: listSelection) {
+            CloudDownloadView(debridSource: debridSource, searchText: $searchText)
+            CloudMagnetView(debridSource: debridSource, searchText: $searchText)
+        }
+        .listStyle(.plain)
+    }
+    
+    // MARK: - Past Cloud View
+    
+    private var pastCloudView: some View {
+        List {
+            ForEach(filteredHistoryItems, id: \.id) { item in
+                CloudHistoryRow(historyItem: item)
+                    .listRowBackground(Color.clear)
+            }
+        }
+        .listStyle(.plain)
+    }
+    
+    private var filteredHistoryItems: [DebridCloudHistoryItem] {
+        let currentIds = debridManager.getCurrentCloudIds(for: debridSource.id)
+        
+        return debridManager.cloudHistory
+            .filter { item in
+                // Filter by provider
+                item.providerId == debridSource.id &&
+                // Exclude items still in current cloud
+                !currentIds.contains(item.id) &&
+                // Filter by search text
+                (searchText.isEmpty || item.name.lowercased().contains(searchText.lowercased()))
+            }
+    }
+    
+    // MARK: - Toolbar
+    
+    @ToolbarContentBuilder
+    private var currentToolbar: some ToolbarContent {
+        ToolbarItemGroup(placement: .navigationBarTrailing) {
+            Menu("Bulk Actions") {
+                Button("Select all downloads") {
+                    selectedDownloads = Set(debridSource.cloudDownloads)
+                }
+
+                Button("Select all magnets") {
+                    selectedMagnets = Set(debridSource.cloudMagnets)
+                }
+
+                if !selectedDownloads.isEmpty || !selectedMagnets.isEmpty {
+                    Button("Bulk unrestrict") {
+                        Task {
+                            await bulkUnrestrict()
+                        }
+                    }
+                }
+
+                if !selectedDownloads.isEmpty {
+                    Button("Share downloads") {
+                        let urls = selectedDownloads.compactMap { URL(string: $0.link) }
+                        if !urls.isEmpty {
+                            navModel.activityItems = urls
+                            navModel.currentChoiceSheet = .activity
+                        }
+                    }
+
+                    Button("Copy download URLs") {
+                        let urls = selectedDownloads.map { $0.link }.filter { !$0.isEmpty }
+                        UIPasteboard.general.string = urls.joined(separator: "\n")
+                    }
+
+                    Button("Delete downloads", role: .destructive) {
+                        Task {
+                            for download in selectedDownloads {
+                                await debridManager.deleteCloudDownload(download)
+                            }
+                            selectedDownloads.removeAll()
+                        }
+                    }
+                }
+
+                if !selectedMagnets.isEmpty {
+                    Button("Copy magnet hashes") {
+                        let hashes = selectedMagnets.map { $0.hash }
+                        UIPasteboard.general.string = hashes.joined(separator: "\n")
+                    }
+
+                    Button("Delete magnets", role: .destructive) {
+                        Task {
+                            for magnet in selectedMagnets {
+                                await debridManager.deleteUserMagnet(magnet)
+                            }
+                            selectedMagnets.removeAll()
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -205,6 +271,66 @@ struct DebridCloudView: View {
         if !skippedMagnetsList.isEmpty {
             skippedMagnets = skippedMagnetsList
             showSkippedMagnetsSheet = true
+        }
+    }
+}
+
+// MARK: - Cloud History Row
+
+private struct CloudHistoryRow: View {
+    let historyItem: DebridCloudHistoryItem
+    
+    private var iconName: String {
+        historyItem.kind == .webDownload ? "arrow.down.circle" : "link.circle"
+    }
+    
+    private var iconColor: Color {
+        historyItem.kind == .webDownload ? .blue : .purple
+    }
+    
+    private var kindLabel: String {
+        historyItem.kind == .webDownload ? "Download" : "Magnet"
+    }
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: iconName)
+                .font(.system(size: 20))
+                .foregroundStyle(iconColor)
+            
+            VStack(alignment: .leading, spacing: 6) {
+                Text(historyItem.name)
+                    .font(.callout)
+                    .lineLimit(2)
+                
+                HStack(spacing: 8) {
+                    Text(kindLabel)
+                    Text("•")
+                    Text(historyItem.dateAdded, style: .date)
+                }
+                .font(.caption)
+                .foregroundColor(.secondary)
+                
+                if historyItem.kind == .torrent {
+                    Text(historyItem.linkOrHash)
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                }
+            }
+            
+            Spacer()
+        }
+        .padding(DesignTokens.Spacing.small)
+        .liquidGlass(cornerRadius: DesignTokens.CornerRadius.medium)
+        .contextMenu {
+            Button {
+                UIPasteboard.general.string = historyItem.linkOrHash
+            } label: {
+                Text("Copy \(historyItem.kind == .webDownload ? "link" : "hash")")
+                Image(systemName: "doc.on.doc.fill")
+            }
         }
     }
 }
