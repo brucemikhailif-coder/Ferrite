@@ -79,7 +79,7 @@ struct CloudMagnetView: View {
 
     private func deleteMagnets(at offsets: IndexSet) {
         for index in offsets {
-            if let cloudMagnet = debridSource.cloudMagnets[safe: index] {
+            if let cloudMagnet = filteredMagnets[safe: index] {
                 Task {
                     await debridManager.deleteUserMagnet(cloudMagnet)
                 }
