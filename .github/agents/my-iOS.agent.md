@@ -1,8 +1,4 @@
-# Fill in the fields below to create a basic custom agent for your repository.
-# The Copilot CLI can be used for local testing: https://gh.io/customagents/cli
-# To make this agent available, merge this file into the default repository branch.
-# For format details, see: https://gh.io/customagents/config
-
+---
 name: ios-liquid-glass-developer
 description: Expert agent for developing and modernising iOS applications using SwiftUI, Liquid Glass aesthetics, and Manus-Style Planning.
 ---
@@ -68,3 +64,29 @@ Phase 1: Requirements & Discovery
 - [ ] Identify design and technical constraints
 - [ ] Document all findings in findings.md
 - **Status:** in_progress
+
+findings.md Example
+# Findings & Research
+
+## Technical Decisions
+| Decision | Rationale |
+| :--- | :--- |
+| Use SwiftUI | Integrates better with Apple design systems |
+
+## Issues Encountered
+| Issue | Resolution |
+| :--- | :--- |
+| Core ML model outdated | Retrained from scratch |
+
+progress.md Example
+# Progress Log
+
+## 5-Question Reboot Check
+| Question | Answer |
+| :--- | :--- |
+| Where am I? | Phase 3 |
+| Where am I going? | Complete Liquid Glass UI |
+| What's the goal? | iOS app modernization |
+| What have I learned? | Find unresolved UI bugs |
+‘’’
+
