@@ -60,15 +60,7 @@ struct PluginCatalogButtonView<PJ: PluginJson>: View {
             )
             .padding(.horizontal, 7)
             .padding(.vertical, 5)
-            .background(
-                Capsule()
-                    .fill(.ultraThinMaterial)
-            )
-            .overlay(
-                Capsule()
-                    .stroke(Color.primary.opacity(0.06), lineWidth: 0.5)
-            )
-            .contentShape(Capsule())
+            .liquidGlassPill()
         }
         .buttonStyle(.borderless)
         .padding(.vertical, 2)

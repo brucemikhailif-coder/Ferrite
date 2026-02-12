@@ -80,6 +80,38 @@ extension View {
                 .shadow(color: shadow ? Color.black.opacity(0.03) : .clear, radius: shadow ? 4 : 0, x: 0, y: shadow ? 1 : 0)
         }
     }
+
+    // MARK: - Semantic Style Wrappers for liquidGlass
+
+    /// Card-style liquid glass with medium corner radius
+    func liquidGlassCard(
+        tint: Color? = nil,
+        interactive: Bool = false,
+        shadow: Bool = true,
+        stroke: Bool = true
+    ) -> some View {
+        liquidGlass(cornerRadius: 12, tint: tint, interactive: interactive, shadow: shadow, stroke: stroke)
+    }
+
+    /// Pill-style liquid glass with fully rounded corners
+    func liquidGlassPill(
+        tint: Color? = nil,
+        interactive: Bool = false,
+        shadow: Bool = true,
+        stroke: Bool = true
+    ) -> some View {
+        liquidGlass(cornerRadius: 999, tint: tint, interactive: interactive, shadow: shadow, stroke: stroke)
+    }
+
+    /// Toast-style liquid glass with small corner radius
+    func liquidGlassToast(
+        tint: Color? = nil,
+        interactive: Bool = false,
+        shadow: Bool = true,
+        stroke: Bool = true
+    ) -> some View {
+        liquidGlass(cornerRadius: 10, tint: tint, interactive: interactive, shadow: shadow, stroke: stroke)
+    }
 }
 
 // MARK: - PressableButtonStyle (top-level)

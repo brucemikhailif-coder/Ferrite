@@ -43,12 +43,10 @@ struct DebridServiceToggle: View {
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
-            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 999))
-            .overlay(
-                RoundedRectangle(cornerRadius: 999)
-                    .stroke(isDisabled ? Color.primary.opacity(0.02) : Color.accentColor.opacity(0.12), lineWidth: 0.5)
+            .liquidGlassPill(
+                tint: isDisabled ? nil : Color.accentColor.opacity(0.08),
+                shadow: false
             )
-            .contentShape(RoundedRectangle(cornerRadius: 999))
         }
         .disabled(isDisabled)
         .accessibilityLabel("Debrid service")
