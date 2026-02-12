@@ -141,10 +141,6 @@ struct DebridCloudView: View {
             }
     }
     
-    private var filteredHistoryItems: [DebridCloudHistoryItem] {
-        cachedFilteredHistory
-    }
-    
     // MARK: - Toolbar
     
     @ToolbarContentBuilder

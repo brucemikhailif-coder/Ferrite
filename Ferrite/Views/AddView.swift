@@ -254,20 +254,19 @@ struct AddView: View {
                     selectedDebridId = debridManager.enabledDebrids.first?.id ?? ""
                 }
 
-                // Auto-process pending torrents from deep link
-                if let pendingUrls = navModel.pendingTorrentUrls, !pendingUrls.isEmpty {
-                    pendingTorrentUrls = pendingUrls
-                    navModel.pendingTorrentUrls = nil
-                    Task {
+                // Auto-process pending items from deep link (sequential to avoid conflicts)
+                Task {
+                    // Process torrents first if present
+                    if let pendingUrls = navModel.pendingTorrentUrls, !pendingUrls.isEmpty {
+                        pendingTorrentUrls = pendingUrls
+                        navModel.pendingTorrentUrls = nil
                         await processTorrentUploads()
                     }
-                }
-                
-                // Auto-process pending magnet from deep link
-                if let magnetLink = navModel.pendingMagnetLink {
-                    multiEntryText = magnetLink
-                    navModel.pendingMagnetLink = nil
-                    Task {
+                    
+                    // Then process magnet if present
+                    if let magnetLink = navModel.pendingMagnetLink {
+                        multiEntryText = magnetLink
+                        navModel.pendingMagnetLink = nil
                         await processMultiEntries()
                     }
                 }
@@ -278,6 +277,7 @@ struct AddView: View {
                 }
             }
             .onChange(of: navModel.pendingTorrentUrls) { newValue in
+                guard !isProcessing else { return }
                 if let newValue, !newValue.isEmpty {
                     pendingTorrentUrls.append(contentsOf: newValue)
                     navModel.pendingTorrentUrls = nil
@@ -287,6 +287,7 @@ struct AddView: View {
                 }
             }
             .onChange(of: navModel.pendingMagnetLink) { newValue in
+                guard !isProcessing else { return }
                 if let newValue {
                     multiEntryText = newValue
                     navModel.pendingMagnetLink = nil
@@ -429,15 +430,22 @@ struct AddView: View {
     
     // Extract display name from magnet link (from dn parameter if available)
     private func extractMagnetName(_ magnetLink: String) -> String? {
-        guard let dnRange = magnetLink.range(of: "&dn=") else {
-            return nil
+        // Look for dn= parameter (can be prefixed with & or ? or be the first param)
+        let patterns = ["&dn=", "?dn="]
+        
+        for pattern in patterns {
+            if let dnRange = magnetLink.range(of: pattern) {
+                let afterDn = magnetLink[dnRange.upperBound...]
+                let endRange = afterDn.range(of: "&") ?? afterDn.endIndex..<afterDn.endIndex
+                let encodedName = String(afterDn[..<endRange.lowerBound])
+                
+                if let decodedName = encodedName.removingPercentEncoding, !decodedName.isEmpty {
+                    return decodedName
+                }
+            }
         }
         
-        let afterDn = magnetLink[dnRange.upperBound...]
-        let endRange = afterDn.range(of: "&") ?? afterDn.endIndex..<afterDn.endIndex
-        let encodedName = String(afterDn[..<endRange.lowerBound])
-        
-        return encodedName.removingPercentEncoding
+        return nil
     }
 
     private func isValidWebLink(_ link: String) -> Bool {
