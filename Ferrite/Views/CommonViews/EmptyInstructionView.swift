@@ -26,9 +26,7 @@ struct EmptyInstructionView: View {
         .multilineTextAlignment(.center)
         .foregroundColor(.init(uiColor: .secondaryLabel))
         .padding(DesignTokens.Spacing.xlarge)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.large))
-        .overlay(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.large).stroke(Color.primary.opacity(0.04), lineWidth: DesignTokens.Stroke.ultraThin))
-        .clipShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.large))
+        .liquidGlass(cornerRadius: DesignTokens.CornerRadius.large, shadow: false)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .ignoresSafeArea()
     }

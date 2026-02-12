@@ -66,10 +66,10 @@ struct SearchResultButtonView: View {
                             .font(.caption2.weight(.semibold))
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
-                            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(badgeColor(for: badge).opacity(0.16), lineWidth: 0.5)
+                            .liquidGlass(
+                                cornerRadius: 12,
+                                tint: badgeColor(for: badge).opacity(0.15),
+                                shadow: false
                             )
                     }
                 }
