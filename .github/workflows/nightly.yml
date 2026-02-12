@@ -2,8 +2,10 @@ name: Build and upload nightly ipa
 
 on:
   push:
-    branches: [next]
-
+    branches: 
+    - '**'
+  workflow_dispatch:
+    
 jobs:
   build:
     runs-on: macos-15
