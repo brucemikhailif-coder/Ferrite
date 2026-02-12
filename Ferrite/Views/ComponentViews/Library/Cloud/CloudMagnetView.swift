@@ -209,6 +209,7 @@ struct CloudMagnetView: View {
         return .orange
     }
 
+    // Fetch a streamable/transcoded link for the magnet, falling back to copying the hash if needed.
     private func fetchStreamable(_ cloudMagnet: DebridCloudMagnet) {
         // Use the first link (if available) as the web-hosted resource to ask the provider to transcode/unrestrict.
         guard let firstLink = cloudMagnet.links.first, !firstLink.isEmpty else {
