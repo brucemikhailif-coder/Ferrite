@@ -247,7 +247,7 @@ private struct CloudDownloadRow: View {
          let navModel = NavigationViewModel()
          let logManager = LoggingManager()
 
-         CloudDownloadView(debridSource: .constant(RealDebrid() as DebridSource), searchText: .constant(""))
+         CloudDownloadView(debridSource: RealDebrid(), searchText: .constant(""))
              .environmentObject(debridManager)
              .environmentObject(navModel)
              .environmentObject(logManager)
