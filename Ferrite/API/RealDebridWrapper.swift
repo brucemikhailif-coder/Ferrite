@@ -663,7 +663,7 @@ class RealDebrid: PollingDebridSource, ObservableObject {
         return (body, boundary)
     }
 
-    private func torrentInfoAllowCaching(debridID: String) async throws -> TorrentInfoResponse {
+    func torrentInfoAllowCaching(debridID: String) async throws -> TorrentInfoResponse {
         var request = URLRequest(url: URL(string: "\(baseApiUrl)/torrents/info/\(debridID)")!)
 
         let data = try await performRequest(request: &request, requestName: #function)

@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		0C0167DC29293FA900B65783 /* RealDebridModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C0167DB29293FA900B65783 /* RealDebridModels.swift */; };
+		0D2A1E5C2E4C3D4E00F1A2B3 /* DesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D2A1E5B2E4C3D4E00F1A2B3 /* DesignTokens.swift */; };
+		0D2A1E5E2E4C3D4E00F1A2B3 /* KeyboardObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D2A1E5D2E4C3D4E00F1A2B3 /* KeyboardObserver.swift */; };
 		0C91A1AB2E3C5C4A00C4B2C1 /* GlassTabBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C91A1AA2E3C5C4A00C4B2C1 /* GlassTabBarView.swift */; };
 		0C018C1B2E3C1D1A00B8C5A1 /* AddView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C018C1A2E3C1D1A00B8C5A1 /* AddView.swift */; };
 		0C03EB71296F619900162E9A /* PluginList+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C03EB6F296F619900162E9A /* PluginList+CoreDataClass.swift */; };
@@ -171,6 +173,8 @@
 
 /* Begin PBXFileReference section */
 		0C0167DB29293FA900B65783 /* RealDebridModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealDebridModels.swift; sourceTree = "<group>"; };
+		0D2A1E5B2E4C3D4E00F1A2B3 /* DesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignTokens.swift; sourceTree = "<group>"; };
+		0D2A1E5D2E4C3D4E00F1A2B3 /* KeyboardObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardObserver.swift; sourceTree = "<group>"; };
 		0C91A1AA2E3C5C4A00C4B2C1 /* GlassTabBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassTabBarView.swift; sourceTree = "<group>"; };
 		0C018C1A2E3C1D1A00B8C5A1 /* AddView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddView.swift; sourceTree = "<group>"; };
 		0C03EB6F296F619900162E9A /* PluginList+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PluginList+CoreDataClass.swift"; sourceTree = "<group>"; };
@@ -476,6 +480,14 @@
 			path = Plugin;
 			sourceTree = "<group>";
 		};
+		0D2A1E5A2E4C3D4E00F1A2B3 /* Design */ = {
+			isa = PBXGroup;
+			children = (
+				0D2A1E5B2E4C3D4E00F1A2B3 /* DesignTokens.swift */,
+			);
+			path = Design;
+			sourceTree = "<group>";
+		};
 		0C44E2A628D4DDC6007711AE /* Utils */ = {
 			isa = PBXGroup;
 			children = (
@@ -483,6 +495,7 @@
 				0C1A3E5529C9488C00DA9730 /* CodableWrapper.swift */,
 				0C1234567890ABCDEF12345B /* UnchainedAdapter.swift */,
 				0CD0265629FEFBF900A83D25 /* FerriteKeychain.swift */,
+				0D2A1E5D2E4C3D4E00F1A2B3 /* KeyboardObserver.swift */,
 				0C8AE2472C0FFB6600701675 /* Store.swift */,
 				0C07C6032C1A859B00808A46 /* FormDataBody.swift */,
 			);
@@ -573,6 +586,7 @@
 			children = (
 				0CC6E4D428A45BA000AF2BCC /* Info.plist */,
 				0CBC7703288DE7E90054BE44 /* DataManagement */,
+				0D2A1E5A2E4C3D4E00F1A2B3 /* Design */,
 				0CA148F12889066000DE2211 /* API */,
 				0C0D50E3288DFE6E0035ECC8 /* Models */,
 				0CA148EF2889061600DE2211 /* ViewModels */,
@@ -854,6 +868,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				0C07C6042C1A859B00808A46 /* FormDataBody.swift in Sources */,
+				0D2A1E5C2E4C3D4E00F1A2B3 /* DesignTokens.swift in Sources */,
+				0D2A1E5E2E4C3D4E00F1A2B3 /* KeyboardObserver.swift in Sources */,
 				0C7ED14328D65518009E29AD /* FileManager.swift in Sources */,
 				0C03EB71296F619900162E9A /* PluginList+CoreDataClass.swift in Sources */,
 				0C1234567890ABCDEF123459 /* UnchainedModels.swift in Sources */,
