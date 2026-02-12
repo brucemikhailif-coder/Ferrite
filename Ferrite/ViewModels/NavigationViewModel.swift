@@ -45,7 +45,8 @@ class NavigationViewModel: ObservableObject {
     @Published var selectedMagnet: Magnet?
     @Published var selectedHistoryInfo: HistoryEntryJson?
     @Published var resultFromCloud: Bool = false
-    @Published var pendingTorrentUrl: URL?
+    @Published var pendingTorrentUrls: [URL]?
+    @Published var pendingMagnetLink: String?
 
     // For giving information in magnet choice sheet
     @Published var selectedTitle: String = ""

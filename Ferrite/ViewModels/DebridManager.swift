@@ -24,6 +24,13 @@ class DebridManager: ObservableObject {
     @Published var showWebView: Bool = false
     @Published var showAuthSession: Bool = false
     @Published var enabledDebrids: [DebridSource] = []
+    
+    // Cloud history storage persisted in UserDefaults
+    @Published var cloudHistory: [DebridCloudHistoryItem] = [] {
+        didSet {
+            saveCloudHistory()
+        }
+    }
 
     @Published var selectedDebridSource: DebridSource? {
         didSet {
@@ -60,6 +67,9 @@ class DebridManager: ObservableObject {
     init() {
         // Update the UI for debrid services that are enabled
         enabledDebrids = debridSources.filter(\.isLoggedIn)
+        
+        // Load cloud history from UserDefaults
+        loadCloudHistory()
 
         // Set the preferred service. Contains migration logic for earlier versions
         if let rawPreferredService = UserDefaults.standard.string(forKey: "Debrid.PreferredService") {
@@ -578,6 +588,9 @@ class DebridManager: ObservableObject {
 
                 // Update the TTL to 5 minutes from now
                 selectedSource.cloudTTL = Date().timeIntervalSince1970 + 300
+                
+                // Merge current cloud items into history
+                mergeCloudIntoHistory(source: selectedSource)
             } catch {
                 let error = error as NSError
                 if error.code != -999 {
@@ -637,5 +650,84 @@ class DebridManager: ObservableObject {
                 await sendDebridError(error, prefix: "\(selectedSource.id) magnet delete error")
             }
         }
+    }
+    
+    // MARK: - Cloud History Management
+    
+    /// Load cloud history from UserDefaults
+    private func loadCloudHistory() {
+        if let data = UserDefaults.standard.data(forKey: "Debrid.CloudHistory"),
+           let decoded = try? JSONDecoder().decode([DebridCloudHistoryItem].self, from: data) {
+            cloudHistory = decoded
+        }
+    }
+    
+    /// Save cloud history to UserDefaults
+    private func saveCloudHistory() {
+        if let encoded = try? JSONEncoder().encode(cloudHistory) {
+            UserDefaults.standard.set(encoded, forKey: "Debrid.CloudHistory")
+        }
+    }
+    
+    /// Get current cloud history keys for a provider (for filtering history)
+    func getCurrentCloudHistoryKeys(for providerId: String) -> Set<String> {
+        guard let source = debridSources.first(where: { $0.id == providerId }) else {
+            return []
+        }
+        
+        var keys = Set<String>()
+        keys.formUnion(source.cloudDownloads.map { "\(providerId)_\(DebridTransferKind.webDownload.rawValue)_\($0.id)" })
+        keys.formUnion(source.cloudMagnets.map { "\(providerId)_\(DebridTransferKind.torrent.rawValue)_\($0.id)" })
+        return keys
+    }
+    
+    /// Merge current cloud items into history
+    private func mergeCloudIntoHistory(source: DebridSource) {
+        var historyDict: [String: DebridCloudHistoryItem] = [:]
+        
+        // Build dictionary from existing history (keyed by provider+id)
+        for item in cloudHistory {
+            let key = item.historyKey
+            historyDict[key] = item
+        }
+        
+        // Merge downloads
+        for download in source.cloudDownloads {
+            let key = "\(source.id)_\(DebridTransferKind.webDownload.rawValue)_\(download.id)"
+            if historyDict[key] == nil {
+                // New item, add to history with current date
+                let historyItem = DebridCloudHistoryItem(
+                    id: download.id,
+                    providerId: source.id,
+                    kind: .webDownload,
+                    name: download.fileName,
+                    linkOrHash: download.link,
+                    dateAdded: Date()
+                )
+                historyDict[key] = historyItem
+            }
+            // If already exists, keep the original dateAdded
+        }
+        
+        // Merge magnets
+        for magnet in source.cloudMagnets {
+            let key = "\(source.id)_\(DebridTransferKind.torrent.rawValue)_\(magnet.id)"
+            if historyDict[key] == nil {
+                // New item, add to history with current date
+                let historyItem = DebridCloudHistoryItem(
+                    id: magnet.id,
+                    providerId: source.id,
+                    kind: .torrent,
+                    name: magnet.fileName,
+                    linkOrHash: magnet.hash,
+                    dateAdded: Date()
+                )
+                historyDict[key] = historyItem
+            }
+            // If already exists, keep the original dateAdded
+        }
+        
+        // Update cloudHistory with merged results
+        cloudHistory = Array(historyDict.values).sorted { $0.dateAdded > $1.dateAdded }
     }
 }

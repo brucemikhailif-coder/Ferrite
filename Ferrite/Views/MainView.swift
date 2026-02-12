@@ -131,7 +131,7 @@ struct MainView: View {
         .onOpenURL { url in
             if url.scheme == "file" {
                 if url.pathExtension.lowercased() == "torrent" {
-                    navModel.pendingTorrentUrl = url
+                    navModel.pendingTorrentUrls = [url]
                     navModel.selectedTab = .add
                     return
                 }
@@ -140,6 +140,10 @@ struct MainView: View {
                 backupManager.copyBackup(backupUrl: url)
 
                 backupManager.showRestoreAlert.toggle()
+            } else if url.scheme == "magnet" {
+                // Handle magnet:// URLs
+                navModel.pendingMagnetLink = url.absoluteString
+                navModel.selectedTab = .add
             }
         }
         // Global alerts and dialogs for backups

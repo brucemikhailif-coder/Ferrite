@@ -41,7 +41,30 @@ struct DebridCloudMagnet: Hashable, Sendable, Identifiable {
     let links: [String]
 }
 
-enum DebridTransferKind: String, Sendable {
+/// Model for tracking cloud download/magnet history
+struct DebridCloudHistoryItem: Codable, Hashable, Identifiable {
+    let id: String
+    let providerId: String
+    let kind: DebridTransferKind
+    let name: String
+    let linkOrHash: String
+    let dateAdded: Date
+    
+    init(id: String, providerId: String, kind: DebridTransferKind, name: String, linkOrHash: String, dateAdded: Date = Date()) {
+        self.id = id
+        self.providerId = providerId
+        self.kind = kind
+        self.name = name
+        self.linkOrHash = linkOrHash
+        self.dateAdded = dateAdded
+    }
+    
+    var historyKey: String {
+        "\(providerId)_\(kind.rawValue)_\(id)"
+    }
+}
+
+enum DebridTransferKind: String, Codable, Sendable {
     case torrent
     case webDownload
 }
