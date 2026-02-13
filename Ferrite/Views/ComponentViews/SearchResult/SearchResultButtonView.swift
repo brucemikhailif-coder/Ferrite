@@ -66,8 +66,7 @@ struct SearchResultButtonView: View {
                             .font(.caption2.weight(.semibold))
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
-                            .liquidGlass(
-                                cornerRadius: 12,
+                            .liquidGlassPill(
                                 tint: badgeColor(for: badge).opacity(0.15),
                                 shadow: false
                             )
@@ -77,7 +76,7 @@ struct SearchResultButtonView: View {
                 SearchResultInfoView(result: result)
             }
             .padding(DesignTokens.Spacing.medium)
-            .liquidGlass(cornerRadius: DesignTokens.CornerRadius.medium, shadow: false)
+            .liquidGlassCard(shadow: false)
             .listRowBackground(Color.clear)
             .disabledAppearance(navModel.currentChoiceSheet != nil, dimmedOpacity: 0.7, animation: .easeOut(duration: 0.2))
         }

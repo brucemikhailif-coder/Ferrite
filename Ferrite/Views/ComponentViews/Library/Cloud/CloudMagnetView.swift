@@ -48,13 +48,26 @@ struct CloudMagnetView: View {
 
                             HStack(spacing: 8) {
                                 Text(cloudMagnet.status.capitalizingFirstLetter())
-                                Text("\(cloudMagnet.links.count) files")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+
+                                if !cloudMagnet.links.isEmpty {
+                                    Text("•")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+
+                                    Image(systemName: "link")
+                                        .font(.caption2)
+                                        .foregroundColor(.secondary)
+
+                                    Text("\(cloudMagnet.links.count) files")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
                             }
-                            .font(.caption)
-                            .foregroundColor(.secondary)
 
                             // Placeholder progress indicator:
-                            // If `DebridManager` later exposes a `@Published var transferProgress: [String: Double]`,
+                            // If  later exposes a ,
                             // this will surface a per-magnet progress bar. If no entry exists, the row shows no progress.
                             if let progress = debridManager.transferProgress?[cloudMagnet.id] {
                                 ProgressView(value: progress)
@@ -145,7 +158,7 @@ struct CloudMagnetView: View {
                     }
                 }
                 .accessibilityElement(children: .combine)
-                .accessibilityLabel("\\(cloudMagnet.fileName), \\(cloudMagnet.links.count) files, status \\(cloudMagnet.status)")
+                .accessibilityLabel("\(cloudMagnet.fileName), \(cloudMagnet.links.count) files, status \(cloudMagnet.status)")
                 .accessibilityHint("Double tap to open the magnet details")
             }
             .onDelete { offsets in
@@ -183,7 +196,7 @@ struct CloudMagnetView: View {
             }
         } message: {
             if let m = pendingDeleteMagnet {
-                Text("Are you sure you want to delete \"\\(m.fileName)\"?")
+                Text("Are you sure you want to delete \"\(m.fileName)\"?")
             } else {
                 Text("Are you sure you want to delete this magnet?")
             }
@@ -223,45 +236,45 @@ struct CloudMagnetView: View {
 //
 // Previews: Dynamic Type variants for CloudMagnetView
 //
-struct CloudMagnetView_Previews: PreviewProvider {
-    static var sampleMagnet = DebridCloudMagnet(
-        id: "m1",
-        fileName: "Sample Series - Episode 1 — A very long title intended to exercise wrapping and accessibility dynamic type scaling",
-        status: "downloaded",
-        hash: "abc123",
-        links: ["https://example.com/video.m3u8"]
-    )
-
-    static var debridManager = DebridManager()
-    static var navModel = NavigationViewModel()
-    static var logManager = LoggingManager()
-
-    static var previews: some View {
-        Group {
-            // Default size
-            CloudMagnetView(searchText: .constant(""))
-                .environmentObject(navModel)
-                .environmentObject(debridManager)
-                .environmentObject(logManager)
-                .previewDisplayName("Magnets — Default")
-
-            // Accessibility large
-            CloudMagnetView(searchText: .constant(""))
-                .environmentObject(navModel)
-                .environmentObject(debridManager)
-                .environmentObject(logManager)
-                .environment(\.sizeCategory, .accessibilityExtraLarge)
-                .previewDisplayName("Magnets — Large Dynamic Type")
-
-            // Accessibility XXL
-            CloudMagnetView(searchText: .constant(""))
-                .environmentObject(navModel)
-                .environmentObject(debridManager)
-                .environmentObject(logManager)
-                .environment(\.sizeCategory, .accessibilityExtraExtraExtraLarge)
-                .previewDisplayName("Magnets — Accessibility XXL")
-        }
-        .padding()
-        .previewLayout(.sizeThatFits)
-    }
-}
+// struct CloudMagnetView_Previews: PreviewProvider {
+//    static var sampleMagnet = DebridCloudMagnet(
+//        id: "m1",
+//        fileName: "Sample Series - Episode 1 — A very long title intended to exercise wrapping and accessibility dynamic type scaling",
+//        status: "downloaded",
+//        hash: "abc123",
+//        links: ["https://example.com/video.m3u8"]
+//    )
+//
+//    static var debridManager = DebridManager()
+//    static var navModel = NavigationViewModel()
+//    static var logManager = LoggingManager()
+//
+//    static var previews: some View {
+//        Group {
+//            // Default size
+//            CloudMagnetView(searchText: .constant(""))
+//                .environmentObject(navModel)
+//                .environmentObject(debridManager)
+//                .environmentObject(logManager)
+//                .previewDisplayName("Magnets — Default")
+//
+//            // Accessibility large
+//            CloudMagnetView(searchText: .constant(""))
+//                .environmentObject(navModel)
+//                .environmentObject(debridManager)
+//                .environmentObject(logManager)
+//                .environment(\.sizeCategory, .accessibilityExtraLarge)
+//                .previewDisplayName("Magnets — Large Dynamic Type")
+//
+//            // Accessibility XXL
+//            CloudMagnetView(searchText: .constant(""))
+//                .environmentObject(navModel)
+//                .environmentObject(debridManager)
+//                .environmentObject(logManager)
+//                .environment(\.sizeCategory, .accessibilityExtraExtraExtraLarge)
+//                .previewDisplayName("Magnets — Accessibility XXL")
+//        }
+//        .padding()
+//        .previewLayout(.sizeThatFits)
+//    }
+// }

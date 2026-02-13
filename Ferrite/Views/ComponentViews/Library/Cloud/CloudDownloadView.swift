@@ -241,17 +241,17 @@ private struct CloudDownloadRow: View {
 }
 
  // MARK: - Previews (file scope)
- struct CloudDownloadView_Previews: PreviewProvider {
-     static var previews: some View {
-         let debridManager = DebridManager()
-         let navModel = NavigationViewModel()
-         let logManager = LoggingManager()
-
-         CloudDownloadView(searchText: .constant(""))
-             .environmentObject(debridManager)
-             .environmentObject(navModel)
-             .environmentObject(logManager)
-             .padding()
-             .previewLayout(.sizeThatFits)
-     }
- }
+// struct CloudDownloadView_Previews: PreviewProvider {
+//     static var previews: some View {
+//         let debridManager = DebridManager()
+//         let navModel = NavigationViewModel()
+//         let logManager = LoggingManager()
+//
+//         CloudDownloadView(searchText: .constant(""))
+//             .environmentObject(debridManager)
+//             .environmentObject(navModel)
+//             .environmentObject(logManager)
+//             .padding()
+//             .previewLayout(.sizeThatFits)
+//     }
+// }
