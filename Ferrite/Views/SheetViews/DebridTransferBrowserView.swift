@@ -177,5 +177,8 @@ struct DebridTransferBrowserView: View {
             title: "Example",
             resultFromCloud: true
         )
+        .environmentObject(NavigationViewModel())
+        .environmentObject(DebridManager())
+        .environmentObject(LoggingManager())
     }
 }

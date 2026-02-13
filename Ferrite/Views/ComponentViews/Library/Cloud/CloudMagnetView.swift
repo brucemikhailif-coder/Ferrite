@@ -232,12 +232,12 @@ struct CloudMagnetView: View {
         links: ["https://example.com/video.m3u8"]
     )
 
-    static var debridManager = DebridManager()
-    static var navModel = NavigationViewModel()
-    static var logManager = LoggingManager()
-
     static var previews: some View {
-        Group {
+        let debridManager = DebridManager()
+        let navModel = NavigationViewModel()
+        let logManager = LoggingManager()
+
+        return Group {
             // Default size
             CloudMagnetView(debridSource: RealDebrid() as DebridSource, searchText: .constant(""))
                 .environmentObject(navModel)
