@@ -50,6 +50,7 @@ struct HybridSecureField: View {
                 Image(systemName: showPassword ? "eye.slash.fill" : "eye.fill")
                     .foregroundColor(.secondary)
             }
+            .accessibilityLabel(showPassword ? "Hide password" : "Show password")
             .buttonStyle(.borderless)
         }
     }

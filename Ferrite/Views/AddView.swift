@@ -95,8 +95,11 @@ struct AddView: View {
                                 .background(Color.secondary.opacity(0.05))
                                 .cornerRadius(DesignTokens.CornerRadius.small)
                                 .padding(.horizontal, DesignTokens.Spacing.small)
+                                .accessibilityLabel("Links or magnets to process")
 
                             Button {
+                                let generator = UIImpactFeedbackGenerator(style: .medium)
+                                generator.impactOccurred()
                                 Task {
                                     await processMultiEntries()
                                 }
@@ -119,6 +122,7 @@ struct AddView: View {
                             .padding(.horizontal, DesignTokens.Spacing.small)
                             .padding(.bottom, DesignTokens.Spacing.small)
                             .disabled(multiEntryText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isProcessing)
+                            .accessibilityHint(isProcessing ? "Wait for current processing to finish" : (multiEntryText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Enter web links or magnets first" : ""))
                         }
                         .liquidGlass(cornerRadius: DesignTokens.CornerRadius.medium)
                         .padding(.horizontal, DesignTokens.Spacing.medium)
@@ -147,11 +151,15 @@ struct AddView: View {
                                                 .lineLimit(1)
                                             Spacer()
                                             Button {
+                                                let generator = UIImpactFeedbackGenerator(style: .light)
+                                                generator.impactOccurred()
                                                 pendingTorrentUrls.remove(at: index)
                                             } label: {
                                                 Image(systemName: "xmark.circle.fill")
                                                     .foregroundColor(.secondary)
                                             }
+                                            .accessibilityLabel("Remove torrent")
+                                            .accessibilityHint("Removes \(url.lastPathComponent) from the upload list")
                                         }
                                         .padding(.horizontal, DesignTokens.Spacing.small)
                                     }
@@ -176,6 +184,8 @@ struct AddView: View {
                             .disabled(!(selectedDebrid?.supportsTorrentUpload ?? false))
 
                             Button {
+                                let generator = UIImpactFeedbackGenerator(style: .medium)
+                                generator.impactOccurred()
                                 Task {
                                     await processTorrentUploads()
                                 }
@@ -198,6 +208,7 @@ struct AddView: View {
                             .padding(.horizontal, DesignTokens.Spacing.small)
                             .padding(.bottom, DesignTokens.Spacing.small)
                             .disabled(!(selectedDebrid?.supportsTorrentUpload ?? false) || pendingTorrentUrls.isEmpty || isProcessing)
+                            .accessibilityHint(isProcessing ? "Wait for current processing to finish" : (pendingTorrentUrls.isEmpty ? "Select torrent files first" : ""))
                         }
                         .liquidGlass(cornerRadius: DesignTokens.CornerRadius.medium)
                         .padding(.horizontal, DesignTokens.Spacing.medium)
