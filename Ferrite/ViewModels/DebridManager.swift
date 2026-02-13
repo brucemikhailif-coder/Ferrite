@@ -191,14 +191,10 @@ class DebridManager: ObservableObject {
                 }
 
                 // Publish the new map on the main actor
-                await MainActor.run {
-                    self.transferProgress = newProgressMap
-                }
+                self.transferProgress = newProgressMap
             } catch {
                 // Log and continue; we don't want polling to stop on transient errors
-                await MainActor.run {
-                    logManager?.error("Transfer polling error: \(error.localizedDescription)", showToast: false)
-                }
+                logManager?.error("Transfer polling error: \(error.localizedDescription)", showToast: false)
             }
 
             // Sleep for interval
@@ -218,14 +214,9 @@ class DebridManager: ObservableObject {
             try? await Task.sleep(nanoseconds: delaySeconds * 1_000_000_000)
 
             // If the task wasn't cancelled, perform the deletion on the main actor
-            await MainActor.run {
-                Task {
-                    await self?.deleteCloudDownload(download)
-                    // Remove from scheduledDeletes map on completion
-                    await MainActor.run {
-                        self?.scheduledDeletes.removeValue(forKey: download.id)
-                    }
-                }
+            await self?.deleteCloudDownload(download)
+            await MainActor.run { [weak self] in
+                self?.scheduledDeletes.removeValue(forKey: download.id)
             }
         }
 
@@ -252,9 +243,7 @@ class DebridManager: ObservableObject {
         }
 
         guard let source else {
-            await MainActor.run {
-                logManager?.error("DebridManager: No provider available to fetch streamable link", showToast: false)
-            }
+            logManager?.error("DebridManager: No provider available to fetch streamable link", showToast: false)
             return
         }
 
@@ -262,17 +251,13 @@ class DebridManager: ObservableObject {
         if let rd = source as? RealDebrid {
             do {
                 let streamable = try await rd.getStreamableLink(for: link)
-                await MainActor.run {
-                    self.downloadUrl = streamable
-                }
+                self.downloadUrl = streamable
             } catch {
                 await sendDebridError(error, prefix: "\(rd.id) streamable link error")
             }
         } else {
             // Fallback: if provider doesn't implement a transcoding/unrestrict helper, expose original link.
-            await MainActor.run {
-                self.downloadUrl = link
-            }
+            self.downloadUrl = link
         }
     }
 

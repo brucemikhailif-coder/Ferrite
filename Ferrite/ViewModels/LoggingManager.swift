@@ -218,10 +218,8 @@ class LoggingManager: ObservableObject {
                 await action()
             }
 
-            await MainActor.run {
                 self.undoAction = nil
                 self.showToast = false
-            }
         }
     }
 }

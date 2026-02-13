@@ -239,14 +239,14 @@ struct CloudMagnetView_Previews: PreviewProvider {
     static var previews: some View {
         Group {
             // Default size
-            CloudMagnetView(searchText: .constant(""))
+            CloudMagnetView(debridSource: RealDebrid() as DebridSource, searchText: .constant(""))
                 .environmentObject(navModel)
                 .environmentObject(debridManager)
                 .environmentObject(logManager)
                 .previewDisplayName("Magnets — Default")
 
             // Accessibility large
-            CloudMagnetView(searchText: .constant(""))
+            CloudMagnetView(debridSource: RealDebrid() as DebridSource, searchText: .constant(""))
                 .environmentObject(navModel)
                 .environmentObject(debridManager)
                 .environmentObject(logManager)
@@ -254,7 +254,7 @@ struct CloudMagnetView_Previews: PreviewProvider {
                 .previewDisplayName("Magnets — Large Dynamic Type")
 
             // Accessibility XXL
-            CloudMagnetView(searchText: .constant(""))
+            CloudMagnetView(debridSource: RealDebrid() as DebridSource, searchText: .constant(""))
                 .environmentObject(navModel)
                 .environmentObject(debridManager)
                 .environmentObject(logManager)
