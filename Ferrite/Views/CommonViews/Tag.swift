@@ -19,8 +19,7 @@ struct Tag: View {
             .opacity(0.8)
             .padding(.horizontal, horizontalPadding)
             .padding(.vertical, verticalPadding)
-            .liquidGlass(
-                cornerRadius: 5,
+            .liquidGlassPill(
                 tint: (color ?? Color(uiColor: .tertiaryLabel)).opacity(0.15),
                 shadow: false
             )
