@@ -2,9 +2,7 @@ name: Build and upload nightly ipa
 
 on:
   push:
-    branches:
-    - '**'
-  workflow_dispatch: 
+    branches: [next]
 
 jobs:
   build:
