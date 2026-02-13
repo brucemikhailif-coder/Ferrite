@@ -9,17 +9,6 @@ import SwiftUI
 
 @main
 struct FerriteApp: App {
-    init() {
-        let oldKey = "Behavior.DisableRequestTimeout"
-        let newKey = "Behavior.EnableRequestTimeout"
-
-        if UserDefaults.standard.object(forKey: oldKey) != nil {
-            let oldValue = UserDefaults.standard.bool(forKey: oldKey)
-            UserDefaults.standard.set(!oldValue, forKey: newKey)
-            UserDefaults.standard.removeObject(forKey: oldKey)
-        }
-    }
-
     let persistenceController = PersistenceController.shared
 
     @StateObject var scrapingModel: ScrapingViewModel = .init()
