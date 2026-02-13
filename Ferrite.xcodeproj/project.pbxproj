@@ -1240,8 +1240,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/norio-nomura/Base32";
 			requirement = {
-				kind = upToNextMinorVersion;
-				minimumVersion = 0.4.0;
+				branch = master;
+				kind = branch;
 			};
 		};
 		0C64A4B5288903880079976D /* XCRemoteSwiftPackageReference "keychain-swift" */ = {
