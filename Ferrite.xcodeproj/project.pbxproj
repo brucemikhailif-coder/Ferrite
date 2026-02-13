@@ -7,6 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0CDE51A12E3D800000A1B2C3 /* DesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CDE51A02E3D800000A1B2C3 /* DesignTokens.swift */; };
+		0CDE51A32E3D800100A1B2C3 /* Keyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CDE51A22E3D800100A1B2C3 /* Keyboard.swift */; };
+		0CDE51A62E3D800300A1B2C3 /* TestHostingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CDE51A52E3D800300A1B2C3 /* TestHostingView.swift */; };
+		0CDE51A82E3D800400A1B2C3 /* SearchableContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CDE51A72E3D800400A1B2C3 /* SearchableContent.swift */; };
+		0CDE51AA2E3D800500A1B2C3 /* SectionHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CDE51A92E3D800500A1B2C3 /* SectionHeaderView.swift */; };
+		0CDE51AC2E3D800600A1B2C3 /* LibraryHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CDE51AB2E3D800600A1B2C3 /* LibraryHeaderView.swift */; };
+		0CDE51AE2E3D800700A1B2C3 /* SourceCatalogButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CDE51AD2E3D800700A1B2C3 /* SourceCatalogButtonView.swift */; };
 		0C0167DC29293FA900B65783 /* RealDebridModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C0167DB29293FA900B65783 /* RealDebridModels.swift */; };
 		0C91A1AB2E3C5C4A00C4B2C1 /* GlassTabBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C91A1AA2E3C5C4A00C4B2C1 /* GlassTabBarView.swift */; };
 		0C018C1B2E3C1D1A00B8C5A1 /* AddView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C018C1A2E3C1D1A00B8C5A1 /* AddView.swift */; };
@@ -169,6 +176,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0CDE51A02E3D800000A1B2C3 /* DesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignTokens.swift; sourceTree = "<group>"; };
+		0CDE51A22E3D800100A1B2C3 /* Keyboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keyboard.swift; sourceTree = "<group>"; };
+		0CDE51A52E3D800300A1B2C3 /* TestHostingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestHostingView.swift; sourceTree = "<group>"; };
+		0CDE51A72E3D800400A1B2C3 /* SearchableContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchableContent.swift; sourceTree = "<group>"; };
+		0CDE51A92E3D800500A1B2C3 /* SectionHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SectionHeaderView.swift; sourceTree = "<group>"; };
+		0CDE51AB2E3D800600A1B2C3 /* LibraryHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryHeaderView.swift; sourceTree = "<group>"; };
+		0CDE51AD2E3D800700A1B2C3 /* SourceCatalogButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceCatalogButtonView.swift; sourceTree = "<group>"; };
 		0C0167DB29293FA900B65783 /* RealDebridModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealDebridModels.swift; sourceTree = "<group>"; };
 		0C91A1AA2E3C5C4A00C4B2C1 /* GlassTabBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassTabBarView.swift; sourceTree = "<group>"; };
 		0C018C1A2E3C1D1A00B8C5A1 /* AddView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddView.swift; sourceTree = "<group>"; };
@@ -502,6 +516,7 @@
 			children = (
 				0C794B68289DACC800DD1CC8 /* InstalledPluginButtonView.swift */,
 				0C794B6A289DACF100DD1CC8 /* PluginCatalogButtonView.swift */,
+				0CDE51AD2E3D800700A1B2C3 /* SourceCatalogButtonView.swift */,
 			);
 			path = Buttons;
 			sourceTree = "<group>";
@@ -574,6 +589,7 @@
 				0C0D50E3288DFE6E0035ECC8 /* Models */,
 				0CA148EF2889061600DE2211 /* ViewModels */,
 				0CA148EE2889061200DE2211 /* Views */,
+				0CDE51A42E3D800200A1B2C3 /* Design */,
 				0C44E2A628D4DDC6007711AE /* Utils */,
 				0C5005552992B9C20064606A /* Protocols */,
 				0CA148C8288903F000DE2211 /* Extensions */,
@@ -595,6 +611,10 @@
 				0C91A1AA2E3C5C4A00C4B2C1 /* GlassTabBarView.swift */,
 				0C2D9652299316CC00A504B6 /* Tag.swift */,
 				0C6771FB29B3E0DB005D38D2 /* HybridSecureField.swift */,
+				0CDE51A52E3D800300A1B2C3 /* TestHostingView.swift */,
+				0CDE51A72E3D800400A1B2C3 /* SearchableContent.swift */,
+				0CDE51A92E3D800500A1B2C3 /* SectionHeaderView.swift */,
+				0CDE51AB2E3D800600A1B2C3 /* LibraryHeaderView.swift */,
 			);
 			path = CommonViews;
 			sourceTree = "<group>";
@@ -607,6 +627,14 @@
 			path = "Preview Content";
 			sourceTree = "<group>";
 		};
+		0CDE51A42E3D800200A1B2C3 /* Design */ = {
+			isa = PBXGroup;
+			children = (
+				0CDE51A02E3D800000A1B2C3 /* DesignTokens.swift */,
+			);
+			path = Design;
+			sourceTree = "<group>";
+		};
 		0CA148C8288903F000DE2211 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
@@ -616,6 +644,7 @@
 				0C7075E329D374C50093DB2D /* Color.swift */,
 				0CA148CA288903F000DE2211 /* Data.swift */,
 				0CA429F728C5098D000D0610 /* DateFormatter.swift */,
+				0CDE51A22E3D800100A1B2C3 /* Keyboard.swift */,
 				0C70E40528C40C4E00A5C72D /* NotificationCenter.swift */,
 				0C78041C28BFB3EA001E8CA3 /* String.swift */,
 				0CA148CB288903F000DE2211 /* Task.swift */,
@@ -850,6 +879,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0CDE51A12E3D800000A1B2C3 /* DesignTokens.swift in Sources */,
+				0CDE51A32E3D800100A1B2C3 /* Keyboard.swift in Sources */,
 				0C07C6042C1A859B00808A46 /* FormDataBody.swift in Sources */,
 				0C7ED14328D65518009E29AD /* FileManager.swift in Sources */,
 				0C03EB71296F619900162E9A /* PluginList+CoreDataClass.swift in Sources */,
@@ -998,6 +1029,11 @@
 				0C2886D22960AC2800D6FC16 /* DebridCloudView.swift in Sources */,
 				0CA148D7288903F000DE2211 /* LoginWebView.swift in Sources */,
 				0CA148E0288903F000DE2211 /* FerriteApp.swift in Sources */,
+				0CDE51A62E3D800300A1B2C3 /* TestHostingView.swift in Sources */,
+				0CDE51A82E3D800400A1B2C3 /* SearchableContent.swift in Sources */,
+				0CDE51AA2E3D800500A1B2C3 /* SectionHeaderView.swift in Sources */,
+				0CDE51AC2E3D800600A1B2C3 /* LibraryHeaderView.swift in Sources */,
+				0CDE51AE2E3D800700A1B2C3 /* SourceCatalogButtonView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
