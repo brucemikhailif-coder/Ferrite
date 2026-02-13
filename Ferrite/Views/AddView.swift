@@ -121,8 +121,8 @@ struct AddView: View {
                             .cornerRadius(DesignTokens.CornerRadius.medium)
                             .padding(.horizontal, DesignTokens.Spacing.small)
                             .padding(.bottom, DesignTokens.Spacing.small)
-                            .disabled(multiEntryText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isProcessing)
-                            .accessibilityHint(isProcessing ? "Wait for current processing to finish" : (multiEntryText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Enter web links or magnets first" : ""))
+                            .disabled(selectedDebrid == nil || multiEntryText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isProcessing)
+                            .accessibilityHint(processEntriesHint)
                         }
                         .liquidGlass(cornerRadius: DesignTokens.CornerRadius.medium)
                         .padding(.horizontal, DesignTokens.Spacing.medium)
@@ -208,7 +208,7 @@ struct AddView: View {
                             .padding(.horizontal, DesignTokens.Spacing.small)
                             .padding(.bottom, DesignTokens.Spacing.small)
                             .disabled(!(selectedDebrid?.supportsTorrentUpload ?? false) || pendingTorrentUrls.isEmpty || isProcessing)
-                            .accessibilityHint(isProcessing ? "Wait for current processing to finish" : (pendingTorrentUrls.isEmpty ? "Select torrent files first" : ""))
+                            .accessibilityHint(uploadTorrentsHint)
                         }
                         .liquidGlass(cornerRadius: DesignTokens.CornerRadius.medium)
                         .padding(.horizontal, DesignTokens.Spacing.medium)
@@ -468,6 +468,35 @@ struct AddView: View {
 
     private func isValidMagnet(_ link: String) -> Bool {
         link.lowercased().starts(with: "magnet:?xt=urn:btih:")
+    }
+
+    private var processEntriesHint: String {
+        if isProcessing {
+            return "Wait for current processing to finish"
+        }
+        if selectedDebrid == nil {
+            return "Select a provider first"
+        }
+        if multiEntryText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return "Enter web links or magnets first"
+        }
+        return ""
+    }
+
+    private var uploadTorrentsHint: String {
+        if isProcessing {
+            return "Wait for current processing to finish"
+        }
+        if selectedDebrid == nil {
+            return "Select a provider first"
+        }
+        if !(selectedDebrid?.supportsTorrentUpload ?? false) {
+            return "Selected provider does not support torrent uploads"
+        }
+        if pendingTorrentUrls.isEmpty {
+            return "Select torrent files first"
+        }
+        return ""
     }
 }
 
