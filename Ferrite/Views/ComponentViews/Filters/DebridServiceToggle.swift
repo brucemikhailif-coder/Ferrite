@@ -25,7 +25,7 @@ struct DebridServiceToggle: View {
 
     // Whether the toggle should be disabled
     private var isDisabled: Bool {
-        loggedInDebridSources.count <= 1
+        loggedInDebridSources.isEmpty
     }
 
     var body: some View {
@@ -65,12 +65,17 @@ struct DebridServiceToggle: View {
             return
         }
 
-        // Find current source index and select the next one
+        // Find current source index
         if let currentIndex = sources.firstIndex(where: { $0.id == currentSource.id }) {
-            let nextIndex = (currentIndex + 1) % sources.count
-            debridManager.selectedDebridSource = sources[nextIndex]
+            // Check if we are at the last source, then cycle to None
+            if currentIndex == sources.count - 1 {
+                debridManager.selectedDebridSource = nil
+            } else {
+                // Otherwise select next source
+                debridManager.selectedDebridSource = sources[currentIndex + 1]
+            }
         } else {
-            // Current source not in logged-in sources, select first one
+            // Current source not in logged-in sources, reset to first
             debridManager.selectedDebridSource = sources.first
         }
     }
