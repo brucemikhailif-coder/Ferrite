@@ -209,3 +209,291 @@ The project uses these key packages:
 - Never commit API keys or credentials
 - Avoid force unwrapping optionals
 - Don't skip code formatting before commits
+## Planning with Files (Manus-Style)
+
+Use persistent markdown files as "working memory on disk" to overcome context window limitations.
+
+### The 3-File Pattern
+For every complex task, you MUST maintain:
+1. `task_plan.md`: Track phases and progress.
+2. `findings.md`: Store research and findings.
+3. `progress.md`: Session log and test results.
+
+### Operational Hooks
+- **SessionStart**: Create all three files FIRST. Fill in the Goal section.
+- **PreToolUse**: Re-read `task_plan.md` before writing code or making major decisions.
+- **PostToolUse**: Update status in `task_plan.md` (pending -> in_progress -> complete).
+- **2-Action Rule**: After every 2 browser/search/view operations, save findings to `findings.md`.
+- **3-Strike Protocol**: If an error persists after 3 attempts (Diagnose -> Alternative -> Rethink), escalate to the user.
+- **Phase Sizing Rule**: Keep each phase to work that fits one focused session (roughly 2-4 hours).
+- **Verification Gate Rule**: Every phase must define explicit verification checks and a concrete exit criterion.
+- **Checkpoint Rule**: At phase boundaries (or when context is full), write a checkpoint summary in `progress.md` and set a concrete next action with file path.
+
+### Extended Planning Files
+For non-trivial work, add these two companion files:
+1. `IMPLEMENTATION_PHASES.md`: Phase breakdown with size limits, dependencies, and exit criteria.
+2. `SESSION.md`: Compact live tracker with current phase/stage, checkpoint hash, and one concrete "Next Action".
+
+When present, keep `task_plan.md` as the high-level plan, and treat `SESSION.md` as the live execution tracker.
+
+## Part 3: Templates (To be created at Task Start)
+
+### task_plan.md
+```markdown
+# Task Plan: [Brief Description]
+
+## Goal
+[One sentence describing the end state]
+
+## Scope
+- In scope: [List]
+- Out of scope: [List]
+
+## Constraints
+- [Technical or process constraints]
+
+## Success Criteria
+- [Observable outcome 1]
+- [Observable outcome 2]
+
+## Current Phase
+Phase 1
+
+## Current Stage
+Implementation
+
+## Phases
+### Phase 1: Requirements & Discovery
+- [ ] Understand user intent
+- [ ] Identify constraints and requirements
+- [ ] Document findings in findings.md
+- **Status:** in_progress
+- **Dependencies:** none
+- **Verification:** requirements and constraints captured
+- **Exit Criteria:** findings recorded and reviewed
+
+### Phase 2: Planning & Structure
+- [ ] Define technical approach
+- [ ] Create project structure if needed
+- **Status:** pending
+- **Dependencies:** Phase 1
+- **Verification:** plan reviewed against constraints
+- **Exit Criteria:** implementation path is clear
+
+### Phase 3: Implementation
+- [ ] Execute the plan step by step
+- [ ] Test incrementally
+- **Status:** pending
+- **Dependencies:** Phase 2
+- **Verification:** core behavior works locally
+- **Exit Criteria:** implementation tasks complete
+
+### Phase 4: Testing & Verification
+- [ ] Verify all requirements met
+- [ ] Document test results in progress.md
+- **Status:** pending
+- **Dependencies:** Phase 3
+- **Verification:** tests/manual checks pass
+- **Exit Criteria:** no unresolved high-severity issues
+
+### Phase 5: Delivery
+- [ ] Review all output files
+- **Status:** pending
+- **Dependencies:** Phase 4
+- **Verification:** deliverables match request
+- **Exit Criteria:** handoff complete
+
+## Decisions Made
+| Decision | Rationale |
+| -------- | --------- |
+|          |           |
+
+## Errors Encountered
+| Error | Attempt | Resolution |
+| ----- | ------- | ---------- |
+|       | 1       |            |
+
+## Risks & Mitigations
+| Risk | Impact | Mitigation | Status |
+| ---- | ------ | ---------- | ------ |
+|      |        |            | open   |
+
+## Next Action (Concrete)
+- File: `path/to/file`
+- Action: [single concrete next edit or command]
+- Why now: [short reason]
+```
+
+### findings.md
+```markdown
+# Findings & Decisions
+
+## Requirements
+<!-- Captured from user request -->
+
+## Assumptions
+<!-- Assumptions made while implementing -->
+
+## Open Questions
+<!-- Blockers or ambiguities that may require user input -->
+
+## Research Findings
+<!-- Key discoveries during exploration -->
+
+## Evidence Log
+| Source | What It Confirms | Confidence |
+| ------ | ---------------- | ---------- |
+|        |                  | high       |
+
+## Technical Decisions
+| Decision | Rationale |
+| -------- | --------- |
+|          |           |
+
+## Issues Encountered
+| Issue | Resolution |
+| ----- | ---------- |
+|       |            |
+
+## Resources
+<!-- URLs, file paths, API references -->
+
+## Visual/Browser Findings
+<!-- CRITICAL: Update after every 2 view/browser operations -->
+
+## Deferred Follow-Ups
+| Follow-Up | Reason Deferred | Trigger to Revisit |
+| --------- | --------------- | ------------------ |
+|           |                 |                    |
+```
+
+### progress.md
+```markdown
+# Progress Log
+
+## Session: [DATE]
+
+## Status Snapshot
+- Current phase: [Phase X]
+- Current stage: [Implementation/Verification/Debugging]
+- Overall status: [on_track/blocked]
+- Last checkpoint: [commit hash or N/A]
+
+### Actions taken:
+- [Itemize work done]
+
+## Test Results
+| Test | Input | Expected | Actual | Status |
+| ---- | ----- | -------- | ------ | ------ |
+|      |       |          |        |        |
+
+## Verification Checklist
+- [ ] Functional checks complete
+- [ ] Regression risk reviewed
+- [ ] Edge cases validated
+- [ ] Documentation updated
+
+## Error Log
+| Timestamp | Error | Attempt | Resolution |
+| --------- | ----- | ------- | ---------- |
+|           |       | 1       |            |
+
+## Checkpoints
+| Time | Checkpoint | Scope | Next Action |
+| ---- | ---------- | ----- | ----------- |
+|      |            |       |             |
+
+## 5-Question Reboot Check
+| Question             | Answer           |
+| -------------------- | ---------------- |
+| Where am I?          | Phase X          |
+| Where am I going?    | Remaining phases |
+| What's the goal?     | [goal statement] |
+| What have I learned? | See findings.md  |
+| What have I done?    | See above        |
+
+## Ready-to-Resume Block
+- Open first: `task_plan.md`
+- Then open: `findings.md`
+- First command/edit to run: [exact next action]
+```
+
+## Required Skills for This Repository
+
+Agents working in this repo must load these skills by default at task start:
+
+- `deep-debug`
+- `swift-development`
+- `apple-swiftui-core`
+- `apple-swiftui-webkit`
+- `apple-liquid-glass`
+
+If a task involves SwiftUI architecture, SwiftUI components, navigation/state patterns, embedded web content, or Liquid Glass styling, these skills are mandatory and should be consulted before implementation.
+
+### Installed Apple Skills (from `apple-skills.zip`)
+
+- `apple-accessibility`
+- `apple-app-intents`
+- `apple-app-patterns`
+- `apple-app-prd-architect`
+- `apple-appkit-bridge`
+- `apple-charts-3d`
+- `apple-cross-platform`
+- `apple-docs`
+- `apple-foundation-models`
+- `apple-global-hotkeys`
+- `apple-liquid-glass`
+- `apple-macos-app-structure`
+- `apple-macos-distribution`
+- `apple-macos-permissions`
+- `apple-mapkit-geo`
+- `apple-pasteboard-textinsertion`
+- `apple-skill-maintainer`
+- `apple-swift-lang`
+- `apple-swiftdata`
+- `apple-swiftui-core`
+- `apple-swiftui-webkit`
+- `apple-tech-stack-validator`
+- `apple-testing-swift`
+
+### Installed Skills (from URL backup zip)
+
+- `accessibility-generator`
+- `analytics-setup`
+- `app-planner`
+- `apple-design`
+- `apple-generators`
+- `apple-intelligence`
+- `apple-product`
+- `architecture-spec`
+- `auth-flow`
+- `ci-cd-setup`
+- `coding-best-practices`
+- `competitive-analysis`
+- `deep-linking`
+- `error-monitoring`
+- `feature-flags`
+- `foundation-models`
+- `implementation-guide`
+- `implementation-spec`
+- `ios`
+- `liquid-glass`
+- `localization-setup`
+- `logging-setup`
+- `market-research`
+- `networking-layer`
+- `onboarding-generator`
+- `paywall-generator`
+- `persistence-setup`
+- `prd-generator`
+- `product-agent`
+- `push-notifications`
+- `release-spec`
+- `review-prompt`
+- `settings-screen`
+- `test-generator`
+- `test-spec`
+- `ui-review`
+- `ux-spec`
+- `visual-intelligence`
+- `widget-generator`
