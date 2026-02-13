@@ -191,10 +191,10 @@ class DebridManager: ObservableObject {
                 }
 
                 // Publish the new map on the main actor
-                self.transferProgress = newProgressMap
+                await MainActor.run { self.transferProgress = newProgressMap }
             } catch {
                 // Log and continue; we don't want polling to stop on transient errors
-                logManager?.error("Transfer polling error: \(error.localizedDescription)", showToast: false)
+                await MainActor.run { logManager?.error("Transfer polling error: \(error.localizedDescription)", showToast: false) }
             }
 
             // Sleep for interval
@@ -215,7 +215,7 @@ class DebridManager: ObservableObject {
 
             // If the task wasn't cancelled, perform the deletion on the main actor
             await self?.deleteCloudDownload(download)
-            await MainActor.run { [weak self] in
+            await MainActor.run {
                 self?.scheduledDeletes.removeValue(forKey: download.id)
             }
         }
@@ -251,13 +251,13 @@ class DebridManager: ObservableObject {
         if let rd = source as? RealDebrid {
             do {
                 let streamable = try await rd.getStreamableLink(for: link)
-                self.downloadUrl = streamable
+                await MainActor.run { self.downloadUrl = streamable }
             } catch {
                 await sendDebridError(error, prefix: "\(rd.id) streamable link error")
             }
         } else {
             // Fallback: if provider doesn't implement a transcoding/unrestrict helper, expose original link.
-            self.downloadUrl = link
+            await MainActor.run { self.downloadUrl = link }
         }
     }
 
