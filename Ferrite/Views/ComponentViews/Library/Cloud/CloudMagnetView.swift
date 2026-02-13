@@ -223,7 +223,7 @@ struct CloudMagnetView: View {
 //
 // Previews: Dynamic Type variants for CloudMagnetView
 //
-struct CloudMagnetView_Previews: PreviewProvider {
+@MainActor struct CloudMagnetView_Previews: PreviewProvider {
     static var sampleMagnet = DebridCloudMagnet(
         id: "m1",
         fileName: "Sample Series - Episode 1 — A very long title intended to exercise wrapping and accessibility dynamic type scaling",
@@ -239,14 +239,14 @@ struct CloudMagnetView_Previews: PreviewProvider {
     static var previews: some View {
         Group {
             // Default size
-            CloudMagnetView(debridSource: RealDebrid(), searchText: .constant(""))
+            CloudMagnetView(debridSource: RealDebrid() as DebridSource, searchText: .constant(""))
                 .environmentObject(navModel)
                 .environmentObject(debridManager)
                 .environmentObject(logManager)
                 .previewDisplayName("Magnets — Default")
 
             // Accessibility large
-            CloudMagnetView(debridSource: RealDebrid(), searchText: .constant(""))
+            CloudMagnetView(debridSource: RealDebrid() as DebridSource, searchText: .constant(""))
                 .environmentObject(navModel)
                 .environmentObject(debridManager)
                 .environmentObject(logManager)
@@ -254,7 +254,7 @@ struct CloudMagnetView_Previews: PreviewProvider {
                 .previewDisplayName("Magnets — Large Dynamic Type")
 
             // Accessibility XXL
-            CloudMagnetView(debridSource: RealDebrid(), searchText: .constant(""))
+            CloudMagnetView(debridSource: RealDebrid() as DebridSource, searchText: .constant(""))
                 .environmentObject(navModel)
                 .environmentObject(debridManager)
                 .environmentObject(logManager)

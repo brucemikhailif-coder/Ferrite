@@ -166,10 +166,10 @@ struct DebridTransferBrowserView: View {
     }
 }
 
-struct DebridTransferBrowserView_Previews: PreviewProvider {
+@MainActor struct DebridTransferBrowserView_Previews: PreviewProvider {
     static var previews: some View {
         DebridTransferBrowserView(
-            debridSource: RealDebrid(),
+            debridSource: RealDebrid() as DebridSource,
             initialFiles: [
                 DebridTransferFile(id: "1", name: "Example.mkv"),
                 DebridTransferFile(id: "2", name: "Sample.srt")

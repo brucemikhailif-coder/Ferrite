@@ -213,18 +213,10 @@ class DebridManager: ObservableObject {
             // Sleep for the undo window
             try? await Task.sleep(nanoseconds: delaySeconds * 1_000_000_000)
 
-            guard let self else { return }
-
             // If the task wasn't cancelled, perform the deletion on the main actor
+            await self?.deleteCloudDownload(download)
             await MainActor.run { [weak self] in
-                guard let self else { return }
-                Task { [weak self] in
-                    await self?.deleteCloudDownload(download)
-                    // Remove from scheduledDeletes map on completion
-                    await MainActor.run { [weak self] in
-                        self?.scheduledDeletes.removeValue(forKey: download.id)
-                    }
-                }
+                self?.scheduledDeletes.removeValue(forKey: download.id)
             }
         }
 
