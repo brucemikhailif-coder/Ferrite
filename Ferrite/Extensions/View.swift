@@ -135,6 +135,7 @@ struct PressableButtonStyle: ButtonStyle {
 // MARK: - Cardify extension
 // A reusable card modifier for consistent container styling across the app.
 extension View {
+    @ViewBuilder
     func cardify(
         cornerRadius: CGFloat = 12,
         padding: CGFloat = 12,
@@ -143,13 +144,7 @@ extension View {
     ) -> some View {
         self
             .padding(padding)
-            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: cornerRadius))
-            .overlay(
-                RoundedRectangle(cornerRadius: cornerRadius)
-                    .stroke(Color.primary.opacity(strokeOpacity), lineWidth: 0.5)
-            )
-            .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
-            .shadow(color: shadow ? Color.black.opacity(0.04) : .clear, radius: shadow ? 8 : 0, x: 0, y: shadow ? 4 : 0)
+            .liquidGlass(cornerRadius: cornerRadius, shadow: shadow, stroke: strokeOpacity > 0)
     }
 
     /// Convenience: apply the pressable button style via a view modifier chain.

@@ -14,11 +14,12 @@ struct FilterAmountLabelView: View {
 
     var body: some View {
         Text(String(amount))
-            .padding(DesignTokens.Spacing.small)
+            .padding(.horizontal, DesignTokens.Spacing.small)
+            .padding(.vertical, DesignTokens.Spacing.tiny)
             .foregroundColor(colorScheme == .light ? .white : .accentColor)
-            .background {
-                Circle()
-                    .foregroundColor(colorScheme == .light ? .accentColor : .white)
-            }
+            .liquidGlassPill(
+                tint: colorScheme == .light ? Color.accentColor.opacity(0.22) : Color.white.opacity(0.16),
+                shadow: false
+            )
     }
 }

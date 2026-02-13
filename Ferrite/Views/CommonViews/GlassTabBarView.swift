@@ -46,9 +46,7 @@ struct GlassTabBarView: View {
                                 .fill(Color.accentColor.opacity(0.18))
                                 .overlay(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium).stroke(Color.accentColor.opacity(0.22), lineWidth: DesignTokens.Stroke.ultraThin))
                         } else {
-                            RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium)
-                                .fill(.ultraThinMaterial)
-                                .overlay(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium).stroke(Color.primary.opacity(0.02), lineWidth: DesignTokens.Stroke.ultraThin))
+                            Color.clear
                         }
                     }
                 )

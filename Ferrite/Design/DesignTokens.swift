@@ -111,10 +111,7 @@ enum DesignTokens {
         func body(content: Content) -> some View {
             content
                 .padding(Spacing.small)
-                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: cornerRadius))
-                .overlay(RoundedRectangle(cornerRadius: cornerRadius)
-                            .stroke(Color.primary.opacity(0.04), lineWidth: Stroke.ultraThin))
-                .shadow(color: Shadow.subtle.color, radius: Shadow.subtle.radius, x: 0, y: Shadow.subtle.y)
+                .liquidGlass(cornerRadius: cornerRadius)
         }
     }
 }

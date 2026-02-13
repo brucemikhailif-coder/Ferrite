@@ -31,7 +31,10 @@ struct TestHostingView: View {
                     .padding(.horizontal, DesignTokens.Spacing.small)
                     .padding(.vertical, DesignTokens.Spacing.small)
                     .font(.caption, weight: .bold)
-                    .background(Capsule().foregroundColor(.secondarySystemFill))
+                    .liquidGlassPill(
+                        tint: Color.accentColor.opacity(0.08),
+                        shadow: false
+                    )
                 }
                 .id(textName)
                 .transaction {
@@ -56,7 +59,10 @@ struct TestHostingView: View {
                     .padding(.horizontal, DesignTokens.Spacing.small)
                     .padding(.vertical, DesignTokens.Spacing.small)
                     .font(.caption, weight: .bold)
-                    .background(Capsule().foregroundColor(.secondarySystemFill))
+                    .liquidGlassPill(
+                        tint: Color.accentColor.opacity(0.08),
+                        shadow: false
+                    )
                 }
                 .id(secondTextName)
                 .transaction {
