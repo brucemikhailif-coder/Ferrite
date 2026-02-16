@@ -10,16 +10,22 @@ import SwiftUI
 struct EmptyInstructionView: View {
     let title: String
     let message: String
-    var systemName: String = "sparkles"
+    let systemName: String
+
+    init(title: String, message: String, systemName: String = "sparkles") {
+        self.title = title
+        self.message = message
+        self.systemName = systemName
+    }
 
     var body: some View {
         VStack(spacing: 12) {
             Image(systemName: systemName)
-                .font(.system(size: 24, weight: .semibold))
+                .font(DesignTokens.Typography.scaled(.title, weight: .semibold))
                 .accessibilityHidden(true)
 
             Text(title)
-                .font(.system(size: 22, weight: .semibold))
+                .font(DesignTokens.Typography.scaled(.title2, weight: .semibold))
 
             Text(message)
                 .padding(.horizontal, DesignTokens.Spacing.xlarge * 2)

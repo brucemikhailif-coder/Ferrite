@@ -68,7 +68,7 @@ struct ContentView: View {
                     EmptyInstructionView(
                         title: "No Results Found",
                         message: pluginManager.filteredInstalledSources.isEmpty ?
-                            "Redo your search with different keywords" :
+                            "Install or enable plugins in Settings to get results" :
                             "Check your source filter and redo your search.",
                         systemName: "magnifyingglass"
                     )
