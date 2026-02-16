@@ -10,11 +10,13 @@ import SwiftUI
 struct EmptyInstructionView: View {
     let title: String
     let message: String
+    var systemName: String = "sparkles"
 
     var body: some View {
         VStack(spacing: 12) {
-            Image(systemName: "sparkles")
+            Image(systemName: systemName)
                 .font(.system(size: 24, weight: .semibold))
+                .accessibilityHidden(true)
 
             Text(title)
                 .font(.system(size: 22, weight: .semibold))
@@ -23,6 +25,7 @@ struct EmptyInstructionView: View {
                 .padding(.horizontal, DesignTokens.Spacing.xlarge * 2)
                 .font(.footnote)
         }
+        .accessibilityElement(children: .combine)
         .multilineTextAlignment(.center)
         .foregroundColor(.init(uiColor: .secondaryLabel))
         .padding(DesignTokens.Spacing.xlarge)
