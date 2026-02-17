@@ -87,6 +87,7 @@ enum DesignTokens {
             case .largeTitle: return .system(.largeTitle, design: .default).weight(weight)
             case .title: return .system(.title, design: .default).weight(weight)
             case .title2: return .system(.title2, design: .default).weight(weight)
+            case .title3: return .system(.title3, design: .default).weight(weight)
             case .headline: return .system(.headline, design: .default).weight(weight)
             case .body: return .system(.body, design: .default).weight(weight)
             case .callout: return .system(.callout, design: .default).weight(weight)
