@@ -92,6 +92,7 @@ enum DesignTokens {
             case .body: return .system(.body, design: .default).weight(weight)
             case .callout: return .system(.callout, design: .default).weight(weight)
             case .subheadline: return .system(.subheadline, design: .default).weight(weight)
+            case .footnote: return .system(.footnote, design: .default).weight(weight)
             case .caption: return .system(.caption, design: .default).weight(weight)
             case .caption2: return .system(.caption2, design: .default).weight(weight)
             default: return .system(.body, design: .default).weight(weight)

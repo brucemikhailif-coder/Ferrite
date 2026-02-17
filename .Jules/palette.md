@@ -6,3 +6,7 @@
 4. Provide a default icon (e.g., "sparkles") in the component's initializer to maintain backward compatibility while allowing customization.
 
 **Action:** Apply this pattern to all `EmptyInstructionView` instances and ensure any new empty states follow this structure.
+
+## 2025-05-24 - Fixing Dangling Project References
+**Learning:** CI failures (exit code 65) in this project are often caused by `project.pbxproj` referencing files that no longer exist on disk. This specifically occurred with `SelectedDebridFilterView.swift`.
+**Action:** When CI fails with "Build input file cannot be found", verify if the file exists on disk. If it doesn't, remove its references from `Ferrite.xcodeproj/project.pbxproj`.
