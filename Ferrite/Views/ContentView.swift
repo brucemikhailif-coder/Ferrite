@@ -69,8 +69,8 @@ struct ContentView: View {
                         systemName: "magnifyingglass",
                         title: "No Results",
                         message: pluginManager.filteredInstalledSources.isEmpty ?
-                            "No results found" :
-                            "No results found. Check your source filter and redo your search."
+                            "Try a different search term" :
+                            "Check your source filter and try again"
                     )
                 }
             }
