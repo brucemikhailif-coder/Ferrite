@@ -12,10 +12,10 @@ struct EmptyInstructionView: View {
     let title: String
     let message: String
 
-    init(systemName: String = "sparkles", title: String, message: String) {
-        self.systemName = systemName
+    init(title: String, message: String, systemName: String = "sparkles") {
         self.title = title
         self.message = message
+        self.systemName = systemName
     }
 
     var body: some View {

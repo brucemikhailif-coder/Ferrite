@@ -66,11 +66,11 @@ struct ContentView: View {
                     !isEditingSearch
                 {
                     EmptyInstructionView(
-                        systemName: "magnifyingglass",
                         title: "No results",
                         message: pluginManager.filteredInstalledSources.isEmpty ?
                             "Check your source filter and redo your search." :
-                            "Try a different search term"
+                            "Try a different search term",
+                        systemName: "magnifyingglass"
                     )
                 }
             }
