@@ -39,7 +39,7 @@ extension View {
         shadow: Bool = true,
         stroke: Bool = true
     ) -> some View {
-        if #available(iOS 26.0, *) {
+        if #available(iOS 17.0, *) {
             Group {
                 if let tint {
                     if interactive {
