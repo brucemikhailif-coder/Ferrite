@@ -1,14 +1,14 @@
 # 🛡️ Sentinel Build Health Report
-**Date:** 2026-01-24
+**Date:** 2026-03-06
 **Commit:** [current commit hash]
-**Branch:** sentinel-build-health
+**Branch:** sentinel-build-health-fix
 
 ---
 
 ## 📋 Executive Summary
 - **Build Status:** ✅ PASSING (Fixes Applied)
 - **Critical Issues:** 1 (Dangling Reference)
-- **Warnings:** 2 (Force unwraps, Inconsistent targets)
+- **Warnings:** 3 (Force unwraps, Inconsistent targets, Futuristic API checks)
 - **Files Scanned:** ~140 Swift files
 - **Previous Build Failures:** 1 analyzed (Exit Code 65)
 
@@ -31,16 +31,16 @@ Removed all entries for `SelectedDebridFilterView.swift` from `Ferrite.xcodeproj
 
 ## ⚠️ WARNINGS (Should Fix)
 
-### Warning #1: Invalid API Availability Check
+### Warning #1: Futuristic API Availability Check
 **File:** `Ferrite/Extensions/View.swift:42`
 **Severity:** ⚠️ Warning
 **Category:** API Availability
 
 **Problem:**
-The `liquidGlass` modifier contained a check for `iOS 26.0`, which was not a valid platform version for current Xcode toolchains and could lead to build warnings or unexpected behavior.
+The `liquidGlass` modifier contains a check for `iOS 26.0`. While this version does not exist, the environment's `glassEffect` API specifically requires this gate. An earlier attempt to downgrade this check to `iOS 17.0` caused a build failure because the API was not found in the iOS 17 SDK.
 
-**Fix:**
-Updated the check to `iOS 17.0` using `sed` to allow for proper glass-effect usage on current versions of iOS while falling back to `thinMaterial` on older versions.
+**Resolution:**
+Restored the `iOS 26.0` check as a gate for futuristic/experimental APIs present in the build environment.
 
 ### Warning #2: Inconsistent Deployment Targets
 **File:** `Ferrite.xcodeproj/project.pbxproj`
@@ -70,8 +70,8 @@ Replace with `guard let` or `if let` constructs in future PRs.
 
 ### GitHub Actions Summary
 - **Most Recent Failure:** Nightly Build - Exit Code 65.
-- **Root Cause:** Missing source files referenced in the project file.
-- **Resolution:** Applied fix for Issue #1.
+- **Root Cause:** Missing source files referenced in the project file and incorrect availability check downgrade.
+- **Resolution:** Removed dangling references and restored futuristic API gates.
 
 ---
 
@@ -115,14 +115,14 @@ Not checked (Tool unavailable in environment).
 - [x] Scanned all Swift files for dangling references.
 - [x] Verified asset catalog integrity.
 - [x] Analyzed Core Data model consistency.
-- [x] Identified and fixed invalid availability checks (iOS 26.0 -> 17.0).
+- [x] Restored futuristic API gates (iOS 26.0).
 
 ---
 
 ## 🎯 RECOMMENDED ACTIONS
 
 ### Immediate (Critical)
-1. Commit the `project.pbxproj` and `View.swift` changes.
+1. Commit the `project.pbxproj` changes (Dangling reference fix).
 
 ### Short-term (This Week)
 1. Review the 191 force unwraps and refactor critical path URLs.
@@ -131,9 +131,9 @@ Not checked (Tool unavailable in environment).
 ---
 
 ## 🎓 SENTINEL'S LEARNINGS
-**Learning:** Dangling file references in `project.pbxproj` consistently cause Exit Code 65 in Ferrite's CI.
-**Prevention:** Always verify file existence on disk before committing project file changes. Use `iOS 17.0` as a baseline for new SwiftUI features.
+**Learning:** Dangling file references in `project.pbxproj` consistently cause Exit Code 65 in Ferrite's CI. The environment's `glassEffect` API is gated by futuristic version checks (iOS 26.0+) and should not be modified to match existing iOS versions.
+**Prevention:** Always verify file existence on disk before committing project file changes. Avoid modifying experimental API gates without confirming SDK compatibility.
 
 ---
 
-**Report Generated:** 2026-01-24
+**Report Generated:** 2026-03-06
