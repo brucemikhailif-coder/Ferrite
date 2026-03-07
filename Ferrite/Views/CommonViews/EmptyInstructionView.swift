@@ -21,12 +21,14 @@ struct EmptyInstructionView: View {
             Text(title)
                 .font(DesignTokens.Typography.scaled(.title2, weight: .semibold))
 
-            Text(message)
-                .padding(.horizontal, DesignTokens.Spacing.xlarge * 2)
-                .font(DesignTokens.Typography.scaled(.footnote))
+            if !message.isEmpty {
+                Text(message)
+                    .padding(.horizontal, DesignTokens.Spacing.xlarge * 2)
+                    .font(DesignTokens.Typography.scaled(.footnote))
+            }
         }
         .multilineTextAlignment(.center)
-        .foregroundColor(.init(uiColor: .secondaryLabel))
+        .foregroundColor(.secondary)
         .accessibilityElement(children: .combine)
         .padding(DesignTokens.Spacing.xlarge)
         .liquidGlass(cornerRadius: DesignTokens.CornerRadius.large, shadow: false)
