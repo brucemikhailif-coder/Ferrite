@@ -95,8 +95,11 @@ struct AddView: View {
                                 .background(Color.secondary.opacity(0.05))
                                 .cornerRadius(DesignTokens.CornerRadius.small)
                                 .padding(.horizontal, DesignTokens.Spacing.small)
+                                .accessibilityLabel("Links or magnets to process")
 
                             Button {
+                                let generator = UIImpactFeedbackGenerator(style: .medium)
+                                generator.impactOccurred()
                                 Task {
                                     await processMultiEntries()
                                 }
@@ -118,7 +121,8 @@ struct AddView: View {
                             .cornerRadius(DesignTokens.CornerRadius.medium)
                             .padding(.horizontal, DesignTokens.Spacing.small)
                             .padding(.bottom, DesignTokens.Spacing.small)
-                            .disabled(multiEntryText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isProcessing)
+                            .disabled(selectedDebrid == nil || multiEntryText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isProcessing)
+                            .accessibilityHint(processEntriesHint)
                         }
                         .liquidGlass(cornerRadius: DesignTokens.CornerRadius.medium)
                         .padding(.horizontal, DesignTokens.Spacing.medium)
@@ -147,11 +151,15 @@ struct AddView: View {
                                                 .lineLimit(1)
                                             Spacer()
                                             Button {
+                                                let generator = UIImpactFeedbackGenerator(style: .light)
+                                                generator.impactOccurred()
                                                 pendingTorrentUrls.remove(at: index)
                                             } label: {
                                                 Image(systemName: "xmark.circle.fill")
                                                     .foregroundColor(.secondary)
                                             }
+                                            .accessibilityLabel("Remove torrent")
+                                            .accessibilityHint("Removes \(url.lastPathComponent) from the upload list")
                                         }
                                         .padding(.horizontal, DesignTokens.Spacing.small)
                                     }
@@ -176,6 +184,8 @@ struct AddView: View {
                             .disabled(!(selectedDebrid?.supportsTorrentUpload ?? false))
 
                             Button {
+                                let generator = UIImpactFeedbackGenerator(style: .medium)
+                                generator.impactOccurred()
                                 Task {
                                     await processTorrentUploads()
                                 }
@@ -198,6 +208,7 @@ struct AddView: View {
                             .padding(.horizontal, DesignTokens.Spacing.small)
                             .padding(.bottom, DesignTokens.Spacing.small)
                             .disabled(!(selectedDebrid?.supportsTorrentUpload ?? false) || pendingTorrentUrls.isEmpty || isProcessing)
+                            .accessibilityHint(uploadTorrentsHint)
                         }
                         .liquidGlass(cornerRadius: DesignTokens.CornerRadius.medium)
                         .padding(.horizontal, DesignTokens.Spacing.medium)
@@ -457,6 +468,35 @@ struct AddView: View {
 
     private func isValidMagnet(_ link: String) -> Bool {
         link.lowercased().starts(with: "magnet:?xt=urn:btih:")
+    }
+
+    private var processEntriesHint: String {
+        if isProcessing {
+            return "Wait for current processing to finish"
+        }
+        if selectedDebrid == nil {
+            return "Select a provider first"
+        }
+        if multiEntryText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return "Enter web links or magnets first"
+        }
+        return ""
+    }
+
+    private var uploadTorrentsHint: String {
+        if isProcessing {
+            return "Wait for current processing to finish"
+        }
+        if selectedDebrid == nil {
+            return "Select a provider first"
+        }
+        if !(selectedDebrid?.supportsTorrentUpload ?? false) {
+            return "Selected provider does not support torrent uploads"
+        }
+        if pendingTorrentUrls.isEmpty {
+            return "Select torrent files first"
+        }
+        return ""
     }
 }
 
