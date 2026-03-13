@@ -67,7 +67,7 @@ class Kodi {
 
     func ping(server: KodiServer) async throws {
         guard let url = URL(string: "\(server.urlString)/jsonrpc") else {
-            throw DebridError.InvalidUrl
+            throw KodiError.InvalidBaseUrl
         }
 
         var request = URLRequest(url: url)
@@ -109,7 +109,7 @@ class Kodi {
         )
 
         guard let url = URL(string: "\(server.urlString)/jsonrpc") else {
-            throw DebridError.InvalidUrl
+            throw KodiError.InvalidBaseUrl
         }
 
         var request = URLRequest(url: url)
