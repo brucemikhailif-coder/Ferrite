@@ -103,7 +103,7 @@ class RealDebrid: PollingDebridSource, ObservableObject {
 
             return directVerificationUrl
         } catch {
-            await LoggingManager.shared.error("Couldn't get the new client creds!")
+            print("Couldn't get the new client creds!")
             throw DebridError.AuthQuery(description: error.localizedDescription)
         }
     }
@@ -164,7 +164,7 @@ class RealDebrid: PollingDebridSource, ObservableObject {
             throw DebridError.EmptyData
         }
 
-        guard let url = URL(string: "\(baseAuthUrl)/token") else {
+        guard let url = URL(string: "\(baseApiUrl)/token") else {
             throw DebridError.InvalidUrl
         }
         var request = URLRequest(url: url)
