@@ -105,7 +105,7 @@ class RealDebrid: PollingDebridSource, ObservableObject {
 
             return directVerificationUrl
         } catch {
-            logManager?.error("Couldn't get the new client creds: \(error.localizedDescription)", showToast: false)
+            await logManager?.error("Couldn't get the new client creds: \(error.localizedDescription)", showToast: false)
             throw DebridError.AuthQuery(description: error.localizedDescription)
         }
     }
@@ -205,7 +205,7 @@ class RealDebrid: PollingDebridSource, ObservableObject {
                     try await getApiTokens(deviceCode: refreshToken)
                 }
             } catch {
-                logManager?.error("RealDebrid: getToken error: \(error.localizedDescription)", showToast: false)
+                await logManager?.error("RealDebrid: getToken error: \(error.localizedDescription)", showToast: false)
                 return nil
             }
         }

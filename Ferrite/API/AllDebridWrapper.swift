@@ -76,7 +76,7 @@ class AllDebrid: PollingDebridSource, ObservableObject {
 
             return userUrl
         } catch {
-            logManager?.error("AllDebrid: Couldn't get pin information: \(error.localizedDescription)", showToast: false)
+            await logManager?.error("AllDebrid: Couldn't get pin information: \(error.localizedDescription)", showToast: false)
             throw DebridError.AuthQuery(description: error.localizedDescription)
         }
     }

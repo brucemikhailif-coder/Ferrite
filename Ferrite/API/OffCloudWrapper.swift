@@ -73,7 +73,7 @@ class OffCloud: DebridSource, ObservableObject {
         } else if response.statusCode == 401 {
             throw DebridError.FailedRequest(description: "The request \(requestName) failed because you were unauthorized. Please relogin to OffCloud in Settings.")
         } else {
-            logManager?.error("OffCloud: \(requestName) failed with status code \(response.statusCode)", showToast: false)
+            await logManager?.error("OffCloud: \(requestName) failed with status code \(response.statusCode)", showToast: false)
             throw DebridError.FailedRequest(description: "The request \(requestName) failed with status code \(response.statusCode).")
         }
     }
