@@ -23,7 +23,7 @@ struct CloudDownloadView: View {
     @State private var pendingDeleteDownload: DebridCloudDownload?
 
     var body: some View {
-        DisclosureGroup("Downloads") {
+        Section {
             ForEach(filteredDownloads, id: \.self) { cloudDownload in
                 CloudDownloadRow(
                     cloudDownload: cloudDownload,
@@ -41,9 +41,11 @@ struct CloudDownloadView: View {
                     contextMenuContent(for: cloudDownload)
                 }
             }
-
             .onDelete(perform: deleteDownloads)
-
+        } header: {
+            if !filteredDownloads.isEmpty {
+                Text("Downloads")
+            }
         }
         .sheet(isPresented: $showTransferBrowser) {
             transferBrowserView

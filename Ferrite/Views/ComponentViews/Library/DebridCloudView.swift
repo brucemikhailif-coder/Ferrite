@@ -31,7 +31,7 @@ struct DebridCloudView: View {
     
     enum CloudSegment: String, CaseIterable {
         case current = "Current"
-        case past = "Past"
+        case history = "History"
     }
 
     var body: some View {
@@ -44,17 +44,35 @@ struct DebridCloudView: View {
             }
             .pickerStyle(.segmented)
             .padding(.horizontal, DesignTokens.Spacing.medium)
+            .padding(.top, DesignTokens.Spacing.small)
+
+            HStack(spacing: DesignTokens.Spacing.small) {
+                DebridServiceToggle()
+                    .transaction {
+                        $0.animation = .none
+                    }
+                Spacer()
+            }
+            .padding(.horizontal, DesignTokens.Spacing.medium)
             .padding(.vertical, DesignTokens.Spacing.small)
             
             // Content based on selection
             if selectedSegment == .current {
                 currentCloudView
             } else {
-                pastCloudView
+                historyCloudView
             }
         }
         .task {
             await debridManager.fetchDebridCloud()
+        }
+        .task(id: selectedSegment) {
+            guard selectedSegment == .current else { return }
+
+            while !Task.isCancelled && selectedSegment == .current {
+                await debridManager.fetchDebridCloud(bypassTTL: true)
+                try? await Task.sleep(nanoseconds: 5_000_000_000)
+            }
         }
         .refreshable {
             await debridManager.fetchDebridCloud(bypassTTL: true)
@@ -121,9 +139,9 @@ struct DebridCloudView: View {
         .listStyle(.plain)
     }
     
-    // MARK: - Past Cloud View
+    // MARK: - History Cloud View
     
-    private var pastCloudView: some View {
+    private var historyCloudView: some View {
         List {
             ForEach(cachedFilteredHistory, id: \.historyKey) { item in
                 CloudHistoryRow(historyItem: item)

@@ -21,11 +21,15 @@ struct CloudMagnetView: View {
     @State private var showDeleteConfirm: Bool = false
     @State private var pendingDeleteMagnet: DebridCloudMagnet?
 
+    private var filteredMagnets: [DebridCloudMagnet] {
+        debridSource.cloudMagnets.filter {
+            searchText.isEmpty ? true : $0.fileName.lowercased().contains(searchText.lowercased())
+        }
+    }
+
     var body: some View {
-        DisclosureGroup("Magnets") {
-            ForEach(debridSource.cloudMagnets.filter {
-                searchText.isEmpty ? true : $0.fileName.lowercased().contains(searchText.lowercased())
-            }, id: \.self) { cloudMagnet in
+        Section {
+            ForEach(filteredMagnets, id: \.self) { cloudMagnet in
                 Button {
                     if debridSource.cachedStatus.contains(cloudMagnet.status), !cloudMagnet.links.isEmpty {
                         navModel.resultFromCloud = true

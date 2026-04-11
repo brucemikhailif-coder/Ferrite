@@ -61,13 +61,7 @@ struct LibraryView: View {
                         Spacer()
                         EditButton()
 
-                        switch navModel.libraryPickerSelection {
-                        case .debridCloud:
-                            DebridServiceToggle()
-                                .transaction {
-                                    $0.animation = .none
-                                }
-                        case .history:
+                        if navModel.libraryPickerSelection == .history {
                             HistoryActionsView()
                         }
                     }
