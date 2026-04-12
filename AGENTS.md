@@ -423,10 +423,14 @@ Implementation
 Agents working in this repo must load these skills by default at task start:
 
 - `deep-debug`
-- `swift-development`
-- `apple-swiftui-core`
-- `apple-swiftui-webkit`
-- `apple-liquid-glass`
+- `ios-development`
+- `liquid-glass`
+
+Use this local mapping when older instructions or prompts mention unavailable skill names:
+- `swift-development` -> `ios-development`
+- `apple-swiftui-core` -> `ios-development`
+- `apple-swiftui-webkit` -> `ios-development`
+- `apple-liquid-glass` -> `liquid-glass`
 
 If a task involves SwiftUI architecture, SwiftUI components, navigation/state patterns, embedded web content, or Liquid Glass styling, these skills are mandatory and should be consulted before implementation.
 
