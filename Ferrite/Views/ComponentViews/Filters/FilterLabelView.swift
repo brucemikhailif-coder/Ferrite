@@ -33,7 +33,7 @@ struct FilterLabelView: View {
 
             Image(systemName: "chevron.down")
                 .font(.caption2.weight(.bold))
-                .foregroundStyle(isActive ? .accent : .tertiary)
+                .foregroundStyle(isActive ? Color.accentColor : Color.primary.opacity(0.5))
                 .symbolRenderingMode(.hierarchical)
         }
         .padding(.horizontal, DesignTokens.Spacing.medium)

@@ -39,12 +39,12 @@ struct DebridServiceToggle: View {
                     .font(.caption.weight(isActive ? .semibold : .medium))
                     .foregroundStyle(isDisabled ? .secondary : (isActive ? .primary : .secondary))
 
-                if !isDisabled {
-                    Image(systemName: "chevron.forward")
-                        .font(.caption2)
-                        .foregroundStyle(isActive ? .accent : .tertiary)
-                        .symbolRenderingMode(.hierarchical)
-                }
+            if !isDisabled {
+                Image(systemName: "chevron.forward")
+                    .font(.caption2)
+                    .foregroundStyle(isActive ? Color.accentColor : Color.primary.opacity(0.5))
+                    .symbolRenderingMode(.hierarchical)
+            }
             }
             .padding(.horizontal, DesignTokens.Spacing.medium)
             .padding(.vertical, DesignTokens.Spacing.small)
