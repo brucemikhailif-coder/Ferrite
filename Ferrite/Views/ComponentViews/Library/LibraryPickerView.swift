@@ -14,7 +14,8 @@ struct LibraryPickerView: View {
     @EnvironmentObject var navModel: NavigationViewModel
 
     var body: some View {
-        LibraryHeaderView(selectedSegment: $navModel.libraryPickerSelection)
-            .padding(.horizontal, verticalSizeClass == .compact && UIDevice.current.hasNotch ? 47 : 0)
+        let horizontalInset: CGFloat = verticalSizeClass == .compact && UIDevice.current.hasNotch ? 47 : 0
+        return LibraryHeaderView(selectedSegment: $navModel.libraryPickerSelection)
+            .padding(.horizontal, horizontalInset)
     }
 }
