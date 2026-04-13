@@ -19,47 +19,73 @@ struct GlassTabBarView: View {
     ]
 
     var body: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: DesignTokens.TabBar.itemSpacing) {
             ForEach(tabs, id: \.0) { tab in
+                let isSelected = selection == tab.0
+
                 Button {
-                    // subtle haptic feedback on selection
-                    let generator = UIImpactFeedbackGenerator(style: .light)
-                    generator.impactOccurred()
-                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                    let generator = UISelectionFeedbackGenerator()
+                    generator.selectionChanged()
+
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
                         selection = tab.0
                     }
                 } label: {
-                    VStack(spacing: 4) {
+                    VStack(spacing: DesignTokens.Spacing.tiny) {
                         Image(systemName: tab.2)
-                            .font(.system(size: 18, weight: .semibold))
+                            .font(.system(size: DesignTokens.IconSize.medium, weight: isSelected ? .medium : .regular))
+                            .symbolRenderingMode(.hierarchical)
+
                         Text(tab.1)
                             .font(.caption2)
+                            .fontWeight(isSelected ? .medium : .regular)
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, DesignTokens.Spacing.small)
+                    .foregroundStyle(isSelected ? .primary : .secondary)
+                    .frame(maxWidth: .infinity, minHeight: DesignTokens.Interactive.minTapTarget)
+                    .background {
+                        RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.large, style: .continuous)
+                            .fill(isSelected ? Color.primary.opacity(0.06) : .clear)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.large, style: .continuous)
+                                    .stroke(isSelected ? Color.primary.opacity(0.06) : .clear, lineWidth: DesignTokens.Stroke.ultraThin)
+                            )
+                            .shadow(
+                                color: isSelected ? Color.black.opacity(0.015) : .clear,
+                                radius: DesignTokens.Shadow.subtle.radius,
+                                x: 0,
+                                y: DesignTokens.Shadow.subtle.y
+                            )
+                    }
+                    .contentShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.large, style: .continuous))
                 }
-                .tint(selection == tab.0 ? .primary : .secondary)
-                .background(
-                    Group {
-                        if selection == tab.0 {
-                            RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium)
-                                .fill(Color.accentColor.opacity(0.18))
-                                .overlay(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium).stroke(Color.accentColor.opacity(0.22), lineWidth: DesignTokens.Stroke.ultraThin))
-                        } else {
-                            Color.clear
-                        }
-                    }
-                )
-                .contentShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium))
+                .buttonStyle(PressableButtonStyle(scaleAmount: 0.97, opacityAmount: 0.98))
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel(tab.1)
+                .accessibilityAddTraits(isSelected ? .isSelected : [])
             }
         }
         .padding(DesignTokens.Spacing.small)
-        .liquidGlass(cornerRadius: DesignTokens.CornerRadius.pill)
+        .background {
+            RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.pill, style: .continuous)
+                .fill(.ultraThinMaterial)
+                .overlay(
+                    RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.pill, style: .continuous)
+                        .stroke(Color.primary.opacity(0.05), lineWidth: DesignTokens.Stroke.ultraThin)
+                )
+                .shadow(
+                    color: DesignTokens.Shadow.subtle.color,
+                    radius: DesignTokens.Shadow.subtle.radius,
+                    x: 0,
+                    y: DesignTokens.Shadow.subtle.y
+                )
+        }
+        .clipShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.pill, style: .continuous))
     }
 }
 
 struct GlassTabBarView_Previews: PreviewProvider {
     static var previews: some View {
         GlassTabBarView(selection: .constant(.search))
+            .padding()
     }
 }

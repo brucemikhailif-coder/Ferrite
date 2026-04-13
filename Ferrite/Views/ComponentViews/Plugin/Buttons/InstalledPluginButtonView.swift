@@ -23,16 +23,19 @@ struct InstalledPluginButtonView<P: Plugin>: View {
                 PersistenceController.shared.save()
             }
         )) {
-            VStack(alignment: .leading) {
-                VStack(alignment: .leading, spacing: 5) {
-                    HStack(spacing: 5) {
+            VStack(alignment: .leading, spacing: DesignTokens.Spacing.small) {
+                VStack(alignment: .leading, spacing: DesignTokens.Spacing.tiny) {
+                    HStack(spacing: DesignTokens.Spacing.tiny) {
                         Text(installedPlugin.name)
+                            .font(.headline)
+
                         Text("v\(installedPlugin.version)")
-                            .foregroundColor(.secondary)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
                     }
 
                     Text("by \(installedPlugin.author)")
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                         .lineLimit(1)
                 }
 
@@ -41,7 +44,7 @@ struct InstalledPluginButtonView<P: Plugin>: View {
                     PluginTagsView(tags: tags)
                 }
             }
-            .padding(.vertical, 2)
+            .padding(.vertical, DesignTokens.Spacing.tiny)
         }
         .contextMenu {
             Button {

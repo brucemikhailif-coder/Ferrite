@@ -12,11 +12,12 @@ struct PluginTagsView: View {
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack {
+            HStack(spacing: DesignTokens.Spacing.tiny) {
                 ForEach(tags, id: \.self) { tag in
                     Tag(name: tag.name, color: tag.colorHex.map { Color(hex: $0) })
                 }
             }
         }
+        .fixedSize(horizontal: false, vertical: true)
     }
 }

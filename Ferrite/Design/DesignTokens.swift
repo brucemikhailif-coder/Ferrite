@@ -2,116 +2,119 @@
 //  DesignTokens.swift
 //  Ferrite
 //
-//  Centralized design tokens for consistent spacing, sizing, and styling across the app.
-//
-//  Created by AI assistant on behalf of the user.
+//  Centralized design tokens following SwiftUI design principles
 //
 
 import SwiftUI
 
 /// Centralized design tokens for the Ferrite app.
 ///
-/// Use these tokens to keep spacing, corner radii, shadows, and sizes consistent
+/// Use these tokens to keep spacing, corner radii, typography, and colors consistent
 /// across the codebase. Avoid hard-coded numbers in views; reference these tokens instead.
 enum DesignTokens {
+    // MARK: - Spacing System (Base-4/Base-8 Grid)
+    
     enum Spacing {
         static let tiny: CGFloat = 4
         static let small: CGFloat = 8
         static let medium: CGFloat = 12
         static let large: CGFloat = 16
-        static let xlarge: CGFloat = 24
+        static let xlarge: CGFloat = 20
+        static let xxlarge: CGFloat = 24
+        static let xxxlarge: CGFloat = 32
+        static let huge: CGFloat = 40
+        static let massive: CGFloat = 48
     }
-
+    
+    // MARK: - Corner Radius
+    
     enum CornerRadius {
         static let micro: CGFloat = 6
         static let small: CGFloat = 8
-        static let medium: CGFloat = 12
-        static let large: CGFloat = 16
-        static let pill: CGFloat = 999 // use for capsule-like shapes
+        static let medium: CGFloat = 10  // iOS standard for cards
+        static let large: CGFloat = 12
+        static let xlarge: CGFloat = 16
+        static let pill: CGFloat = 999
     }
-
+    
+    // MARK: - Stroke Width
+    
     enum Stroke {
-        /// Very thin subtle stroke useful for glass outlines.
         static let ultraThin: CGFloat = 0.5
-        /// Standard outline width.
         static let thin: CGFloat = 1.0
+        static let medium: CGFloat = 2.0
+        static let thick: CGFloat = 3.0
     }
-
+    
+    // MARK: - Shadow
+    
     enum Shadow {
         static let subtle = ShadowSpec(radius: 2, y: 1, color: Color.black.opacity(0.02))
         static let medium = ShadowSpec(radius: 4, y: 2, color: Color.black.opacity(0.04))
         static let prominent = ShadowSpec(radius: 8, y: 4, color: Color.black.opacity(0.06))
-
+        
         struct ShadowSpec {
             let radius: CGFloat
             let y: CGFloat
             let color: Color
         }
     }
-
+    
+    // MARK: - Tab Bar
+    
     enum TabBar {
-        /// Smaller height for the tab bar (reduced from 56)
-        static let height: CGFloat = 44
-        /// Even more compact height when keyboard visible
-        static let compactHeight: CGFloat = 40
-        /// Tighter horizontal padding to keep bar closer to edges
-        static let horizontalPadding: CGFloat = 8
-        /// Minimal bottom padding to keep bar closer to screen edge
-        static let bottomPadding: CGFloat = 4
-        static let cornerRadius: CGFloat = CornerRadius.medium
+        static let height: CGFloat = 60
+        static let horizontalPadding: CGFloat = 16
+        static let bottomPadding: CGFloat = 8
+        static let itemSpacing: CGFloat = 8
     }
-
-    enum Sizes {
-        static let iconSmall: CGFloat = 14
-        static let iconMedium: CGFloat = 20
-        static let iconLarge: CGFloat = 28
-
-        static let progressHeight: CGFloat = 6
-        static let rowVerticalPadding: CGFloat = 10
-    }
-
+    
+    // MARK: - Typography (Limited to 6 distinct sizes for clear hierarchy)
+    
     enum Typography {
-        // Use the system text styles which automatically scale with Dynamic Type.
-        static var largeTitle: Font { .largeTitle }
-        static var title: Font { .title }
-        static var title2: Font { .title2 }
-        static var headline: Font { .headline }
-        static var body: Font { .body }
-        static var callout: Font { .callout }
-        static var caption: Font { .caption }
-
-        // Convenience helper to return a scaled SwiftUI Font with weight
-        static func scaled(_ textStyle: Font.TextStyle, weight: Font.Weight = .regular) -> Font {
-            // Prefer the built-in text style so SwiftUI dynamic type scaling is preserved.
-            switch textStyle {
-            case .largeTitle: return .system(.largeTitle, design: .default).weight(weight)
-            case .title: return .system(.title, design: .default).weight(weight)
-            case .title2: return .system(.title2, design: .default).weight(weight)
-            case .headline: return .system(.headline, design: .default).weight(weight)
-            case .body: return .system(.body, design: .default).weight(weight)
-            case .callout: return .system(.callout, design: .default).weight(weight)
-            case .subheadline: return .system(.subheadline, design: .default).weight(weight)
-            case .caption: return .system(.caption, design: .default).weight(weight)
-            case .caption2: return .system(.caption2, design: .default).weight(weight)
-            default: return .system(.body, design: .default).weight(weight)
-            }
-        }
+        static let hero: Font = .system(size: 36, weight: .light, design: .default)
+        static let title: Font = .system(size: 24, weight: .semibold, design: .default)
+        static let headline: Font = .system(size: 17, weight: .semibold, design: .default)
+        static let body: Font = .system(size: 15, weight: .regular, design: .default)
+        static let caption: Font = .system(size: 13, weight: .regular, design: .default)
+        static let label: Font = .system(size: 11, weight: .medium, design: .default)
+        
+        // Letter spacing for uppercase labels
+        static let labelTracking: CGFloat = 1.5
+        static let titleTracking: CGFloat = 0.5
     }
-
-    // MARK: - Helpful view modifiers and helpers
-
-    /// Apply a subtle card background style with material, stroke and shadow.
-    static func cardBackground<R: Shape>(cornerRadius: CGFloat = CornerRadius.medium) -> some ViewModifier {
-        CardBackgroundModifier(cornerRadius: cornerRadius)
+    
+    // MARK: - Icon Sizes
+    
+    enum IconSize {
+        static let small: CGFloat = 14
+        static let medium: CGFloat = 18
+        static let large: CGFloat = 22
+        static let xlarge: CGFloat = 28
     }
+    
+    // MARK: - Interactive Elements
+    
+    enum Interactive {
+        static let minTapTarget: CGFloat = 44
+        static let buttonHeight: CGFloat = 48
+        static let toggleRowPadding: CGFloat = 12
+    }
+}
 
-    private struct CardBackgroundModifier: ViewModifier {
-        var cornerRadius: CGFloat
+// MARK: - View Extensions
 
-        func body(content: Content) -> some View {
-            content
-                .padding(Spacing.small)
-                .liquidGlass(cornerRadius: cornerRadius)
-        }
+extension View {
+    /// Apply semantic system colors for cards/groups
+    func cardBackground() -> some View {
+        self
+            .background(Color(.secondarySystemBackground))
+            .clipShape(.rect(cornerRadius: DesignTokens.CornerRadius.medium))
+    }
+    
+    /// Standard divider with leading inset
+    func standardDivider() -> some View {
+        Divider()
+            .padding(.leading, DesignTokens.Spacing.large)
     }
 }

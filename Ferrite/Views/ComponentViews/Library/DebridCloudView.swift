@@ -44,17 +44,9 @@ struct DebridCloudView: View {
             }
             .pickerStyle(.segmented)
             .padding(.horizontal, DesignTokens.Spacing.medium)
-            .padding(.top, DesignTokens.Spacing.small)
-
-            HStack(spacing: DesignTokens.Spacing.small) {
-                DebridServiceToggle()
-                    .transaction {
-                        $0.animation = .none
-                    }
-                Spacer()
-            }
-            .padding(.horizontal, DesignTokens.Spacing.medium)
             .padding(.vertical, DesignTokens.Spacing.small)
+            
+            Divider()
             
             // Content based on selection
             if selectedSegment == .current {
@@ -332,12 +324,13 @@ private struct CloudHistoryRow: View {
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: iconName)
-                .font(.system(size: 20))
+                .font(.system(size: 20, weight: .semibold))
                 .foregroundStyle(iconColor)
             
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(historyItem.name)
-                    .font(.callout)
+                    .font(.callout.weight(.medium))
+                    .foregroundColor(.primary)
                     .lineLimit(2)
                 
                 HStack(spacing: 8) {
@@ -345,13 +338,13 @@ private struct CloudHistoryRow: View {
                     Text("•")
                     Text(historyItem.dateAdded, style: .date)
                 }
-                .font(.caption)
+                .font(.footnote)
                 .foregroundColor(.secondary)
                 
                 if !historyItem.linkOrHash.isEmpty {
                     Text(historyItem.linkOrHash)
                         .font(.caption2)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(.secondary.opacity(0.8))
                         .lineLimit(1)
                         .truncationMode(.middle)
                 }
@@ -359,7 +352,7 @@ private struct CloudHistoryRow: View {
             
             Spacer()
         }
-        .padding(DesignTokens.Spacing.small)
+        .padding(DesignTokens.Spacing.medium)
         .liquidGlass(cornerRadius: DesignTokens.CornerRadius.medium)
         .contextMenu {
             Button {

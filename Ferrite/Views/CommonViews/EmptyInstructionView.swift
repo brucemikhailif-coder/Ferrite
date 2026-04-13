@@ -10,23 +10,36 @@ import SwiftUI
 struct EmptyInstructionView: View {
     let title: String
     let message: String
+    var buttonTitle: String? = nil
+    var buttonAction: (() -> Void)? = nil
 
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 20) {
             Image(systemName: "sparkles")
-                .font(.system(size: 24, weight: .semibold))
+                .font(.system(size: 40, weight: .semibold))
+                .foregroundColor(.accentColor)
+                .opacity(0.8)
 
-            Text(title)
-                .font(.system(size: 22, weight: .semibold))
+            VStack(spacing: 8) {
+                Text(title)
+                    .font(.title3.weight(.bold))
+                    .foregroundColor(.primary)
 
-            Text(message)
-                .padding(.horizontal, DesignTokens.Spacing.xlarge * 2)
-                .font(.footnote)
+                Text(message)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .padding(.horizontal, DesignTokens.Spacing.xlarge)
+            }
+
+            if let buttonTitle, let buttonAction {
+                Button(buttonTitle, action: buttonAction)
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
+                .padding(.top, 8)
+            }
         }
         .multilineTextAlignment(.center)
-        .foregroundColor(.init(uiColor: .secondaryLabel))
         .padding(DesignTokens.Spacing.xlarge)
-        .liquidGlass(cornerRadius: DesignTokens.CornerRadius.large, shadow: false)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .ignoresSafeArea()
     }

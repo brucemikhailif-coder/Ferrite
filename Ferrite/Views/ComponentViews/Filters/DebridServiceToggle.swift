@@ -28,23 +28,29 @@ struct DebridServiceToggle: View {
         loggedInDebridSources.isEmpty
     }
 
+    private var isActive: Bool {
+        debridManager.selectedDebridSource != nil
+    }
+
     var body: some View {
         Button(action: cycleToNextService) {
-            HStack(spacing: 4) {
+            HStack(spacing: DesignTokens.Spacing.tiny) {
                 Text(currentServiceDisplay)
-                    .font(.caption.weight(.medium))
-                    .foregroundColor(isDisabled ? .secondary : .primary)
+                    .font(.caption.weight(isActive ? .semibold : .medium))
+                    .foregroundStyle(isDisabled ? .secondary : (isActive ? .primary : .secondary))
 
                 if !isDisabled {
                     Image(systemName: "chevron.forward")
                         .font(.caption2)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(isActive ? .accent : .tertiary)
+                        .symbolRenderingMode(.hierarchical)
                 }
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
+            .padding(.horizontal, DesignTokens.Spacing.medium)
+            .padding(.vertical, DesignTokens.Spacing.small)
+            .frame(minHeight: DesignTokens.Interactive.minTapTarget)
             .liquidGlassPill(
-                tint: isDisabled ? nil : Color.accentColor.opacity(0.08),
+                tint: isDisabled ? nil : (isActive ? Color.accentColor.opacity(0.16) : Color.primary.opacity(0.03)),
                 shadow: false
             )
         }

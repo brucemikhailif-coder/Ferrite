@@ -11,10 +11,6 @@ struct BackupsView: View {
     @EnvironmentObject var backupManager: BackupManager
     @EnvironmentObject var navModel: NavigationViewModel
 
-    @State private var selectedBackupUrl: URL?
-    @State private var showRestoreAlert = false
-    @State private var showRestoreCompletedAlert = false
-
     var body: some View {
         ZStack {
             if backupManager.backupUrls.isEmpty {
@@ -22,10 +18,22 @@ struct BackupsView: View {
             } else {
                 List {
                     ForEach(backupManager.backupUrls, id: \.self) { url in
-                        Button(url.lastPathComponent) {
+                        Button {
                             backupManager.selectedBackupUrl = url
                             backupManager.showRestoreAlert.toggle()
+                        } label: {
+                            VStack(alignment: .leading, spacing: DesignTokens.Spacing.tiny) {
+                                Text(url.lastPathComponent)
+                                    .font(.body.weight(.medium))
+                                    .foregroundStyle(.primary)
+
+                                Text(url.lastPathComponent.replacingOccurrences(of: ".ferritebackup", with: ""))
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
                         }
+                        .buttonStyle(.plain)
                         .contextMenu {
                             Button {
                                 navModel.activityItems = [url]
@@ -34,7 +42,6 @@ struct BackupsView: View {
                                 Label("Export", systemImage: "square.and.arrow.up")
                             }
                         }
-                        .tint(.primary)
                     }
                     .onDelete { offsets in
                         for index in offsets {

@@ -8,30 +8,32 @@
 import SwiftUI
 
 struct PluginCatalogButtonView<PJ: PluginJson>: View {
-    @Environment(\.colorScheme) var colorScheme
-
     @EnvironmentObject var pluginManager: PluginManager
 
     let availablePlugin: PJ
     let needsUpdate: Bool
 
     var body: some View {
-        HStack {
-            VStack(alignment: .leading) {
-                VStack(alignment: .leading, spacing: 5) {
-                    HStack(spacing: 5) {
+        HStack(alignment: .center, spacing: DesignTokens.Spacing.medium) {
+            VStack(alignment: .leading, spacing: DesignTokens.Spacing.medium) {
+                VStack(alignment: .leading, spacing: DesignTokens.Spacing.tiny) {
+                    HStack(alignment: .firstTextBaseline, spacing: DesignTokens.Spacing.tiny) {
                         Text(availablePlugin.name)
+                            .font(DesignTokens.Typography.headline)
+
                         Text("v\(availablePlugin.version)")
-                            .foregroundColor(.secondary)
+                            .font(DesignTokens.Typography.caption)
+                            .foregroundStyle(.secondary)
                     }
 
                     Group {
                         Text("by \(availablePlugin.author ?? "No author")")
+                            .font(DesignTokens.Typography.caption)
 
                         Text(availablePlugin.listName.map { "from \($0)" } ?? "an unknown list")
-                            .font(.caption)
+                            .font(DesignTokens.Typography.caption)
                     }
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
                     .lineLimit(1)
                 }
 
@@ -41,9 +43,9 @@ struct PluginCatalogButtonView<PJ: PluginJson>: View {
                 }
             }
 
-            Spacer()
+            Spacer(minLength: DesignTokens.Spacing.medium)
 
-            Button(needsUpdate ? "UPDATE" : "INSTALL") {
+            Button(needsUpdate ? "Update" : "Install") {
                 Task {
                     if let availableSource = availablePlugin as? SourceJson {
                         await pluginManager.installSource(sourceJson: availableSource, doUpsert: needsUpdate)
@@ -54,15 +56,12 @@ struct PluginCatalogButtonView<PJ: PluginJson>: View {
                     }
                 }
             }
-            .font(
-                .footnote
-                    .weight(.bold)
-            )
-            .padding(.horizontal, 7)
-            .padding(.vertical, 5)
-            .liquidGlassPill()
+            .buttonStyle(.borderedProminent)
+            .controlSize(.small)
+            .font(.caption.weight(.semibold))
         }
         .buttonStyle(.borderless)
-        .padding(.vertical, 2)
+        .padding(.vertical, DesignTokens.Spacing.small)
+        .frame(minHeight: DesignTokens.Interactive.minTapTarget, alignment: .leading)
     }
 }

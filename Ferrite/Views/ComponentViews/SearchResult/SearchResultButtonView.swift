@@ -18,7 +18,10 @@ struct SearchResultButtonView: View {
 
     @State private var runOnce = false
     @State var existingBookmark: Bookmark? = nil
-    @State private var showConfirmation = false
+
+    private var titleLineLimit: Int {
+        cacheBadgeText() == nil ? 3 : 2
+    }
 
     var body: some View {
         Button {
@@ -52,34 +55,31 @@ struct SearchResultButtonView: View {
                 }
             }
         } label: {
-            VStack(alignment: .leading, spacing: 10) {
-                HStack(spacing: 8) {
+            VStack(alignment: .leading, spacing: DesignTokens.Spacing.medium) {
+                HStack(alignment: .top, spacing: DesignTokens.Spacing.medium) {
                     Text(result.title ?? "No title")
-                        .font(.callout)
+                        .font(DesignTokens.Typography.headline)
+                        .foregroundStyle(.primary)
                         .fixedSize(horizontal: false, vertical: true)
-                        .lineLimit(4)
+                        .lineLimit(titleLineLimit)
+                        .multilineTextAlignment(.leading)
 
-                    Spacer(minLength: 0)
+                    Spacer(minLength: DesignTokens.Spacing.medium)
 
                     if let badge = cacheBadgeText() {
-                        Text(badge)
-                            .font(.caption2.weight(.semibold))
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .liquidGlassPill(
-                                tint: badgeColor(for: badge).opacity(0.15),
-                                shadow: false
-                            )
+                        cacheBadge(badge)
                     }
                 }
 
                 SearchResultInfoView(result: result)
             }
             .padding(DesignTokens.Spacing.medium)
-            .liquidGlassCard(shadow: false)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .liquidGlassCard(interactive: true)
             .listRowBackground(Color.clear)
             .disabledAppearance(navModel.currentChoiceSheet != nil, dimmedOpacity: 0.7, animation: .easeOut(duration: 0.2))
         }
+        .buttonStyle(.plain)
         .disableInteraction(navModel.currentChoiceSheet != nil)
         .tint(.primary)
         .contextMenu {
@@ -231,5 +231,19 @@ struct SearchResultButtonView: View {
         default:
             return .secondary
         }
+    }
+
+    private func cacheBadge(_ badge: String) -> some View {
+        Text(badge)
+            .font(.caption2.weight(.semibold))
+            .foregroundStyle(.primary)
+            .lineLimit(1)
+            .padding(.horizontal, DesignTokens.Spacing.small)
+            .padding(.vertical, DesignTokens.Spacing.tiny + 1)
+            .liquidGlassPill(
+                tint: badgeColor(for: badge).opacity(0.16),
+                shadow: false
+            )
+            .accessibilityLabel("Status: \(badge)")
     }
 }

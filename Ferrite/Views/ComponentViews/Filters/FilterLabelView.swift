@@ -8,45 +8,42 @@
 import SwiftUI
 
 struct FilterLabelView: View {
-    @Environment(\.colorScheme) var colorScheme
-
     var name: String?
     var fallbackName: String
     var count: Int?
 
-    // Pressed state for subtle feedback on touch
-    @State private var isPressed: Bool = false
+    private var isActive: Bool {
+        (count ?? 0) > 0
+    }
+
+    private var displayName: String {
+        (count ?? 1) == 1 ? (name ?? fallbackName) : fallbackName
+    }
 
     var body: some View {
-        HStack(spacing: 4) {
+        HStack(spacing: DesignTokens.Spacing.tiny) {
             if let count, count > 1 {
                 FilterAmountLabelView(amount: count)
             }
 
-            Text(count ?? 1 == 1 ? name ?? fallbackName : fallbackName)
-                .opacity(count ?? 0 > 0 ? 1 : 0.6)
-                .foregroundColor(count ?? 0 > 0 && colorScheme == .light ? .accentColor : .primary)
+            Text(displayName)
+                .lineLimit(1)
+                .foregroundStyle(isActive ? .primary : .secondary)
+                .fontWeight(isActive ? .semibold : .medium)
 
             Image(systemName: "chevron.down")
-                .foregroundColor(count ?? 0 > 0 ? (colorScheme == .light ? .accentColor : .primary) : .init(uiColor: .tertiaryLabel))
+                .font(.caption2.weight(.bold))
+                .foregroundStyle(isActive ? .accent : .tertiary)
+                .symbolRenderingMode(.hierarchical)
         }
-        .padding(.horizontal, 9)
-        .padding(.vertical, count ?? 1 > 1 ? 2 : 7)
-        .font(
-            .caption
-                .weight(.medium)
-        )
+        .padding(.horizontal, DesignTokens.Spacing.medium)
+        .padding(.vertical, DesignTokens.Spacing.small)
+        .frame(minHeight: DesignTokens.Interactive.minTapTarget)
+        .font(.caption)
         .liquidGlassPill(
-            tint: count ?? 0 > 0 ? Color.accentColor.opacity(0.1) : nil,
+            tint: isActive ? Color.accentColor.opacity(0.16) : Color.primary.opacity(0.03),
             shadow: false
         )
-        // Subtle pressed feedback
-        .scaleEffect(isPressed ? 0.98 : 1)
-        .animation(.spring(response: 0.25, dampingFraction: 0.8), value: isPressed)
-        .gesture(
-            DragGesture(minimumDistance: 0)
-                .onChanged { _ in isPressed = true }
-                .onEnded { _ in isPressed = false }
-        )
+        .contentShape(Capsule())
     }
 }

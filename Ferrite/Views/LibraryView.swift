@@ -57,8 +57,14 @@ struct LibraryView: View {
             .navigationTitle("Library")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    HStack {
-                        Spacer()
+                    HStack(spacing: 8) {
+                        if navModel.libraryPickerSelection == .debridCloud {
+                            DebridServiceToggle()
+                                .transaction {
+                                    $0.animation = .none
+                                }
+                        }
+
                         EditButton()
 
                         if navModel.libraryPickerSelection == .history {

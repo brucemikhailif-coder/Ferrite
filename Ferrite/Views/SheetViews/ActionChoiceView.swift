@@ -27,31 +27,33 @@ struct ActionChoiceView: View {
 
     @State private var showLinkCopyAlert = false
     @State private var showMagnetCopyAlert = false
+    @State private var showLocalActivitySheet = false
 
     var body: some View {
         NavigationStack {
             Form {
-                Section("Now Playing") {
-                    VStack(alignment: .leading, spacing: 5) {
+                Section {
+                    VStack(alignment: .leading, spacing: DesignTokens.Spacing.tiny) {
                         Text(navModel.selectedTitle)
-                            .font(.callout)
+                            .font(.headline)
                             .lineLimit(navModel.selectedBatchTitle.isEmpty ? .max : 1)
 
                         if !navModel.selectedBatchTitle.isEmpty {
                             Text(navModel.selectedBatchTitle)
-                                .foregroundColor(.gray)
+                                .foregroundStyle(.secondary)
                                 .font(.subheadline)
                         }
                     }
+                } header: {
+                    SectionHeaderView(title: "Now Playing", subtitle: "Current item and selected file context")
                 }
 
                 if !debridManager.downloadUrl.isEmpty {
-                    Section("Debrid options") {
-                        ListRowButtonView("Default action", systemImage: "sparkles") {
-                            pluginManager.runDefaultAction(
-                                urlString: debridManager.downloadUrl,
-                                navModel: navModel
-                            )
+                    Section {
+                        if let defaultDebridAction, defaultDebridAction != .none {
+                            ListRowButtonView("Default action", systemImage: "sparkles") {
+                                performDefaultAction(defaultDebridAction, urlString: debridManager.downloadUrl)
+                            }
                         }
 
                         ForEach(actions, id: \.id) { action in
@@ -97,16 +99,21 @@ struct ActionChoiceView: View {
                         }
 
                         ListRowButtonView("Share download URL", systemImage: "square.and.arrow.up.fill") {
-                            if let url = URL(string: debridManager.downloadUrl) {
-                                navModel.activityItems = [url]
-                                navModel.showLocalActivitySheet.toggle()
-                            }
+                            presentActivityItems(for: debridManager.downloadUrl)
                         }
+                    } header: {
+                        SectionHeaderView(title: "Debrid Options", subtitle: "Actions available for the generated download link")
                     }
                 }
 
                 if !navModel.resultFromCloud {
-                    Section("Magnet options") {
+                    Section {
+                        if let defaultMagnetAction, defaultMagnetAction != .none {
+                            ListRowButtonView("Default action", systemImage: "sparkles") {
+                                performDefaultAction(defaultMagnetAction, urlString: navModel.selectedMagnet?.link)
+                            }
+                        }
+
                         ForEach(actions, id: \.id) { action in
                             if action.requires.contains(ActionRequirement.magnet.rawValue) {
                                 ListRowButtonView(action.name, systemImage: "arrow.up.forward.app.fill") {
@@ -126,18 +133,15 @@ struct ActionChoiceView: View {
                         }
 
                         ListRowButtonView("Share magnet", systemImage: "square.and.arrow.up.fill") {
-                            if let magnetLink = navModel.selectedMagnet?.link,
-                               let url = URL(string: magnetLink)
-                            {
-                                navModel.activityItems = [url]
-                                navModel.showLocalActivitySheet.toggle()
-                            }
+                            presentActivityItems(for: navModel.selectedMagnet?.link)
                         }
+                    } header: {
+                        SectionHeaderView(title: "Magnet Options", subtitle: "Actions available for the original magnet link")
                     }
                 }
             }
             .tint(.primary)
-            .sheet(isPresented: $navModel.showLocalActivitySheet) {
+            .sheet(isPresented: $showLocalActivitySheet) {
                 ShareSheet(activityItems: navModel.activityItems)
                     .presentationDetents([.medium, .large])
             }
@@ -152,30 +156,86 @@ struct ActionChoiceView: View {
                 Text(pluginManager.actionErrorAlertMessage)
             }
             .onDisappear {
-                debridManager.downloadUrl = ""
-                debridManager.clearSelectedDebridItems()
-                debridManager.requiresUnrestrict = false
-                navModel.selectedTitle = ""
-                navModel.selectedBatchTitle = ""
-                navModel.resultFromCloud = false
+                clearSelectionState()
             }
             .navigationTitle("Link actions")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
-                        debridManager.downloadUrl = ""
-                        debridManager.clearSelectedDebridItems()
-                        debridManager.requiresUnrestrict = false
-                        navModel.selectedTitle = ""
-                        navModel.selectedBatchTitle = ""
-                        navModel.resultFromCloud = false
-
+                        clearSelectionState()
                         dismiss()
                     }
                 }
             }
         }
+    }
+
+    private var defaultDebridAction: DefaultAction? {
+        defaultAction(forKey: "Actions.DefaultDebrid")
+    }
+
+    private var defaultMagnetAction: DefaultAction? {
+        defaultAction(forKey: "Actions.DefaultMagnet")
+    }
+
+    private func defaultAction(forKey key: String) -> DefaultAction? {
+        guard
+            let rawValue = UserDefaults.standard.string(forKey: key),
+            let wrapper = CodableWrapper<DefaultAction>(rawValue: rawValue)
+        else {
+            return nil
+        }
+
+        return wrapper.value
+    }
+
+    private func performDefaultAction(_ action: DefaultAction, urlString: String?) {
+        switch action {
+        case .none:
+            break
+        case .share:
+            presentActivityItems(for: urlString)
+        case .kodi:
+            navModel.kodiExpanded = true
+        case let .custom(name, listId):
+            let actionFetchRequest = Action.fetchRequest()
+            actionFetchRequest.fetchLimit = 1
+            actionFetchRequest.predicate = NSPredicate(format: "name == %@ AND listId == %@", name, listId)
+
+            if let fetchedAction = try? PersistenceController.shared.backgroundContext.fetch(actionFetchRequest).first {
+                pluginManager.runDeeplinkAction(fetchedAction, urlString: urlString)
+            } else {
+                pluginManager.actionErrorAlertMessage =
+                    "The default action could not be run. Please check your default actions in Settings."
+                pluginManager.showActionErrorAlert.toggle()
+            }
+        }
+    }
+
+    private func presentActivityItems(for urlString: String?) {
+        guard let urlString, !urlString.isEmpty else {
+            return
+        }
+
+        if let url = URL(string: urlString) {
+            navModel.activityItems = [url]
+        } else {
+            navModel.activityItems = [urlString]
+        }
+
+        showLocalActivitySheet = true
+    }
+
+    private func clearSelectionState() {
+        debridManager.downloadUrl = ""
+        debridManager.clearSelectedDebridItems()
+        debridManager.requiresUnrestrict = false
+        navModel.selectedTitle = ""
+        navModel.selectedBatchTitle = ""
+        navModel.resultFromCloud = false
+        navModel.selectedMagnet = nil
+        navModel.activityItems = []
     }
 }
 

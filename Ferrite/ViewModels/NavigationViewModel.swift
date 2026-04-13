@@ -89,9 +89,6 @@ class NavigationViewModel: ObservableObject {
     @Published var currentChoiceSheet: ChoiceSheetType?
     var activityItems: [Any] = []
 
-    // Used to show the activity sheet in the share menu
-    @Published var showLocalActivitySheet = false
-
     @Published var selectedTab: ViewTab = .search
 
     // Used between service views and editor views in Settings

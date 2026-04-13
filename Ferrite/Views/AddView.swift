@@ -33,43 +33,42 @@ struct AddView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: DesignTokens.Spacing.medium) {
+                VStack(spacing: DesignTokens.Spacing.large) {
                     // Provider Section
                     VStack(alignment: .leading, spacing: DesignTokens.Spacing.small) {
-                        Text("Provider")
-                            .font(DesignTokens.Typography.headline)
-                            .padding(.horizontal, DesignTokens.Spacing.medium)
+                        HStack {
+                            Text("Provider")
+                                .font(DesignTokens.Typography.headline)
+                            Spacer()
+                            if let selectedDebrid {
+                                HStack(spacing: 8) {
+                                    capabilityIcon("Web", supported: selectedDebrid.supportsWebLinks, icon: "globe")
+                                    capabilityIcon("Magnet", supported: selectedDebrid.supportsMagnetUnrestrict, icon: "magnet")
+                                    capabilityIcon("Torrent", supported: selectedDebrid.supportsTorrentUpload, icon: "doc.zipper")
+                                }
+                            }
+                        }
+                        .padding(.horizontal, DesignTokens.Spacing.medium)
                         
-                        if debridManager.enabledDebrids.isEmpty {
-                            Text("No debrid providers are enabled.")
-                                .foregroundColor(.secondary)
-                                .padding(DesignTokens.Spacing.medium)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .liquidGlass(cornerRadius: DesignTokens.CornerRadius.medium)
-                                .padding(.horizontal, DesignTokens.Spacing.medium)
-                        } else {
-                            VStack(spacing: DesignTokens.Spacing.small) {
+                        VStack(spacing: 0) {
+                            if debridManager.enabledDebrids.isEmpty {
+                                Text("No debrid providers are enabled.")
+                                    .foregroundColor(.secondary)
+                                    .padding(DesignTokens.Spacing.medium)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            } else {
                                 Picker("Service", selection: $selectedDebridId) {
                                     ForEach(debridManager.enabledDebrids, id: \.id) { debrid in
                                         Text(debrid.id).tag(debrid.id)
                                     }
                                 }
                                 .pickerStyle(.menu)
-                                .padding(DesignTokens.Spacing.small)
-
-                                if let selectedDebrid {
-                                    HStack(spacing: 12) {
-                                        capabilityLabel("Web", supported: selectedDebrid.supportsWebLinks)
-                                        capabilityLabel("Magnet", supported: selectedDebrid.supportsMagnetUnrestrict)
-                                        capabilityLabel("Torrent", supported: selectedDebrid.supportsTorrentUpload)
-                                    }
-                                    .padding(.horizontal, DesignTokens.Spacing.small)
-                                    .padding(.bottom, DesignTokens.Spacing.small)
-                                }
+                                .padding(.horizontal, DesignTokens.Spacing.small)
+                                .padding(.vertical, 4)
                             }
-                            .liquidGlass(cornerRadius: DesignTokens.CornerRadius.medium)
-                            .padding(.horizontal, DesignTokens.Spacing.medium)
                         }
+                        .liquidGlass(cornerRadius: DesignTokens.CornerRadius.medium)
+                        .padding(.horizontal, DesignTokens.Spacing.medium)
                     }
 
                     // Multi-entry input Section
@@ -79,21 +78,25 @@ struct AddView: View {
                             .padding(.horizontal, DesignTokens.Spacing.medium)
                         
                         VStack(spacing: DesignTokens.Spacing.small) {
-                            Text("Enter one web link or magnet per line")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.horizontal, DesignTokens.Spacing.small)
-                                .padding(.top, DesignTokens.Spacing.small)
-                            
                             TextEditor(text: $multiEntryText)
                                 .textInputAutocapitalization(.never)
                                 .autocorrectionDisabled()
-                                .font(.body)
+                                .font(.system(.body, design: .monospaced))
                                 .frame(minHeight: 120)
                                 .padding(DesignTokens.Spacing.small)
-                                .background(Color.secondary.opacity(0.05))
+                                .background(Color.primary.opacity(0.03))
                                 .cornerRadius(DesignTokens.CornerRadius.small)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.small)
+                                        .stroke(Color.primary.opacity(0.06), lineWidth: 0.5)
+                                )
+                                .padding(.horizontal, DesignTokens.Spacing.small)
+                                .padding(.top, DesignTokens.Spacing.small)
+
+                            Text("Enter one link or magnet per line")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                                .frame(maxWidth: .infinity, alignment: .leading)
                                 .padding(.horizontal, DesignTokens.Spacing.small)
 
                             Button {
@@ -110,7 +113,7 @@ struct AddView: View {
                                         .font(.headline)
                                 }
                                 .frame(maxWidth: .infinity)
-                                .padding(DesignTokens.Spacing.small)
+                                .padding(DesignTokens.Spacing.medium)
                             }
                             .buttonStyle(PressableButtonStyle())
                             .background(Color.accentColor)
@@ -132,16 +135,30 @@ struct AddView: View {
                         
                         VStack(spacing: DesignTokens.Spacing.small) {
                             if pendingTorrentUrls.isEmpty {
-                                Text("No torrent files selected")
+                                Button {
+                                    showFileImporter.toggle()
+                                } label: {
+                                    VStack(spacing: 8) {
+                                        Image(systemName: "doc.badge.plus")
+                                            .font(.system(size: 24))
+                                        Text("Tap to choose .torrent files")
+                                            .font(.subheadline)
+                                    }
                                     .foregroundColor(.secondary)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .padding(DesignTokens.Spacing.medium)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 30)
+                                    .background(Color.primary.opacity(0.02))
+                                    .cornerRadius(DesignTokens.CornerRadius.small)
+                                }
+                                .padding(DesignTokens.Spacing.small)
+                                .disabled(!(selectedDebrid?.supportsTorrentUpload ?? false))
                             } else {
                                 VStack(alignment: .leading, spacing: 4) {
                                     ForEach(Array(pendingTorrentUrls.enumerated()), id: \.offset) { index, url in
                                         HStack {
                                             Image(systemName: "doc.fill")
                                                 .foregroundColor(.accentColor)
+                                                .font(.caption)
                                             Text(url.lastPathComponent)
                                                 .font(.caption)
                                                 .lineLimit(1)
@@ -150,60 +167,59 @@ struct AddView: View {
                                                 pendingTorrentUrls.remove(at: index)
                                             } label: {
                                                 Image(systemName: "xmark.circle.fill")
-                                                    .foregroundColor(.secondary)
+                                                    .foregroundColor(.secondary.opacity(0.8))
                                             }
                                         }
                                         .padding(.horizontal, DesignTokens.Spacing.small)
+                                        .padding(.vertical, 4)
+                                        .background(Color.primary.opacity(0.03))
+                                        .cornerRadius(DesignTokens.CornerRadius.micro)
                                     }
                                 }
-                                .padding(.vertical, DesignTokens.Spacing.small)
-                            }
-
-                            Button {
-                                showFileImporter.toggle()
-                            } label: {
-                                HStack {
-                                    Image(systemName: "folder")
-                                    Text("Choose Torrent Files")
-                                }
-                                .frame(maxWidth: .infinity)
                                 .padding(DesignTokens.Spacing.small)
-                            }
-                            .buttonStyle(PressableButtonStyle())
-                            .background(Color.secondary.opacity(0.2))
-                            .cornerRadius(DesignTokens.CornerRadius.medium)
-                            .padding(.horizontal, DesignTokens.Spacing.small)
-                            .disabled(!(selectedDebrid?.supportsTorrentUpload ?? false))
 
-                            Button {
-                                Task {
-                                    await processTorrentUploads()
+                                Button {
+                                    showFileImporter.toggle()
+                                } label: {
+                                    Label("Add more files", systemImage: "plus.circle")
+                                        .font(.caption.weight(.medium))
                                 }
-                            } label: {
-                                HStack {
-                                    if isProcessing {
-                                        ProgressView()
-                                            .tint(.white)
+                                .padding(.horizontal, DesignTokens.Spacing.small)
+                                .padding(.bottom, 4)
+                            }
+
+                            if !pendingTorrentUrls.isEmpty {
+                                Button {
+                                    Task {
+                                        await processTorrentUploads()
                                     }
-                                    Text(isProcessing ? "Uploading..." : "Upload Torrents")
-                                        .font(.headline)
+                                } label: {
+                                    HStack {
+                                        if isProcessing {
+                                            ProgressView()
+                                                .tint(.white)
+                                        }
+                                        Text(isProcessing ? "Uploading..." : "Upload Torrents")
+                                            .font(.headline)
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .padding(DesignTokens.Spacing.medium)
                                 }
-                                .frame(maxWidth: .infinity)
-                                .padding(DesignTokens.Spacing.small)
+                                .buttonStyle(PressableButtonStyle())
+                                .background(Color.accentColor)
+                                .foregroundColor(.white)
+                                .cornerRadius(DesignTokens.CornerRadius.medium)
+                                .padding(.horizontal, DesignTokens.Spacing.small)
+                                .padding(.bottom, DesignTokens.Spacing.small)
+                                .disabled(!(selectedDebrid?.supportsTorrentUpload ?? false) || pendingTorrentUrls.isEmpty || isProcessing)
                             }
-                            .buttonStyle(PressableButtonStyle())
-                            .background(Color.accentColor)
-                            .foregroundColor(.white)
-                            .cornerRadius(DesignTokens.CornerRadius.medium)
-                            .padding(.horizontal, DesignTokens.Spacing.small)
-                            .padding(.bottom, DesignTokens.Spacing.small)
-                            .disabled(!(selectedDebrid?.supportsTorrentUpload ?? false) || pendingTorrentUrls.isEmpty || isProcessing)
                         }
                         .liquidGlass(cornerRadius: DesignTokens.CornerRadius.medium)
                         .padding(.horizontal, DesignTokens.Spacing.medium)
                     }
                 }
                 .padding(.vertical, DesignTokens.Spacing.medium)
+                .padding(.bottom, 80) // Space for floating tab bar
             }
             .navigationTitle("Download")
             .navigationBarTitleDisplayMode(.inline)
@@ -299,13 +315,14 @@ struct AddView: View {
         }
     }
 
-    private func capabilityLabel(_ title: String, supported: Bool) -> some View {
-        Label(
-            title,
-            systemImage: supported ? "checkmark.circle.fill" : "xmark.circle.fill"
-        )
-        .font(.caption)
-        .foregroundColor(supported ? .green : .secondary)
+    private func capabilityIcon(_ title: String, supported: Bool, icon: String) -> some View {
+        Image(systemName: icon)
+            .font(.system(size: 14, weight: .bold))
+            .foregroundColor(supported ? .accentColor : .secondary.opacity(0.4))
+            .padding(6)
+            .background(supported ? Color.accentColor.opacity(0.12) : Color.primary.opacity(0.05))
+            .clipShape(Circle())
+            .help("\(title): \(supported ? "Supported" : "Not supported")")
     }
     
     // MARK: - Multi-entry Processing

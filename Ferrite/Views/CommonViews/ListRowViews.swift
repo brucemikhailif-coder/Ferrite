@@ -9,21 +9,51 @@
 
 import SwiftUI
 
+private enum ListRowMetrics {
+    static let contentSpacing = DesignTokens.Spacing.medium
+    static let minimumTrailingSpacing = DesignTokens.Spacing.medium
+    static let verticalPadding = DesignTokens.Spacing.small
+    static let accessoryFont = Font.caption.weight(.semibold)
+}
+
 struct ListRowLinkView: View {
     let text: String
     let link: String
 
+    private var destinationURL: URL? {
+        URL(string: link)
+    }
+
     var body: some View {
-        HStack {
-            Link(text, destination: URL(string: link)!)
-                .foregroundColor(.primary)
-
-            Spacer()
-
-            Image(systemName: "arrow.up.forward.app.fill")
-                .foregroundColor(.gray)
+        Group {
+            if let destinationURL {
+                Link(destination: destinationURL) {
+                    rowLabel
+                }
+            } else {
+                rowLabel
+                    .disabled(true)
+            }
         }
-        .padding(.trailing, -5)
+        .buttonStyle(.plain)
+    }
+
+    private var rowLabel: some View {
+        HStack(spacing: ListRowMetrics.contentSpacing) {
+            Text(text)
+                .font(DesignTokens.Typography.body)
+                .foregroundStyle(.primary)
+
+            Spacer(minLength: ListRowMetrics.minimumTrailingSpacing)
+
+            Image(systemName: "arrow.up.forward.app")
+                .font(ListRowMetrics.accessoryFont)
+                .foregroundStyle(.tertiary)
+                .symbolRenderingMode(.hierarchical)
+        }
+        .padding(.vertical, ListRowMetrics.verticalPadding)
+        .frame(maxWidth: .infinity, minHeight: DesignTokens.Interactive.minTapTarget, alignment: .leading)
+        .contentShape(Rectangle())
     }
 }
 
@@ -39,19 +69,28 @@ struct ListRowButtonView: View {
     }
 
     var body: some View {
-        HStack {
-            Button(text) {
-                action()
-            }
+        Button {
+            action()
+        } label: {
+            HStack(spacing: ListRowMetrics.contentSpacing) {
+                Text(text)
+                    .font(DesignTokens.Typography.body)
+                    .foregroundStyle(.primary)
 
-            Spacer()
+                Spacer(minLength: ListRowMetrics.minimumTrailingSpacing)
 
-            if let imageName = systemImage {
-                Image(systemName: imageName)
-                    .foregroundColor(.gray)
+                if let imageName = systemImage {
+                    Image(systemName: imageName)
+                        .font(ListRowMetrics.accessoryFont)
+                        .foregroundStyle(.tertiary)
+                        .symbolRenderingMode(.hierarchical)
+                }
             }
+            .padding(.vertical, ListRowMetrics.verticalPadding)
+            .frame(maxWidth: .infinity, minHeight: DesignTokens.Interactive.minTapTarget, alignment: .leading)
+            .contentShape(Rectangle())
         }
-        .padding(.trailing, -5)
+        .buttonStyle(.plain)
     }
 }
 
@@ -61,17 +100,27 @@ struct ListRowTextView: View {
     var rightSymbol: String?
 
     var body: some View {
-        HStack {
+        HStack(spacing: ListRowMetrics.contentSpacing) {
             Text(leftText)
+                .font(DesignTokens.Typography.body)
+                .foregroundStyle(.primary)
 
-            Spacer()
+            Spacer(minLength: ListRowMetrics.minimumTrailingSpacing)
 
             if let rightText {
                 Text(rightText)
+                    .font(DesignTokens.Typography.caption)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.trailing)
             } else if let rightSymbol {
                 Image(systemName: rightSymbol)
+                    .font(ListRowMetrics.accessoryFont)
+                    .foregroundStyle(.tertiary)
+                    .symbolRenderingMode(.hierarchical)
             }
         }
-        .padding(.trailing, -5)
+        .padding(.vertical, ListRowMetrics.verticalPadding)
+        .frame(maxWidth: .infinity, minHeight: DesignTokens.Interactive.minTapTarget, alignment: .leading)
+        .contentShape(Rectangle())
     }
 }

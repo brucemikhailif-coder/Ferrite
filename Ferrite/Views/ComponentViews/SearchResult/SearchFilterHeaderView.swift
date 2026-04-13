@@ -14,9 +14,13 @@ struct SearchFilterHeaderView: View {
     @EnvironmentObject var pluginManager: PluginManager
     @EnvironmentObject var navModel: NavigationViewModel
 
+    private var horizontalInset: CGFloat {
+        verticalSizeClass == .compact ? DesignTokens.Spacing.xlarge : DesignTokens.Spacing.large
+    }
+
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 6) {
+            HStack(spacing: DesignTokens.Spacing.small) {
                 // MARK: - Current filters
 
                 if !navModel.enabledFilters.isEmpty {
@@ -25,24 +29,24 @@ struct SearchFilterHeaderView: View {
                             navModel.enabledFilters = []
                         }
                     } label: {
-                        HStack(spacing: 4) {
+                        HStack(spacing: DesignTokens.Spacing.tiny) {
                             Image(systemName: "line.3.horizontal.decrease")
-                                .opacity(0.6)
-                                .foregroundColor(.primary)
+                                .foregroundStyle(.primary)
+                                .symbolRenderingMode(.hierarchical)
 
                             FilterAmountLabelView(amount: navModel.enabledFilters.count)
                         }
-                        .padding(.horizontal, 9)
-                        .padding(.vertical, 2)
-                        .font(
-                            .caption
-                                .weight(.medium)
-                        )
-                        .liquidGlassPill(shadow: false)
+                        .padding(.horizontal, DesignTokens.Spacing.medium)
+                        .padding(.vertical, DesignTokens.Spacing.small)
+                        .frame(minHeight: DesignTokens.Interactive.minTapTarget)
+                        .font(.caption.weight(.medium))
+                        .liquidGlassPill(tint: Color.primary.opacity(0.03), shadow: false)
                     }
+                    .buttonStyle(.plain)
 
-                    Divider()
-                        .frame(width: 2, height: 20)
+                    Rectangle()
+                        .fill(Color.secondary.opacity(0.18))
+                        .frame(width: 1, height: DesignTokens.Interactive.minTapTarget - 12)
                 }
 
                 // MARK: - Source filter picker
@@ -63,7 +67,8 @@ struct SearchFilterHeaderView: View {
 
                 SortFilterView()
             }
-            .padding(.horizontal, verticalSizeClass == .compact ? 65 : 18)
+            .padding(.horizontal, horizontalInset)
+            .padding(.vertical, DesignTokens.Spacing.tiny)
             .animation(.easeInOut, value: navModel.enabledFilters)
         }
     }

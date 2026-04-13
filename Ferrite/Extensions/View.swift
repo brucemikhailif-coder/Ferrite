@@ -33,7 +33,7 @@ extension View {
 
     @ViewBuilder
     func liquidGlass(
-        cornerRadius: CGFloat = 16,
+        cornerRadius: CGFloat = DesignTokens.CornerRadius.medium,
         tint: Color? = nil,
         interactive: Bool = false,
         shadow: Bool = true,
@@ -43,22 +43,20 @@ extension View {
             Group {
                 if let tint {
                     if interactive {
-                        glassEffect(.regular.tint(tint).interactive(), in: .rect(cornerRadius: cornerRadius))
+                        glassEffect(.ultraThinMaterial.tint(tint).interactive(), in: .rect(cornerRadius: cornerRadius))
                     } else {
-                        glassEffect(.regular.tint(tint), in: .rect(cornerRadius: cornerRadius))
+                        glassEffect(.ultraThinMaterial.tint(tint), in: .rect(cornerRadius: cornerRadius))
                     }
                 } else if interactive {
-                    glassEffect(.regular.interactive(), in: .rect(cornerRadius: cornerRadius))
+                    glassEffect(.ultraThinMaterial.interactive(), in: .rect(cornerRadius: cornerRadius))
                 } else {
-                    glassEffect(.regular, in: .rect(cornerRadius: cornerRadius))
+                    glassEffect(.ultraThinMaterial, in: .rect(cornerRadius: cornerRadius))
                 }
             }
-
-            // (PressableButtonStyle and cardify moved to top-level declarations)
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius)
-                    .stroke(Color.primary.opacity(0.06), lineWidth: stroke ? 0.5 : 0)
+                    .stroke(Color.primary.opacity(0.06), lineWidth: stroke ? DesignTokens.Stroke.ultraThin : 0)
                     .blendMode(.overlay)
             )
             .overlay(
@@ -71,13 +69,23 @@ extension View {
                 .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
                 .allowsHitTesting(false)
             )
-            .shadow(color: shadow ? Color.black.opacity(0.03) : .clear, radius: shadow ? 6 : 0, x: 0, y: shadow ? 2 : 0)
+            .shadow(
+                color: shadow ? DesignTokens.Shadow.subtle.color : .clear,
+                radius: shadow ? DesignTokens.Shadow.subtle.radius : 0,
+                x: 0,
+                y: shadow ? DesignTokens.Shadow.subtle.y : 0
+            )
         } else {
-            background(.thinMaterial)
+            background(.ultraThinMaterial)
                 .cornerRadius(cornerRadius)
                 .overlay(RoundedRectangle(cornerRadius: cornerRadius)
-                    .stroke(Color.primary.opacity(0.04), lineWidth: stroke ? 0.5 : 0))
-                .shadow(color: shadow ? Color.black.opacity(0.03) : .clear, radius: shadow ? 4 : 0, x: 0, y: shadow ? 1 : 0)
+                    .stroke(Color.primary.opacity(0.04), lineWidth: stroke ? DesignTokens.Stroke.ultraThin : 0))
+                .shadow(
+                    color: shadow ? DesignTokens.Shadow.subtle.color : .clear,
+                    radius: shadow ? DesignTokens.Shadow.subtle.radius : 0,
+                    x: 0,
+                    y: shadow ? DesignTokens.Shadow.subtle.y : 0
+                )
         }
     }
 
@@ -90,7 +98,7 @@ extension View {
         shadow: Bool = true,
         stroke: Bool = true
     ) -> some View {
-        liquidGlass(cornerRadius: 12, tint: tint, interactive: interactive, shadow: shadow, stroke: stroke)
+        liquidGlass(cornerRadius: DesignTokens.CornerRadius.medium, tint: tint, interactive: interactive, shadow: shadow, stroke: stroke)
     }
 
     /// Pill-style liquid glass with fully rounded corners
@@ -100,28 +108,23 @@ extension View {
         shadow: Bool = true,
         stroke: Bool = true
     ) -> some View {
-        liquidGlass(cornerRadius: 999, tint: tint, interactive: interactive, shadow: shadow, stroke: stroke)
+        liquidGlass(cornerRadius: DesignTokens.CornerRadius.pill, tint: tint, interactive: interactive, shadow: shadow, stroke: stroke)
     }
 
     /// Toast-style liquid glass with small corner radius
-    /// Uses cornerRadius 10 for a slightly rounded but not pill-shaped appearance,
-    /// suitable for temporary notification overlays
     func liquidGlassToast(
         tint: Color? = nil,
         interactive: Bool = false,
         shadow: Bool = true,
         stroke: Bool = true
     ) -> some View {
-        liquidGlass(cornerRadius: 10, tint: tint, interactive: interactive, shadow: shadow, stroke: stroke)
+        liquidGlass(cornerRadius: DesignTokens.CornerRadius.small, tint: tint, interactive: interactive, shadow: shadow, stroke: stroke)
     }
 }
 
-// MARK: - PressableButtonStyle (top-level)
-// Moved out of the liquidGlass implementation so it can be applied app-wide.
+// MARK: - PressableButtonStyle
 struct PressableButtonStyle: ButtonStyle {
-    /// Scale applied while pressed (defaults to a gentle 0.98)
     var scaleAmount: CGFloat = 0.98
-    /// Opacity applied while pressed (defaults to a slight dim)
     var opacityAmount: Double = 0.96
 
     func makeBody(configuration: Configuration) -> some View {
@@ -133,12 +136,11 @@ struct PressableButtonStyle: ButtonStyle {
 }
 
 // MARK: - Cardify extension
-// A reusable card modifier for consistent container styling across the app.
 extension View {
     @ViewBuilder
     func cardify(
-        cornerRadius: CGFloat = 12,
-        padding: CGFloat = 12,
+        cornerRadius: CGFloat = DesignTokens.CornerRadius.medium,
+        padding: CGFloat = DesignTokens.Spacing.medium,
         shadow: Bool = true,
         strokeOpacity: Double = 0.04
     ) -> some View {
@@ -147,7 +149,6 @@ extension View {
             .liquidGlass(cornerRadius: cornerRadius, shadow: shadow, stroke: strokeOpacity > 0)
     }
 
-    /// Convenience: apply the pressable button style via a view modifier chain.
     func applyPressableButtonStyle(scaleAmount: CGFloat = 0.98, opacityAmount: Double = 0.96) -> some View {
         self.buttonStyle(PressableButtonStyle(scaleAmount: scaleAmount, opacityAmount: opacityAmount))
     }

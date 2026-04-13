@@ -39,15 +39,17 @@ struct PluginAggregateView<P: Plugin, PJ: PluginJson>: View {
                 searchText: searchText
             )
             if !filteredUpdatedPlugins.isEmpty {
-                Section("Updates") {
+                Section {
                     ForEach(filteredUpdatedPlugins, id: \.self) { (updatedPlugin: PJ) in
                         PluginCatalogButtonView(availablePlugin: updatedPlugin, needsUpdate: true)
                     }
+                } header: {
+                    SectionHeaderView(title: "Updates", subtitle: "Installed plugins with newer versions available")
                 }
             }
 
             if !installedPlugins.isEmpty {
-                Section("Installed") {
+                Section {
                     ForEach(installedPlugins, id: \.self) { installedPlugin in
                         InstalledPluginButtonView(
                             installedPlugin: installedPlugin,
@@ -55,6 +57,8 @@ struct PluginAggregateView<P: Plugin, PJ: PluginJson>: View {
                             selectedPlugin: $selectedPlugin
                         )
                     }
+                } header: {
+                    SectionHeaderView(title: "Installed", subtitle: "Enabled plugins available on this device")
                 }
             }
 
@@ -64,10 +68,12 @@ struct PluginAggregateView<P: Plugin, PJ: PluginJson>: View {
                 searchText: searchText
             )
             if !filteredAvailablePlugins.isEmpty {
-                Section("Catalog") {
+                Section {
                     ForEach(filteredAvailablePlugins, id: \.self) { availablePlugin in
                         PluginCatalogButtonView(availablePlugin: availablePlugin, needsUpdate: false)
                     }
+                } header: {
+                    SectionHeaderView(title: "Catalog", subtitle: "Available plugins from your configured lists")
                 }
             }
         }

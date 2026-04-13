@@ -56,11 +56,15 @@ struct DebridTransferBrowserView: View {
                 ForEach(files.filter {
                     searchText.isEmpty ? true : $0.name.lowercased().contains(searchText.lowercased())
                 }, id: \.self) { file in
-                    Button(file.name) {
+                    Button {
                         Task {
                             await unrestrict(file: file)
                         }
+                    } label: {
+                        Text(file.name)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
+                    .buttonStyle(.plain)
                     .tint(.primary)
                 }
             }

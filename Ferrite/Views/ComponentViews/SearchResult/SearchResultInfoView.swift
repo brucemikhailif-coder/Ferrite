@@ -13,27 +13,75 @@ struct SearchResultInfoView: View {
     var result: SearchResult
 
     var body: some View {
-        HStack {
+        ViewThatFits(in: .horizontal) {
+            infoRow
+
+            VStack(alignment: .leading, spacing: DesignTokens.Spacing.small) {
+                primaryMetadata
+                secondaryMetadata
+            }
+        }
+    }
+
+    private var infoRow: some View {
+        HStack(alignment: .center, spacing: DesignTokens.Spacing.medium) {
+            primaryMetadata
+
+            Spacer(minLength: DesignTokens.Spacing.medium)
+
+            secondaryMetadata
+        }
+        .font(.caption2)
+    }
+
+    private var primaryMetadata: some View {
+        HStack(spacing: DesignTokens.Spacing.small) {
             Text(result.source)
+                .foregroundStyle(.secondary)
 
-            Spacer()
+            if let size = result.size {
+                metadataLabel(size, emphasis: .standard)
+            }
+        }
+    }
 
+    private var secondaryMetadata: some View {
+        HStack(spacing: DesignTokens.Spacing.small) {
             if let seeders = result.seeders {
-                Text("S: \(seeders)")
+                metadataLabel("S: \(seeders)", emphasis: seeders > 0 ? .positive : .muted)
             }
 
             if let leechers = result.leechers {
-                Text("L: \(leechers)")
-            }
-
-            if let size = result.size {
-                Text(size)
+                metadataLabel("L: \(leechers)", emphasis: .muted)
             }
 
             if let debridSource = debridManager.selectedDebridSource {
                 DebridLabelView(debridSource: debridSource, magnet: result.magnet)
             }
         }
-        .font(.caption)
+    }
+
+    @ViewBuilder
+    private func metadataLabel(_ text: String, emphasis: MetadataEmphasis) -> some View {
+        Text(text)
+            .foregroundStyle(emphasis.color)
+            .font(.caption2.weight(emphasis == .positive ? .medium : .regular))
+    }
+
+    private enum MetadataEmphasis: Equatable {
+        case standard
+        case positive
+        case muted
+
+        var color: some ShapeStyle {
+            switch self {
+            case .standard:
+                return Color.secondary
+            case .positive:
+                return Color.green.opacity(0.9)
+            case .muted:
+                return Color.tertiary
+            }
+        }
     }
 }

@@ -37,48 +37,63 @@ struct HistoryButtonView: View {
                 )
             }
         } label: {
-            VStack(alignment: .leading, spacing: 10) {
-                VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: DesignTokens.Spacing.medium) {
+                VStack(alignment: .leading, spacing: DesignTokens.Spacing.tiny) {
                     Text(entry.name ?? "Unknown title")
-                        .font(entry.subName == nil ? .body : .subheadline)
+                        .font(DesignTokens.Typography.headline)
+                        .foregroundStyle(.primary)
                         .lineLimit(entry.subName == nil ? 2 : 1)
 
                     if let subName = entry.subName {
                         Text(subName)
-                            .foregroundColor(.gray)
-                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .font(DesignTokens.Typography.body)
                             .lineLimit(2)
                     }
                 }
 
-                HStack {
+                HStack(alignment: .center, spacing: DesignTokens.Spacing.medium) {
                     Text(entry.source ?? "Unknown source")
+                        .foregroundStyle(.secondary)
+                        .font(DesignTokens.Typography.caption)
 
-                    Spacer()
+                    Spacer(minLength: DesignTokens.Spacing.medium)
 
-                    Text("DEBRID")
-                        .fontWeight(.bold)
-                        .font(.caption2)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .liquidGlassPill(
-                            tint: getTagColor().opacity(0.2),
-                            shadow: false
-                        )
+                    statusBadge
+
+                    Image(systemName: "chevron.right")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.tertiary)
+                        .symbolRenderingMode(.hierarchical)
                 }
-                .font(.caption)
             }
+            .padding(DesignTokens.Spacing.medium)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .liquidGlassCard(interactive: true)
             .disabledAppearance(navModel.currentChoiceSheet != nil, dimmedOpacity: 0.7, animation: .easeOut(duration: 0.2))
         }
+        .buttonStyle(.plain)
         .tint(.primary)
         .disableInteraction(navModel.currentChoiceSheet != nil)
     }
 
-    func getTagColor() -> Color {
-        if let url = entry.url, url.starts(with: "https://") {
-            return Color.green
-        } else {
-            return Color.red
+    private var isDirectLink: Bool {
+        guard let url = entry.url?.lowercased() else {
+            return false
         }
+
+        return url.hasPrefix("https://") || url.hasPrefix("http://")
+    }
+
+    private var statusBadge: some View {
+        Text(isDirectLink ? "Link" : "Magnet")
+            .font(.caption2.weight(.semibold))
+            .foregroundStyle(.primary)
+            .padding(.horizontal, DesignTokens.Spacing.small)
+            .padding(.vertical, DesignTokens.Spacing.tiny + 1)
+            .liquidGlassPill(
+                tint: (isDirectLink ? Color.green : Color.red).opacity(0.2),
+                shadow: false
+            )
     }
 }

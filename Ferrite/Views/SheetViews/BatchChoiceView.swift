@@ -22,11 +22,15 @@ struct BatchChoiceView: View {
             List {
                 ForEach(debridManager.selectedDebridItem?.files ?? [], id: \.self) { file in
                     if file.name.lowercased().contains(searchText.lowercased()) || searchText.isEmpty {
-                        Button(file.name) {
+                        Button {
                             debridManager.selectedDebridFile = file
 
                             queueCommonDownload(fileName: file.name)
+                        } label: {
+                            Text(file.name)
+                                .frame(maxWidth: .infinity, alignment: .leading)
                         }
+                        .buttonStyle(.plain)
                     }
                 }
             }
