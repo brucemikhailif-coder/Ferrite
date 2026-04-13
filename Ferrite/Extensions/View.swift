@@ -43,14 +43,14 @@ extension View {
             Group {
                 if let tint {
                     if interactive {
-                        glassEffect(.ultraThinMaterial.tint(tint).interactive(), in: .rect(cornerRadius: cornerRadius))
+                        glassEffect(.regular.tint(tint).interactive(), in: .rect(cornerRadius: cornerRadius))
                     } else {
-                        glassEffect(.ultraThinMaterial.tint(tint), in: .rect(cornerRadius: cornerRadius))
+                        glassEffect(.regular.tint(tint), in: .rect(cornerRadius: cornerRadius))
                     }
                 } else if interactive {
-                    glassEffect(.ultraThinMaterial.interactive(), in: .rect(cornerRadius: cornerRadius))
+                    glassEffect(.regular.interactive(), in: .rect(cornerRadius: cornerRadius))
                 } else {
-                    glassEffect(.ultraThinMaterial, in: .rect(cornerRadius: cornerRadius))
+                    glassEffect(.regular, in: .rect(cornerRadius: cornerRadius))
                 }
             }
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
