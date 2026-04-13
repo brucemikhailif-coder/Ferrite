@@ -48,7 +48,7 @@ struct SearchResultInfoView: View {
     private var secondaryMetadata: some View {
         HStack(spacing: DesignTokens.Spacing.small) {
             if let seeders = result.seeders {
-                metadataLabel("S: \(seeders)", emphasis: seeders > 0 ? .positive : .muted)
+                metadataLabel("S: \(seeders)", emphasis: (Int(seeders) ?? 0) > 0 ? .positive : .muted)
             }
 
             if let leechers = result.leechers {
@@ -73,14 +73,15 @@ struct SearchResultInfoView: View {
         case positive
         case muted
 
+        @ViewBuilder
         var color: some ShapeStyle {
             switch self {
             case .standard:
-                return Color.secondary
+                Color.secondary
             case .positive:
-                return Color.green.opacity(0.9)
+                Color.green.opacity(0.9)
             case .muted:
-                return Color.tertiary
+                Color.primary.opacity(0.5)
             }
         }
     }
