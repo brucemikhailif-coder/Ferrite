@@ -1,61 +1,74 @@
 # Findings & Decisions
 
 ## Requirements
-- Produce an implementation plan for the next task cycle
-- Update the relevant repository configuration
-- Keep the repo aligned with the planning workflow defined in `AGENTS.md`
+- Apply the remaining 5 UI polish fixes directly in the codebase
+- Keep behavior unchanged unless needed for polish
+- Reuse `DesignTokens` and shared styles where possible
+- Limit edits to the listed SwiftUI files
 
 ## Assumptions
-- "Update the configuration" refers to agent/repository configuration rather than app runtime settings
-- The immediate problem to fix is the mismatch between required skill names in `AGENTS.md` and the locally installed skill files
+- The existing migrated glass/card styles are the baseline to align to
+- Row unification should come from spacing, typography, and accessory treatment rather than introducing a new component abstraction in this pass
+- Settings logs should remain list-based but can feel more elevated with subtle surface treatment
 
 ## Open Questions
-- None blocking. The configuration target is concrete enough after inspection.
+- None blocking for this polish pass
 
 ## Research Findings
-- Existing planning docs were still archived around the completed Debrid/Add feature cycle and needed a fresh active task state.
-- The repo already had `task_plan.md`, `findings.md`, and `progress.md`, but it was missing `IMPLEMENTATION_PHASES.md` and `SESSION.md`.
-- The required-skills section in `AGENTS.md` listed `swift-development`, `apple-swiftui-core`, `apple-swiftui-webkit`, and `apple-liquid-glass`.
-- Local skill discovery confirmed only these relevant installed skill files:
-  - `/root/.agents/skills/deep-debug/SKILL.md`
-  - `/root/.agents/skills/ios/SKILL.md`
-  - `/root/.agents/skills/apple-design/liquid-glass/SKILL.md`
-- There is no local `SKILL.md` for `swift-development`, `apple-swiftui-core`, or `apple-swiftui-webkit` in this environment.
+- `SearchFilterHeaderView` used a suspicious `xxxlarge` compact inset that felt tuned by eye rather than by token scale.
+- Shared row files (`ListRowViews`, `HistoryButtonView`, `PluginCatalogButtonView`) were close stylistically but not using the same rhythm for spacing, label sizing, and accessory treatment.
+- Search result cards already had a solid glass-card shell; density mainly came from tight vertical rhythm and metadata weight.
+- `GlassTabBarView` still used a more assertive selected fill than the rest of the migrated glass system.
+- `SettingsLogView` had the right container structure but visually read as flat/plain text rows.
 
 ## Evidence Log
 | Source | What It Confirms | Confidence |
 | ------ | ---------------- | ---------- |
-| `AGENTS.md` | Repo requires a default skill set and a planning-file workflow | high |
-| `task_plan.md`, `findings.md`, `progress.md` | Existing docs were still tied to the prior completed cycle | high |
-| `/root/.agents/skills/deep-debug/SKILL.md` | `deep-debug` exists locally | high |
-| `/root/.agents/skills/ios/SKILL.md` | `ios-development` is the closest installed SwiftUI/iOS fallback skill | high |
-| `/root/.agents/skills/apple-design/liquid-glass/SKILL.md` | `liquid-glass` exists locally | high |
+| `Ferrite/Design/DesignTokens.swift` | Token scales support replacing hard-coded insets and normalizing row spacing | high |
+| `Ferrite/Extensions/View.swift` | Existing glass helpers are sufficient for subtle surface polish without adding new abstractions | high |
+| `Ferrite/Views/CommonViews/ListRowViews.swift` | Shared row affordances can be unified with a local metrics helper | high |
+| `Ferrite/Views/ComponentViews/SearchResult/SearchResultButtonView.swift` | Search result density is driven by spacing and badge treatment, not structure | high |
+| `Ferrite/Views/CommonViews/GlassTabBarView.swift` | Selected tab state is visually stronger than the surrounding glass styling | high |
+| `Ferrite/Views/ComponentViews/Settings/SettingsLogView.swift` | Logs screen can be improved with subtle card surfaces and hierarchy cues while staying behaviorally identical | high |
 
 ## Technical Decisions
 | Decision | Rationale |
 | -------- | --------- |
-| Replace non-resolvable default skill names with resolvable local skills | Prevents future sessions from following invalid configuration literally |
-| Add an explicit fallback mapping note in `AGENTS.md` | Preserves the intent of the original Apple/SwiftUI guidance |
-| Add `IMPLEMENTATION_PHASES.md` and `SESSION.md` | Required by the repo's planning rules for non-trivial work |
+| Replace the compact search-filter inset with `Spacing.xlarge` | It preserves a slightly roomier compact layout without the outlier jump to `xxxlarge` |
+| Add a local metrics helper in `ListRowViews` | It unifies row rhythm in one place without changing public APIs |
+| Soften selected states and metadata weight instead of removing affordances | The goal is polish and hierarchy tuning, not less functionality |
 
 ## Issues Encountered
 | Issue | Resolution |
 | ----- | ---------- |
-| Required skill names did not correspond to local skill files | Updated the default-skill section to use installed skills and documented the mapping |
+| Delegated designer execution failed with an empty provider response | Continued directly with local reads and targeted patches |
 
 ## Resources
-- `AGENTS.md`
 - `task_plan.md`
 - `findings.md`
 - `progress.md`
-- `/root/.agents/skills/deep-debug/SKILL.md`
-- `/root/.agents/skills/ios/SKILL.md`
-- `/root/.agents/skills/apple-design/liquid-glass/SKILL.md`
+- `Ferrite/Design/DesignTokens.swift`
+- `Ferrite/Extensions/View.swift`
+- Target view files listed in the user request
 
 ## Visual/Browser Findings
-- Not applicable for this task
+- Not applicable for this local code polish task
+
+## Polish Pass Notes
+
+| File | Main Polish Change |
+| ---- | ------------------ |
+| `SearchFilterHeaderView.swift` | Replaced the compact-only hard-coded inset jump with a token-based large-to-xlarge rule |
+| `ListRowViews.swift` | Introduced shared local row metrics for spacing, vertical padding, body typography, and accessory symbol weight |
+| `HistoryButtonView.swift` | Increased row rhythm, lightened metadata styling, and added a subtle chevron affordance to match shared rows |
+| `PluginCatalogButtonView.swift` | Matched text rhythm and baseline alignment more closely to other list rows while keeping the install/update CTA intact |
+| `SearchResultButtonView.swift` | Increased vertical spacing and softened the cache badge tint so the title remains visually dominant |
+| `SearchResultInfoView.swift` | Reduced metadata weight/size and added more breathing room between primary and secondary metadata groups |
+| `GlassTabBarView.swift` | Softened selected-state fill/shadow and reduced selected font weight intensity |
+| `SettingsLogView.swift` | Wrapped log entries in subtle glass cards with clearer hierarchy and expand/collapse affordance |
 
 ## Deferred Follow-Ups
 | Follow-Up | Reason Deferred | Trigger to Revisit |
 | --------- | --------------- | ------------------ |
-| Normalize the "Installed Apple Skills" inventory against real local files | User asked for plan plus config fix, not a full documentation audit | Revisit if more agent/runtime mismatches appear |
+| Audit screenshots or runtime previews | Not needed for initial structural migration plan | Revisit before implementation polish pass |
+| Deep accessibility pass with VoiceOver-specific review | Current task is broader design migration planning | Revisit during implementation/verification |

@@ -4,12 +4,12 @@
 Phase 5
 
 ## Current Stage
-Delivery
+Verification
 
 ## Checkpoint
-planning-and-config-updated
+apple-design-final-polish
 
 ## Next Action
 - File: `progress.md`
-- Action: Use the recorded verification results when handing off the completed change
-- Why now: The repo is ready for the next task cycle once the user has the summary
+- Action: Hand off for local formatting/build verification and optional commit preparation
+- Why now: The migration and final polish pass are complete in this environment; remaining proof steps require Swift/Xcode tooling not present here

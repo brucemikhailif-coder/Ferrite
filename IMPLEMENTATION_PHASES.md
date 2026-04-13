@@ -1,55 +1,54 @@
-# Implementation Phases: Planning Refresh and Agent Configuration Alignment
+# Implementation Phases: Debrid Add Flow and Chooser Cleanup
 
-**Project Type**: Repository workflow and agent-configuration maintenance
-**Estimated Total**: 1.5 hours
+**Project Type**: SwiftUI / debrid feature continuation
+**Estimated Total**: 2 hours
 
-## Phase 1: Discovery
-**Type**: Infrastructure
+## Phase 1: Discovery and Gap Analysis
+**Type**: Implementation support
 **Estimated**: 0.5 hours
-**Files**: `task_plan.md`, `findings.md`, `progress.md`, `AGENTS.md`
+**Files**: `plan.md`, `task_plan.md`, `Ferrite/Views/AddView.swift`, `Ferrite/Views/SheetViews/ActionChoiceView.swift`
 
 **Tasks**:
-- [x] Review the current planning documents
-- [x] Inspect `AGENTS.md` for required workflow and default-skill rules
-- [x] Verify the relevant locally installed skill files
+- [x] Read the existing feature plan
+- [x] Compare the plan to the current codebase
+- [x] Pick a focused next slice
 
 **Verification Criteria**:
-- [x] Configuration target identified
-- [x] Missing or mismatched skill names confirmed with file evidence
+- [x] Already-landed work is separated from genuinely unfinished work
+- [x] The next target file is identified
 
 **Exit Criteria**:
-- Active scope and concrete configuration change are defined
+- One implementation slice is selected for this session
 
-## Phase 2: Planning Docs Refresh
-**Type**: Infrastructure
-**Estimated**: 0.5 hours
-**Files**: `task_plan.md`, `findings.md`, `progress.md`, `IMPLEMENTATION_PHASES.md`, `SESSION.md`
+## Phase 2: Chooser-Flow Cleanup
+**Type**: UI behavior
+**Estimated**: 1.0 hours
+**Files**: `Ferrite/Views/SheetViews/ActionChoiceView.swift`, `Ferrite/ViewModels/NavigationViewModel.swift`, `Ferrite/ViewModels/PluginManager.swift`
 
 **Tasks**:
-- [x] Reset the planning docs to an active task cycle
-- [x] Add implementation phases for this work
-- [x] Add a compact session tracker
+- [x] Remove the recursive default-action path inside the chooser
+- [x] Make explicit default actions behave predictably for share, Kodi, and custom actions
+- [x] Keep the current share and action presentation model coherent
 
 **Verification Criteria**:
-- [x] All required planning files exist
-- [x] Each file reflects the current task instead of the archived previous feature cycle
+- [x] The default-action button no longer reopens the same chooser when it should perform an action
+- [x] Share behavior remains available from the chooser
 
 **Exit Criteria**:
-- The repository can resume this task from disk without hidden context
+- Chooser interactions are internally consistent
 
-## Phase 3: Configuration Alignment
-**Type**: Infrastructure
+## Phase 3: Verification and Handoff
+**Type**: Verification
 **Estimated**: 0.5 hours
-**Files**: `AGENTS.md`
+**Files**: `progress.md`, `SESSION.md`
 
 **Tasks**:
-- [x] Replace non-resolvable default skill names with installed local skills
-- [x] Add a mapping note that explains the fallback from the original skill names
-- [x] Preserve the intent of the SwiftUI/Liquid Glass guidance
+- [x] Re-read changed code paths
+- [x] Record residual risks and next plan items
 
 **Verification Criteria**:
-- [x] Every default skill named in the section corresponds to a local `SKILL.md`
-- [x] Mapping note is specific enough for future sessions to follow literally
+- [x] Touched flows are documented
+- [x] Next follow-up from `plan.md` is explicit
 
 **Exit Criteria**:
-- `AGENTS.md` no longer instructs agents to load missing default skills
+- Session can be resumed from disk without hidden context

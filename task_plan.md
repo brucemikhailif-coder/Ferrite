@@ -1,88 +1,89 @@
-# Task Plan: Planning Refresh and Agent Configuration Alignment
+# Task Plan: Apple Design Migration Polish Pass
 
 ## Goal
-Refresh the planning documents for the next work cycle and align the repository's required-skill configuration with the skills that actually exist in this environment.
+Apply the remaining targeted UI polish fixes for Ferrite's Apple design migration without changing behavior.
 
 ## Scope
-- In scope: `task_plan.md`, `findings.md`, `progress.md`, `IMPLEMENTATION_PHASES.md`, `SESSION.md`, `AGENTS.md`
-- Out of scope: application feature code, CI behavior, Xcode project settings
+- In scope: tokenizing the search filter inset, unifying row spacing/affordances, reducing search-result density, softening tab selected-state styling, polishing the settings log surface
+- Out of scope: behavior changes, unrelated files, broad redesigns or rewrites
 
 ## Constraints
-- Preserve the repository's planning-file workflow from `AGENTS.md`
-- Keep the required-skill intent intact while fixing invalid or non-resolvable skill names
-- Do not introduce agent instructions that point to missing local skill files
+- Keep behavior unchanged unless polish requires otherwise
+- Prefer small coherent edits over rewrites
+- Reuse `DesignTokens` and existing shared styles wherever possible
+- Do not touch unrelated files
 
 ## Success Criteria
-- Planning docs reflect a new active task cycle for this configuration cleanup
-- `AGENTS.md` names a default skill set that can be resolved locally
-- Skill-name mapping is explicit enough that later sessions do not need to guess
+- All requested files are updated with targeted UI polish edits
+- Spacing and affordances feel more systemized across affected components
+- Selected-state and metadata styling feel lighter and more aligned with the glass system
 
 ## Current Phase
-Phase 5
+Phase 4
 
 ## Current Stage
-Delivery
+Verification
 
 ## Phases
 ### Phase 1: Requirements & Discovery
-- [x] Understand user intent
-- [x] Identify constraints and requirements
-- [x] Document findings in findings.md
+- [x] Confirm the requested polish targets and constraints
+- [x] Review existing design tokens and glass helpers
+- [x] Inspect the target views
 - **Status:** complete
 - **Dependencies:** none
-- **Verification:** repo instructions and current planning docs reviewed
-- **Exit Criteria:** configuration target identified
+- **Verification:** affected files and reuse opportunities identified
+- **Exit Criteria:** implementation approach is clear
 
 ### Phase 2: Planning & Structure
-- [x] Define technical approach
-- [x] Create project structure if needed
+- [x] Identify minimal edits per file
+- [x] Reuse token-based spacing and existing glass affordances
 - **Status:** complete
 - **Dependencies:** Phase 1
-- **Verification:** active task plan, implementation phases, and session tracker drafted
-- **Exit Criteria:** implementation path is clear
+- **Verification:** each requested goal has a concrete edit path
+- **Exit Criteria:** ready to implement
 
 ### Phase 3: Implementation
-- [x] Execute the plan step by step
-- [x] Test incrementally
+- [x] Update target SwiftUI files with focused polish changes
+- [x] Keep interaction behavior unchanged
 - **Status:** complete
 - **Dependencies:** Phase 2
-- **Verification:** `AGENTS.md` updated to use resolvable skills and explicit mappings
-- **Exit Criteria:** configuration edit applied cleanly
+- **Verification:** requested visual polish applied only in listed files
+- **Exit Criteria:** edits are ready for review
 
-### Phase 4: Testing & Verification
-- [x] Verify all requirements met
-- [x] Document test results in progress.md
-- **Status:** complete
+### Phase 4: Verification
+- [x] Re-read touched files after patching
+- [ ] Run diagnostics on touched files if available
+- [x] Record summary in findings/progress files
+- **Status:** in_progress
 - **Dependencies:** Phase 3
-- **Verification:** skill references checked against `/root/.agents/skills`
-- **Exit Criteria:** docs and config are internally consistent
+- **Verification:** edits are scoped, coherent, and compile-clean if tooling allows
+- **Exit Criteria:** ready to deliver concise summary
 
 ### Phase 5: Delivery
-- [x] Review all output files
-- **Status:** complete
+- [ ] Deliver concise summary of files changed and polish decisions
+- **Status:** pending
 - **Dependencies:** Phase 4
-- **Verification:** deliverables match request
+- **Verification:** response clearly states changed files and main UI decisions
 - **Exit Criteria:** handoff complete
 
 ## Decisions Made
 | Decision | Rationale |
 | -------- | --------- |
-| Treat `AGENTS.md` as the configuration target | The request followed skill-loading work and the repo's default-skill section contained non-resolvable names |
-| Map missing SwiftUI-related skill names to `ios-development` plus `liquid-glass` | Those are the installed local skills that cover SwiftUI guidance and Liquid Glass behavior |
-| Create `IMPLEMENTATION_PHASES.md` and `SESSION.md` for this cycle | `AGENTS.md` requires them for non-trivial work |
+| Prefer token substitutions and spacing normalization over structural rewrites | The request is a polish pass, not a redesign |
+| Keep search result density changes focused on typography/spacing, not content logic | Titles should become more dominant without changing behavior |
 
 ## Errors Encountered
 | Error | Attempt | Resolution |
 | ----- | ------- | ---------- |
-| Required skill names did not match installed local skills | 1 | Verified installed skill files and replaced the defaults with resolvable names plus an explicit mapping note |
+| Delegated designer subagent returned an empty provider response | 1 | Continued directly with local file edits |
 
 ## Risks & Mitigations
 | Risk | Impact | Mitigation | Status |
 | ---- | ------ | ---------- | ------ |
-| Future sessions may still reference the old names from the installed-skill inventory text | medium | Added a direct mapping note in the required-skills section | open |
-| Skill coverage is broader than the original names implied | low | Mapping note explains the fallback intent and when to consult the skills | open |
+| Small style changes may drift from adjacent untouched views | medium | Reuse existing tokens and glass helpers so the changes match current migrated surfaces | open |
+| Diagnostics may be unavailable in this environment | low | Manually review touched files and report tooling limitation if needed | open |
 
 ## Next Action (Concrete)
-- File: `task_plan.md`
-- Action: Start the next task cycle from Phase 1 when a new request arrives
-- Why now: This configuration-alignment cycle is complete
+- File: `Ferrite/Views/CommonViews/GlassTabBarView.swift`
+- Action: Run diagnostics/manual verification across the touched polish-pass files, then deliver summary
+- Why now: Implementation is complete and needs final validation before handoff

@@ -44,8 +44,3 @@ Comprehensive Liquid Glass implementation for iOS 26+, macOS 26+.
 - Glass effects create depth and layering
 - Use tints to indicate prominence
 - Combine with appropriate shadows
-
-## Reference Documentation
-
-- `/Users/ravishankar/Downloads/docs/SwiftUI-Implementing-Liquid-Glass-Design.md`
-- `/Users/ravishankar/Downloads/docs/AppKit-Implementing-Liquid-Glass-Design.md`
