@@ -8,10 +8,12 @@
 import Foundation
 
 struct FormDataBody {
-    let boundary: String = UUID().uuidString
+    let boundary: String
     let body: Data
 
     init(params: [String: String]) {
+        let boundary = UUID().uuidString
+        self.boundary = boundary
         var tempBody = Data()
 
         for (key, value) in params {

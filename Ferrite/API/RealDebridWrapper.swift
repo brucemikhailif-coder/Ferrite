@@ -479,7 +479,7 @@ class RealDebrid: PollingDebridSource, ObservableObject {
             // Refresh the user magnet list
             // The first file is the currently caching one
             let _ = try await getUserMagnets()
-            guard let firstCloudMagnet = cloudMagnets[safe: -1] else {
+            guard let firstCloudMagnet = cloudMagnets[safe: 0] else {
                 throw DebridError.EmptyUserMagnets
             }
 

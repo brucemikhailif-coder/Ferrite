@@ -112,10 +112,9 @@ class TorBox: DebridSource, ObservableObject {
             return
         }
 
-        guard let components = URLComponents(string: "\(baseApiUrl)/torrents/checkcached") else {
+        guard var components = URLComponents(string: "\(baseApiUrl)/torrents/checkcached") else {
             throw DebridError.InvalidUrl
         }
-        var components = components
         components.queryItems = sendMagnets.map { URLQueryItem(name: "hash", value: $0.hash) }
         components.queryItems?.append(URLQueryItem(name: "format", value: "list"))
         components.queryItems?.append(URLQueryItem(name: "list_files", value: "true"))
