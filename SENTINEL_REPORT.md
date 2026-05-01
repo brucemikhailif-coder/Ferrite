@@ -16,16 +16,16 @@
 
 ## 🔴 CRITICAL ISSUES (Resolved)
 
-### Issue #1: Dangling File Reference (Resolved)
+### Issue #1: Dangling File References (Resolved)
 **File:** `Ferrite.xcodeproj/project.pbxproj`
 **Severity:** 🔴 Critical (Previously)
 **Category:** Xcode Project Configuration
 
 **Problem:**
-The file `SelectedDebridFilterView.swift` was referenced in the Xcode project but missing from the filesystem.
+The files `SelectedDebridFilterView.swift` and `Preview Assets.xcassets` were referenced in the Xcode project but missing or improperly configured in the filesystem. This caused build failures (Exit code 65).
 
 **Fix:**
-Removed all entries related to `SelectedDebridFilterView.swift` from the project file.
+Removed all entries related to `SelectedDebridFilterView.swift` and `Preview Assets.xcassets` (internal IDs `0CA148DF288903F000DE2211` and `0CA148C6288903F000DE2211`) from the project file.
 
 ---
 
@@ -42,16 +42,20 @@ Refactored `liquidGlass` to use standard SwiftUI materials (`.thinMaterial`) and
 
 ---
 
-### Issue #3: Invalid Dependency Version (Resolved)
+### Issue #3: SPM Dependency Issues (Resolved)
 **File:** `Ferrite.xcodeproj/project.pbxproj`
 **Severity:** 🔴 Critical (Previously)
 **Category:** Dependency Resolution
 
 **Problem:**
-The `swiftui-introspect` package was configured with a non-existent version `26.0.0`.
+1. The `swiftui-introspect` package was configured with a non-existent version `26.0.0`.
+2. Multiple packages (SwiftyJSON, Base32, keychain-swift, Regex, BetterSafariView) used branch-based requirements (`master` or `main`), which caused CI resolution failures (Exit code 74).
+3. Repository URLs were missing `.git` suffixes.
 
 **Fix:**
-Corrected the minimum version to `1.2.1`.
+1. Corrected `swiftui-introspect` version to `1.2.1`.
+2. Migrated all packages to semantic versioning (upToNextMajorVersion) and updated to their latest stable tags (e.g., SwiftyJSON 5.0.2, BetterSafariView 2.4.2).
+3. Added `.git` suffixes to all repository URLs.
 
 ---
 
