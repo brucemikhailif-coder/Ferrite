@@ -105,4 +105,4 @@ The codebase still contains 133 instances of force unwraps, primarily in non-cri
 
 ---
 
-**Report Generated:** 2026-05-22
+**Report Generated:** 2026-05-22 (Re-verified after CI transient failure)
