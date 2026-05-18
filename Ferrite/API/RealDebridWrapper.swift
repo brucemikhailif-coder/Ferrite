@@ -229,7 +229,7 @@ class RealDebrid: PollingDebridSource, ObservableObject {
         // Run the request, doesn't matter if it fails
         if let token = FerriteKeychain.shared.get("RealDebrid.AccessToken") {
             guard let url = URL(string: "\(baseApiUrl)/disable_access_token") else {
-                throw DebridError.InvalidUrl
+                return
             }
             var request = URLRequest(url: url)
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
