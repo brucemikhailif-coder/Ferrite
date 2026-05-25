@@ -10,26 +10,18 @@
 import SwiftUI
 
 struct ListRowLinkView: View {
-    @Environment(\.openURL) var openURL
-
     let text: String
     let link: String
 
     var body: some View {
-        Button {
-            if let url = URL(string: link) {
-                openURL(url)
-            }
-        } label: {
-            HStack {
-                Text(text)
-                    .foregroundColor(.primary)
+        HStack {
+            Link(text, destination: URL(string: link)!)
+                .foregroundColor(.primary)
 
-                Spacer()
+            Spacer()
 
-                Image(systemName: "arrow.up.forward.app.fill")
-                    .foregroundColor(.gray)
-            }
+            Image(systemName: "arrow.up.forward.app.fill")
+                .foregroundColor(.gray)
         }
         .padding(.trailing, -5)
     }

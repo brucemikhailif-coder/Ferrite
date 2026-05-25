@@ -1,10 +1,3 @@
-//
-//  GithubWrapper.swift
-//  Ferrite
-//
-//  Created by Brian Dashore on 8/28/22.
-//
-
 import Foundation
 
 enum GithubError: Error {

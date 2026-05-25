@@ -166,13 +166,13 @@
 		0CF1ABDC2C0C04B2009F6C26 /* Debrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CF1ABDB2C0C04B2009F6C26 /* Debrid.swift */; };
 		0CF1ABE22C0C3D2F009F6C26 /* DebridModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CF1ABE12C0C3D2F009F6C26 /* DebridModels.swift */; };
 		0CF2C0A529D1EBD400E716DD /* UIApplication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CF2C0A429D1EBD400E716DD /* UIApplication.swift */; };
-		037C0745880C472987C5E8A9 /* DesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F80E802CF124F648B01AE38 /* DesignTokens.swift */; };
-		31A4D56B52C84E6683A0CDC9 /* Keyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = D34B9D8DCD8D40F38B181361 /* Keyboard.swift */; };
-		8CA1BE5A01364420A84BDF18 /* LibraryHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 489C2B27DEBE4854BD6826F7 /* LibraryHeaderView.swift */; };
-		31AEF39DBEF44767BB4EC976 /* TestHostingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 310695A48C9C456D91F5CB5B /* TestHostingView.swift */; };
-		A8B1F2F2C55A4F1DBDEF796E /* SearchableContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 269D4EC442C843F0A348B6F7 /* SearchableContent.swift */; };
-		654F9EC9EFFD4866A7C98839 /* SectionHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82BA1AFC839E4A33BECA8302 /* SectionHeaderView.swift */; };
-		FA91A27FAF3B4DA4A881310C /* SourceCatalogButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72D82EBA280142FEB2B2A964 /* SourceCatalogButtonView.swift */; };
+		6F7EE28A138A4165A63E7711 /* DesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9314AF756DF4F85BF0EBDA9 /* DesignTokens.swift */; };
+		F6FA0DAE12094AA3AC7C8440 /* Keyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EE567575767496FB08E606A /* Keyboard.swift */; };
+		0A5A0DF907834C31BB5EFFBF /* LibraryHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 245C969FF1CC46CDA2558084 /* LibraryHeaderView.swift */; };
+		773B7B59E25E4E23AB5A0A2D /* TestHostingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2684316A192144FEA887B380 /* TestHostingView.swift */; };
+		D18AFF14E01D417F82A3028D /* SearchableContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = F225D072C85847389A06A35E /* SearchableContent.swift */; };
+		127F8A1D65B346B9BC294E26 /* SectionHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19AA1A5A6CFC49CBBD493F74 /* SectionHeaderView.swift */; };
+		D46B5AC4C464401F9CE94C7A /* SourceCatalogButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D45E226085B4EF3B69BCF45 /* SourceCatalogButtonView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -330,13 +330,13 @@
 		0CF1ABDB2C0C04B2009F6C26 /* Debrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Debrid.swift; sourceTree = "<group>"; };
 		0CF1ABE12C0C3D2F009F6C26 /* DebridModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebridModels.swift; sourceTree = "<group>"; };
 		0CF2C0A429D1EBD400E716DD /* UIApplication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIApplication.swift; sourceTree = "<group>"; };
-		3F80E802CF124F648B01AE38 /* DesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignTokens.swift; sourceTree = "<group>"; };
-		D34B9D8DCD8D40F38B181361 /* Keyboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keyboard.swift; sourceTree = "<group>"; };
-		489C2B27DEBE4854BD6826F7 /* LibraryHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryHeaderView.swift; sourceTree = "<group>"; };
-		310695A48C9C456D91F5CB5B /* TestHostingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestHostingView.swift; sourceTree = "<group>"; };
-		269D4EC442C843F0A348B6F7 /* SearchableContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchableContent.swift; sourceTree = "<group>"; };
-		82BA1AFC839E4A33BECA8302 /* SectionHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SectionHeaderView.swift; sourceTree = "<group>"; };
-		72D82EBA280142FEB2B2A964 /* SourceCatalogButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceCatalogButtonView.swift; sourceTree = "<group>"; };
+		A9314AF756DF4F85BF0EBDA9 /* DesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignTokens.swift; sourceTree = "<group>"; };
+		8EE567575767496FB08E606A /* Keyboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keyboard.swift; sourceTree = "<group>"; };
+		245C969FF1CC46CDA2558084 /* LibraryHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryHeaderView.swift; sourceTree = "<group>"; };
+		2684316A192144FEA887B380 /* TestHostingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestHostingView.swift; sourceTree = "<group>"; };
+		F225D072C85847389A06A35E /* SearchableContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchableContent.swift; sourceTree = "<group>"; };
+		19AA1A5A6CFC49CBBD493F74 /* SectionHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SectionHeaderView.swift; sourceTree = "<group>"; };
+		3D45E226085B4EF3B69BCF45 /* SourceCatalogButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceCatalogButtonView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -491,7 +491,7 @@
 		0C44E2A628D4DDC6007711AE /* Utils */ = {
 			isa = PBXGroup;
 			children = (
-				72D82EBA280142FEB2B2A964 /* SourceCatalogButtonView.swift */,
+				3D45E226085B4EF3B69BCF45 /* SourceCatalogButtonView.swift */,
 				0C44E2A728D4DDDC007711AE /* Application.swift */,
 				0C1A3E5529C9488C00DA9730 /* CodableWrapper.swift */,
 				0C1234567890ABCDEF12345B /* UnchainedAdapter.swift */,
@@ -583,7 +583,7 @@
 		0CA148BA288903F000DE2211 /* Ferrite */ = {
 			isa = PBXGroup;
 			children = (
-				011E4E637DB0424B912C5214 /* Design */,
+				B63E04C308BC4C46B39289A1 /* Design */,
 				0CC6E4D428A45BA000AF2BCC /* Info.plist */,
 				0CBC7703288DE7E90054BE44 /* DataManagement */,
 				0CA148F12889066000DE2211 /* API */,
@@ -604,11 +604,11 @@
 		0CA148C0288903F000DE2211 /* CommonViews */ = {
 			isa = PBXGroup;
 			children = (
-				82BA1AFC839E4A33BECA8302 /* SectionHeaderView.swift */,
-				269D4EC442C843F0A348B6F7 /* SearchableContent.swift */,
-				310695A48C9C456D91F5CB5B /* TestHostingView.swift */,
-				489C2B27DEBE4854BD6826F7 /* LibraryHeaderView.swift */,
-				D34B9D8DCD8D40F38B181361 /* Keyboard.swift */,
+				19AA1A5A6CFC49CBBD493F74 /* SectionHeaderView.swift */,
+				F225D072C85847389A06A35E /* SearchableContent.swift */,
+				2684316A192144FEA887B380 /* TestHostingView.swift */,
+				245C969FF1CC46CDA2558084 /* LibraryHeaderView.swift */,
+				8EE567575767496FB08E606A /* Keyboard.swift */,
 				0C44E2A928D4DFC4007711AE /* Modifiers */,
 				0CDCB91728C662640098B513 /* EmptyInstructionView.swift */,
 				0CA3FB1F28B91D9500FA10A8 /* IndeterminateProgressView.swift */,
@@ -756,10 +756,10 @@
 			path = Info;
 			sourceTree = "<group>";
 		};
-		011E4E637DB0424B912C5214 /* Design */ = {
+		B63E04C308BC4C46B39289A1 /* Design */ = {
 			isa = PBXGroup;
 			children = (
-				3F80E802CF124F648B01AE38 /* DesignTokens.swift */,
+				A9314AF756DF4F85BF0EBDA9 /* DesignTokens.swift */,
 			);
 			path = Design;
 			sourceTree = "<group>";
@@ -879,13 +879,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				037C0745880C472987C5E8A9 /* DesignTokens.swift in Sources */,
-				31A4D56B52C84E6683A0CDC9 /* Keyboard.swift in Sources */,
-				8CA1BE5A01364420A84BDF18 /* LibraryHeaderView.swift in Sources */,
-				31AEF39DBEF44767BB4EC976 /* TestHostingView.swift in Sources */,
-				A8B1F2F2C55A4F1DBDEF796E /* SearchableContent.swift in Sources */,
-				654F9EC9EFFD4866A7C98839 /* SectionHeaderView.swift in Sources */,
-				FA91A27FAF3B4DA4A881310C /* SourceCatalogButtonView.swift in Sources */,
+				6F7EE28A138A4165A63E7711 /* DesignTokens.swift in Sources */,
+				F6FA0DAE12094AA3AC7C8440 /* Keyboard.swift in Sources */,
+				0A5A0DF907834C31BB5EFFBF /* LibraryHeaderView.swift in Sources */,
+				773B7B59E25E4E23AB5A0A2D /* TestHostingView.swift in Sources */,
+				D18AFF14E01D417F82A3028D /* SearchableContent.swift in Sources */,
+				127F8A1D65B346B9BC294E26 /* SectionHeaderView.swift in Sources */,
+				D46B5AC4C464401F9CE94C7A /* SourceCatalogButtonView.swift in Sources */,
 				0C07C6042C1A859B00808A46 /* FormDataBody.swift in Sources */,
 				0C7ED14328D65518009E29AD /* FileManager.swift in Sources */,
 				0C03EB71296F619900162E9A /* PluginList+CoreDataClass.swift in Sources */,

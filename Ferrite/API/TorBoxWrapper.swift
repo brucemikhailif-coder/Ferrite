@@ -112,9 +112,7 @@ class TorBox: DebridSource, ObservableObject {
             return
         }
 
-        guard var components = URLComponents(string: "\(baseApiUrl)/torrents/checkcached") else {
-            throw DebridError.InvalidUrl
-        }
+        guard var components = URLComponents(string: "\(baseApiUrl)/torrents/checkcached") else { throw DebridError.InvalidUrl }
         components.queryItems = sendMagnets.map { URLQueryItem(name: "hash", value: $0.hash) }
         components.queryItems?.append(URLQueryItem(name: "format", value: "list"))
         components.queryItems?.append(URLQueryItem(name: "list_files", value: "true"))
@@ -176,10 +174,7 @@ class TorBox: DebridSource, ObservableObject {
     }
 
     private func createTorrent(magnet: Magnet) async throws -> Int {
-        guard let url = URL(string: "\(baseApiUrl)/torrents/createtorrent") else {
-            throw DebridError.InvalidUrl
-        }
-
+        guard let url = URL(string: "\(baseApiUrl)/torrents/createtorrent") else { throw DebridError.InvalidUrl }
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
 
@@ -202,10 +197,7 @@ class TorBox: DebridSource, ObservableObject {
     }
 
     private func myTorrentList() async throws -> [MyTorrentListResponse] {
-        guard let url = URL(string: "\(baseApiUrl)/torrents/mylist") else {
-            throw DebridError.InvalidUrl
-        }
-
+        guard let url = URL(string: "\(baseApiUrl)/torrents/mylist") else { throw DebridError.InvalidUrl }
         var request = URLRequest(url: url)
 
         let data = try await performRequest(request: &request, requestName: #function)
@@ -219,9 +211,7 @@ class TorBox: DebridSource, ObservableObject {
     }
 
     func unrestrictFile(_ restrictedFile: DebridIAFile) async throws -> String {
-        guard var components = URLComponents(string: "\(baseApiUrl)/torrents/requestdl") else {
-            throw DebridError.InvalidUrl
-        }
+        guard var components = URLComponents(string: "\(baseApiUrl)/torrents/requestdl") else { throw DebridError.InvalidUrl }
         components.queryItems = [
             URLQueryItem(name: "token", value: getToken()),
             URLQueryItem(name: "torrent_id", value: restrictedFile.streamUrlString),
@@ -267,10 +257,7 @@ class TorBox: DebridSource, ObservableObject {
     }
 
     func deleteUserDownload(downloadId: String) async throws {
-        guard let url = URL(string: "\(baseApiUrl)/webdl/controlwebdownload") else {
-            throw DebridError.InvalidUrl
-        }
-
+        guard let url = URL(string: "\(baseApiUrl)/webdl/controlwebdownload") else { throw DebridError.InvalidUrl }
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -301,10 +288,7 @@ class TorBox: DebridSource, ObservableObject {
             throw DebridError.InvalidPostBody
         }
 
-        guard let url = URL(string: "\(baseApiUrl)/torrents/controltorrent") else {
-            throw DebridError.InvalidUrl
-        }
-
+        guard let url = URL(string: "\(baseApiUrl)/torrents/controltorrent") else { throw DebridError.InvalidUrl }
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -403,10 +387,7 @@ class TorBox: DebridSource, ObservableObject {
     }
 
     private func createWebDownload(link: String) async throws -> Int {
-        guard let url = URL(string: "\(baseApiUrl)/webdl/createwebdownload") else {
-            throw DebridError.InvalidUrl
-        }
-
+        guard let url = URL(string: "\(baseApiUrl)/webdl/createwebdownload") else { throw DebridError.InvalidUrl }
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
 
@@ -425,10 +406,7 @@ class TorBox: DebridSource, ObservableObject {
     }
 
     private func myWebDownloadList() async throws -> [WebDownloadListResponse] {
-        guard let url = URL(string: "\(baseApiUrl)/webdl/mylist") else {
-            throw DebridError.InvalidUrl
-        }
-
+        guard let url = URL(string: "\(baseApiUrl)/webdl/mylist") else { throw DebridError.InvalidUrl }
         var request = URLRequest(url: url)
 
         let data = try await performRequest(request: &request, requestName: #function)
@@ -438,9 +416,7 @@ class TorBox: DebridSource, ObservableObject {
     }
 
     private func requestWebDownload(webdownloadId: String) async throws -> String {
-        guard var components = URLComponents(string: "\(baseApiUrl)/webdl/requestdl") else {
-            throw DebridError.InvalidUrl
-        }
+        guard var components = URLComponents(string: "\(baseApiUrl)/webdl/requestdl") else { throw DebridError.InvalidUrl }
         components.queryItems = [
             URLQueryItem(name: "token", value: getToken()),
             URLQueryItem(name: "webdl_id", value: webdownloadId)
@@ -463,9 +439,7 @@ class TorBox: DebridSource, ObservableObject {
     }
 
     private func requestTorrentDownload(torrentId: String, fileId: Int) async throws -> String {
-        guard var components = URLComponents(string: "\(baseApiUrl)/torrents/requestdl") else {
-            throw DebridError.InvalidUrl
-        }
+        guard var components = URLComponents(string: "\(baseApiUrl)/torrents/requestdl") else { throw DebridError.InvalidUrl }
         components.queryItems = [
             URLQueryItem(name: "token", value: getToken()),
             URLQueryItem(name: "torrent_id", value: torrentId),
@@ -489,10 +463,7 @@ class TorBox: DebridSource, ObservableObject {
     }
 
     private func createTorrent(fileUrl: URL) async throws -> Int {
-        guard let url = URL(string: "\(baseApiUrl)/torrents/createtorrent") else {
-            throw DebridError.InvalidUrl
-        }
-
+        guard let url = URL(string: "\(baseApiUrl)/torrents/createtorrent") else { throw DebridError.InvalidUrl }
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
 
