@@ -13,14 +13,24 @@ struct ListRowLinkView: View {
     @Environment(\.openURL) var openURL
     let text: String
     let link: String
+
     var body: some View {
-        Button { if let url = URL(string: link) { openURL(url) } } label: {
-            HStack {
-                Text(text).foregroundColor(.primary)
-                Spacer()
-                Image(systemName: "arrow.up.forward.app.fill").foregroundColor(.gray)
+        Button {
+            if let url = URL(string: link) {
+                openURL(url)
             }
-        }.padding(.trailing, -5)
+        } label: {
+            HStack {
+                Text(text)
+                    .foregroundColor(.primary)
+
+                Spacer()
+
+                Image(systemName: "arrow.up.forward.app.fill")
+                    .foregroundColor(.gray)
+            }
+        }
+        .padding(.trailing, -5)
     }
 }
 

@@ -202,7 +202,8 @@ class Premiumize: OAuthDebridSource, ObservableObject {
             throw DebridError.EmptyData
         }
 
-        guard let url = URL(string: "\(baseApiUrl)/transfer/directdl") else { throw DebridError.InvalidUrl }\n        var request = URLRequest(url: url)
+        guard let url = URL(string: "\(baseApiUrl)/transfer/directdl") else { throw DebridError.InvalidUrl }
+        var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
 
@@ -311,7 +312,8 @@ class Premiumize: OAuthDebridSource, ObservableObject {
             throw DebridError.FailedRequest(description: "The magnet link is invalid")
         }
 
-        guard let url = URL(string: "\(baseApiUrl)/transfer/create") else { throw DebridError.InvalidUrl }\n        var request = URLRequest(url: url)
+        guard let url = URL(string: "\(baseApiUrl)/transfer/create") else { throw DebridError.InvalidUrl }
+        var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
 
@@ -326,7 +328,8 @@ class Premiumize: OAuthDebridSource, ObservableObject {
     // MARK: - Cloud methods
 
     func getUserDownloads() async throws {
-        guard let url = URL(string: "\(baseApiUrl)/item/listall") else { throw DebridError.InvalidUrl }\n        var request = URLRequest(url: url)
+        guard let url = URL(string: "\(baseApiUrl)/item/listall") else { throw DebridError.InvalidUrl }
+        var request = URLRequest(url: url)
 
         let data = try await performRequest(request: &request, requestName: #function)
         let rawResponse = try jsonDecoder.decode(AllItemsResponse.self, from: data)
@@ -362,7 +365,8 @@ class Premiumize: OAuthDebridSource, ObservableObject {
     }
 
     func deleteUserDownload(downloadId: String) async throws {
-        guard let url = URL(string: "\(baseApiUrl)/item/delete") else { throw DebridError.InvalidUrl }\n        var request = URLRequest(url: url)
+        guard let url = URL(string: "\(baseApiUrl)/item/delete") else { throw DebridError.InvalidUrl }
+        var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
 

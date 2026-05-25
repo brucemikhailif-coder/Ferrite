@@ -66,7 +66,8 @@ class Kodi {
     }
 
     func ping(server: KodiServer) async throws {
-        guard let url = URL(string: "\(server.urlString)/jsonrpc") else { throw KodiError.InvalidBaseUrl }\n        var request = URLRequest(url: url)
+        guard let url = URL(string: "\(server.urlString)/jsonrpc") else { throw KodiError.InvalidBaseUrl }
+        var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
@@ -104,7 +105,8 @@ class Kodi {
             params: Params(item: Item(file: urlString))
         )
 
-        guard let url = URL(string: "\(server.urlString)/jsonrpc") else { throw KodiError.InvalidBaseUrl }\n        var request = URLRequest(url: url)
+        guard let url = URL(string: "\(server.urlString)/jsonrpc") else { throw KodiError.InvalidBaseUrl }
+        var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
