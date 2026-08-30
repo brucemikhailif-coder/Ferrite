@@ -32,12 +32,7 @@ struct CloudMagnetView: View {
             ForEach(filteredMagnets, id: \.self) { cloudMagnet in
                 Button {
                     if debridSource.cachedStatus.contains(cloudMagnet.status), !cloudMagnet.links.isEmpty {
-                        navModel.resultFromCloud = true
-                        navModel.selectedTitle = cloudMagnet.fileName
-                        navModel.selectedMagnet = Magnet(hash: cloudMagnet.hash, link: nil, title: cloudMagnet.fileName)
-                        transferHandle = DebridTransferHandle(id: cloudMagnet.id, kind: .torrent)
-                        transferTitle = cloudMagnet.fileName
-                        showTransferBrowser = true
+                        openTransferBrowser(cloudMagnet)
                     }
                 } label: {
                     HStack(spacing: 12) {
@@ -81,40 +76,29 @@ struct CloudMagnetView: View {
                 .tag(cloudMagnet)
                 .listRowBackground(Color.clear)
                 .contextMenu {
-                                    Button {
-                                        UIPasteboard.general.string = cloudMagnet.hash
-                                    } label: {
-                                        Text("Copy hash")
-                                        Image(systemName: "doc.on.doc.fill")
-                                    }
+                    Button {
+                        UIPasteboard.general.string = cloudMagnet.hash
+                    } label: {
+                        Text("Copy hash")
+                        Image(systemName: "doc.on.doc.fill")
+                    }
 
-                                    Button {
-                                        // Get a streamable/transcoded link from provider and present playback/share options.
-                                        // Use the first available web link; fall back to copying the magnet hash if none exists.
-                                        if let firstLink = cloudMagnet.links.first, !firstLink.isEmpty {
-                                            Task {
-                                                await debridManager.fetchStreamableLink(from: firstLink, providerId: debridSource.id)
-                                                if !debridManager.downloadUrl.isEmpty {
-                                                    navModel.currentChoiceSheet = .action
-                                                }
-                                            }
-                                        } else {
-                                            UIPasteboard.general.string = cloudMagnet.hash
-                                        }
-                                    } label: {
-                                        Text("Get streamable link")
-                                        Image(systemName: "link.circle")
-                                    }
+                    Button {
+                        openTransferBrowser(cloudMagnet)
+                    } label: {
+                        Text("Open files")
+                        Image(systemName: "link.circle")
+                    }
 
-                                    Button {
-                                        // show confirmation dialog before deleting
-                                        pendingDeleteMagnet = cloudMagnet
-                                        showDeleteConfirm = true
-                                    } label: {
-                                        Text("Delete magnet")
-                                        Image(systemName: "trash.fill")
-                                    }
-                                }
+                    Button {
+                        // show confirmation dialog before deleting
+                        pendingDeleteMagnet = cloudMagnet
+                        showDeleteConfirm = true
+                    } label: {
+                        Text("Delete magnet")
+                        Image(systemName: "trash.fill")
+                    }
+                }
                 // Add swipe actions for quick access on rows
                 .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                     Button {
@@ -125,19 +109,9 @@ struct CloudMagnetView: View {
                     .tint(.blue)
 
                     Button {
-                        // Quick access to provider-transcoded/streamable link for the magnet (if a web link exists).
-                        if let firstLink = cloudMagnet.links.first, !firstLink.isEmpty {
-                            Task {
-                                await debridManager.fetchStreamableLink(from: firstLink, providerId: debridSource.id)
-                                if !debridManager.downloadUrl.isEmpty {
-                                    navModel.currentChoiceSheet = .action
-                                }
-                            }
-                        } else {
-                            UIPasteboard.general.string = cloudMagnet.hash
-                        }
+                        openTransferBrowser(cloudMagnet)
                     } label: {
-                        Label("Get streamable", systemImage: "link")
+                        Label("Open files", systemImage: "link")
                     }
                     .tint(.purple)
 
@@ -206,21 +180,17 @@ struct CloudMagnetView: View {
         return .orange
     }
 
-    private func fetchStreamable(_ cloudMagnet: DebridCloudMagnet) {
-        // Use the first link (if available) as the web-hosted resource to ask the provider to transcode/unrestrict.
-        guard let firstLink = cloudMagnet.links.first, !firstLink.isEmpty else {
-            // No web-hosted link available; copy magnet hash as a fallback.
-            UIPasteboard.general.string = cloudMagnet.hash
-            return
-        }
-
-        Task {
-            await debridManager.fetchStreamableLink(from: firstLink, providerId: debridSource.id)
-            if !debridManager.downloadUrl.isEmpty {
-                // Present the standard action sheet so user can Play/Copy/Share the returned link.
-                navModel.currentChoiceSheet = .action
-            }
-        }
+    private func openTransferBrowser(_ cloudMagnet: DebridCloudMagnet) {
+        // `DebridCloudMagnet.links` is provider-specific metadata. In particular,
+        // TorBox stores per-torrent file IDs ("0", "1", ...) here rather than
+        // playable URLs. Never promote those values directly into downloadUrl.
+        // Resolve the selected file through the provider's transfer API instead.
+        navModel.resultFromCloud = true
+        navModel.selectedTitle = cloudMagnet.fileName
+        navModel.selectedMagnet = Magnet(hash: cloudMagnet.hash, link: nil, title: cloudMagnet.fileName)
+        transferHandle = DebridTransferHandle(id: cloudMagnet.id, kind: .torrent)
+        transferTitle = cloudMagnet.fileName
+        showTransferBrowser = true
     }
 }
 
