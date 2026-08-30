@@ -12,6 +12,35 @@ extension TorBox {
         let success: Bool
         let detail: String
         let data: TBData?
+
+        enum CodingKeys: String, CodingKey {
+            case success, detail, data
+        }
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            success = try container.decode(Bool.self, forKey: .success)
+            detail = try container.decode(String.self, forKey: .detail)
+
+            do {
+                data = try container.decodeIfPresent(TBData.self, forKey: .data)
+            } catch {
+                // TorBox's /torrents/mylist response changes shape when an `id`
+                // filter is supplied: an unfiltered request returns an array, while
+                // an ID-filtered request can return the matching torrent object.
+                // Ferrite's callers deliberately use an array in both cases, so
+                // normalize the single-object form to a one-element array here.
+                if TBData.self == [MyTorrentListResponse].self {
+                    let singleTorrent = try container.decode(MyTorrentListResponse.self, forKey: .data)
+                    guard let normalized = [singleTorrent] as? TBData else {
+                        throw error
+                    }
+                    data = normalized
+                } else {
+                    throw error
+                }
+            }
+        }
     }
 
     // MARK: - InstantAvailability
