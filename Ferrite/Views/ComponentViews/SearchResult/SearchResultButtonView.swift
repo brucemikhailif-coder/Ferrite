@@ -12,6 +12,7 @@ struct SearchResultButtonView: View {
 
     @EnvironmentObject var navModel: NavigationViewModel
     @EnvironmentObject var debridManager: DebridManager
+    @EnvironmentObject var pluginManager: PluginManager
 
     var result: SearchResult
     var debridIAStatus: IAStatus?
@@ -48,7 +49,14 @@ struct SearchResultButtonView: View {
                     historyEntry.url = result.magnet.link
                     PersistenceController.shared.createHistory(historyEntry, performSave: true)
 
-                    navModel.currentChoiceSheet = .action
+                    // Preserve Kingbri Ferrite's magnet-action behavior. A configured
+                    // magnet action (for example the user's installed Debrify plugin)
+                    // receives the original magnet directly instead of being forced
+                    // through a debrid transfer/file-selection flow first.
+                    pluginManager.runDefaultAction(
+                        urlString: result.magnet.link,
+                        navModel: navModel
+                    )
                 }
             }
         } label: {
@@ -206,7 +214,16 @@ struct SearchResultButtonView: View {
             historyEntry.url = debridManager.downloadUrl
             PersistenceController.shared.createHistory(historyEntry, performSave: true)
 
-            navModel.currentChoiceSheet = .action
+            pluginManager.runDefaultAction(
+                urlString: debridManager.downloadUrl,
+                navModel: navModel
+            )
+
+            // If the configured action launched externally, the link no longer
+            // needs to remain in Ferrite's action-sheet state.
+            if navModel.currentChoiceSheet != .action {
+                debridManager.downloadUrl = ""
+            }
         }
     }
 
