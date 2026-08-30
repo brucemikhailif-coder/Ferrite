@@ -13,6 +13,7 @@ struct DebridTransferBrowserView: View {
     @EnvironmentObject var navModel: NavigationViewModel
     @EnvironmentObject var debridManager: DebridManager
     @EnvironmentObject var logManager: LoggingManager
+    @EnvironmentObject var pluginManager: PluginManager
 
     let debridSource: DebridSource
     let handle: DebridTransferHandle?
@@ -136,7 +137,19 @@ struct DebridTransferBrowserView: View {
             historyInfo.subName = file.name
             PersistenceController.shared.createHistory(historyInfo, performSave: true)
 
-            navModel.currentChoiceSheet = .action
+            // Match the original Ferrite action behavior: once the provider has
+            // produced the real download URL, run the user's configured debrid
+            // action. If no default is configured this opens the normal action
+            // sheet, where VidHub/Outplayer/VLC/etc. remain available.
+            pluginManager.runDefaultAction(
+                urlString: result.urlString,
+                navModel: navModel
+            )
+
+            if navModel.currentChoiceSheet != .action {
+                debridManager.downloadUrl = ""
+            }
+
             dismiss()
         } catch {
             logManager.error("Debrid transfer error: \(error.localizedDescription)")
