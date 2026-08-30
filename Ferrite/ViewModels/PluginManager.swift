@@ -412,7 +412,45 @@ class PluginManager: ObservableObject {
             return
         }
 
-        let playbackUrl = URL(string: deeplink.replacingOccurrences(of: "{link}", with: urlString))
+        // A plugin whose entire deeplink is `{link}` (for example Debrify) must
+        // receive the original URL unchanged. When `{link}` is embedded inside
+        // another deeplink's query string (VidHub, Infuse, VLC, etc.), however,
+        // the nested URL must be encoded as one query-item value. Raw string
+        // replacement truncates TorBox URLs at their own `&` characters.
+        //
+        // Some action lists also include `{subtitle}` even when Ferrite has no
+        // subtitle URL to provide. Resolve it to an empty value before creating
+        // the URL; leaving braces in the template can cause Foundation to
+        // re-encode already-percent-encoded data.
+        let template = deeplink.replacingOccurrences(of: "{subtitle}", with: "")
+        let playbackUrl: URL?
+
+        if template.trimmingCharacters(in: .whitespacesAndNewlines) == "{link}" {
+            playbackUrl = URL(string: urlString)
+        } else {
+            let linkToken = "__FERRITE_LINK_VALUE__"
+            let tokenizedTemplate = template.replacingOccurrences(of: "{link}", with: linkToken)
+
+            if var components = URLComponents(string: tokenizedTemplate),
+               let queryItems = components.queryItems,
+               queryItems.contains(where: { $0.value?.contains(linkToken) == true })
+            {
+                components.queryItems = queryItems.map { item in
+                    URLQueryItem(
+                        name: item.name,
+                        value: item.value?.replacingOccurrences(of: linkToken, with: urlString)
+                    )
+                }
+                playbackUrl = components.url
+            } else {
+                // Fallback for templates that place `{link}` outside the query.
+                // RFC 3986 unreserved characters are safe in an embedded value.
+                var allowedCharacters = CharacterSet.alphanumerics
+                allowedCharacters.insert(charactersIn: "-._~")
+                let encodedLink = urlString.addingPercentEncoding(withAllowedCharacters: allowedCharacters) ?? urlString
+                playbackUrl = URL(string: template.replacingOccurrences(of: "{link}", with: encodedLink))
+            }
+        }
 
         if let playbackUrl {
             UIApplication.shared.open(playbackUrl)
@@ -477,7 +515,6 @@ class PluginManager: ObservableObject {
                 PersistenceController.shared.delete(existingAction, context: backgroundContext)
             } else {
                 await logManager?.error("Action addition: Could not install action with name \(actionJson.name) because it is already installed")
-
                 return
             }
         }
