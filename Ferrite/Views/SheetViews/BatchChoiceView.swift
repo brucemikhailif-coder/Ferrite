@@ -10,6 +10,7 @@ import SwiftUI
 struct BatchChoiceView: View {
     @EnvironmentObject var debridManager: DebridManager
     @EnvironmentObject var navModel: NavigationViewModel
+    @EnvironmentObject var pluginManager: PluginManager
 
     let backgroundContext = PersistenceController.shared.backgroundContext
 
@@ -78,7 +79,14 @@ struct BatchChoiceView: View {
                     PersistenceController.shared.createHistory(selectedHistoryInfo, performSave: true)
                 }
 
-                navModel.currentChoiceSheet = .action
+                pluginManager.runDefaultAction(
+                    urlString: debridManager.downloadUrl,
+                    navModel: navModel
+                )
+
+                if navModel.currentChoiceSheet != .action {
+                    debridManager.downloadUrl = ""
+                }
             }
 
             debridManager.clearSelectedDebridItems()
