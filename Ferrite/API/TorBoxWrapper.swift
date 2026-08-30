@@ -155,7 +155,7 @@ class TorBox: DebridSource, ObservableObject {
 
     func getRestrictedFile(magnet: Magnet, ia: DebridIA?, iaFile: DebridIAFile?) async throws -> (restrictedFile: DebridIAFile?, newIA: DebridIA?) {
         let cloudMagnetId = try await createTorrent(magnet: magnet)
-        let cloudMagnetList = try await myTorrentList()
+        let cloudMagnetList = try await myTorrentList(id: cloudMagnetId, bypassCache: true)
         guard let filteredCloudMagnet = cloudMagnetList.first(where: { $0.id == cloudMagnetId }) else {
             throw DebridError.FailedRequest(description: "Could not find a cached magnet. Are you sure it's cached?")
         }
@@ -195,9 +195,25 @@ class TorBox: DebridSource, ObservableObject {
         return torrentId
     }
 
-    private func myTorrentList() async throws -> [MyTorrentListResponse] {
-        var request = URLRequest(url: URL(string: "\(baseApiUrl)/torrents/mylist")!)
+    private func myTorrentList(id: Int? = nil, bypassCache: Bool = false) async throws -> [MyTorrentListResponse] {
+        guard var components = URLComponents(string: "\(baseApiUrl)/torrents/mylist") else {
+            throw DebridError.InvalidUrl
+        }
 
+        var queryItems: [URLQueryItem] = []
+        if let id {
+            queryItems.append(URLQueryItem(name: "id", value: String(id)))
+        }
+        if bypassCache {
+            queryItems.append(URLQueryItem(name: "bypass_cache", value: "true"))
+        }
+        components.queryItems = queryItems.isEmpty ? nil : queryItems
+
+        guard let url = components.url else {
+            throw DebridError.InvalidUrl
+        }
+
+        var request = URLRequest(url: url)
         let data = try await performRequest(request: &request, requestName: #function)
         let rawResponse = try jsonDecoder.decode(TBResponse<[MyTorrentListResponse]>.self, from: data)
 
@@ -213,7 +229,8 @@ class TorBox: DebridSource, ObservableObject {
         components.queryItems = [
             URLQueryItem(name: "token", value: getToken()),
             URLQueryItem(name: "torrent_id", value: restrictedFile.streamUrlString),
-            URLQueryItem(name: "file_id", value: String(restrictedFile.id))
+            URLQueryItem(name: "file_id", value: String(restrictedFile.id)),
+            URLQueryItem(name: "append_name", value: "true")
         ]
 
         guard let url = components.url else {
@@ -338,7 +355,10 @@ class TorBox: DebridSource, ObservableObject {
                 )
             ]
         case .torrent:
-            let torrentList = try await myTorrentList()
+            guard let torrentId = Int(handle.id) else {
+                throw DebridError.InvalidPostBody
+            }
+            let torrentList = try await myTorrentList(id: torrentId, bypassCache: true)
             guard let torrent = torrentList.first(where: { String($0.id) == handle.id }) else {
                 return []
             }
@@ -437,7 +457,8 @@ class TorBox: DebridSource, ObservableObject {
         components.queryItems = [
             URLQueryItem(name: "token", value: getToken()),
             URLQueryItem(name: "torrent_id", value: torrentId),
-            URLQueryItem(name: "file_id", value: String(fileId))
+            URLQueryItem(name: "file_id", value: String(fileId)),
+            URLQueryItem(name: "append_name", value: "true")
         ]
 
         guard let url = components.url else {
