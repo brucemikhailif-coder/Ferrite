@@ -34,7 +34,7 @@ struct CloudMagnetView: View {
                     if debridSource.cachedStatus.contains(cloudMagnet.status), !cloudMagnet.links.isEmpty {
                         navModel.resultFromCloud = true
                         navModel.selectedTitle = cloudMagnet.fileName
-                        navModel.selectedMagnet = nil
+                        navModel.selectedMagnet = Magnet(hash: cloudMagnet.hash, link: nil, title: cloudMagnet.fileName)
                         transferHandle = DebridTransferHandle(id: cloudMagnet.id, kind: .torrent)
                         transferTitle = cloudMagnet.fileName
                         showTransferBrowser = true
