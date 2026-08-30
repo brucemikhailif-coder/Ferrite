@@ -127,7 +127,6 @@ struct DebridTransferBrowserView: View {
             navModel.selectedTitle = title
             navModel.selectedBatchTitle = file.name
             navModel.resultFromCloud = resultFromCloud
-            navModel.selectedMagnet = nil
 
             var historyInfo = HistoryEntryJson(
                 name: title,
