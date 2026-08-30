@@ -105,7 +105,7 @@ struct ActionChoiceView: View {
                     }
                 }
 
-                if !navModel.resultFromCloud {
+                if navModel.selectedMagnet?.link != nil {
                     Section("Magnet options") {
                         ForEach(actions, id: \.id) { action in
                             if action.requires.contains(ActionRequirement.magnet.rawValue) {

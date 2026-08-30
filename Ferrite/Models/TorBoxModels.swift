@@ -82,6 +82,17 @@ extension TorBox {
             case id, hash, name, files
             case downloadState = "download_state"
         }
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            id = try container.decode(Int.self, forKey: .id)
+            hash = try container.decode(String.self, forKey: .hash)
+            name = try container.decode(String.self, forKey: .name)
+            downloadState = try container.decode(String.self, forKey: .downloadState)
+            // TorBox may return `files: null` for some torrent records. Treat that as
+            // an empty file list so one record cannot make the entire /mylist response fail.
+            files = try container.decodeIfPresent([MyTorrentListFile].self, forKey: .files) ?? []
+        }
     }
 
     struct MyTorrentListFile: Codable, Sendable {
